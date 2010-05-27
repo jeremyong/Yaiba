@@ -15,6 +15,7 @@ instance Show (Polynomial Lex) where
           
 nullPoly = Polynomial empty
           
+--Don't use, use "compare" instead
 instance Eq (Polynomial ord) where
            
 instance Ord (Polynomial Lex) where

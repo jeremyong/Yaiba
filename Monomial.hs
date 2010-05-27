@@ -5,14 +5,13 @@ module Yaiba.Monomial where
 import Math.Algebra.Field.Base
 
 newtype Monomial ord = Monomial (Q, [Int])
-                                               
-unMon (Monomial (a,b)) = b
 
 instance Eq (Monomial ord) where
   Monomial a == Monomial b = a==b
 
 instance Show (Monomial ord) where
-  show (Monomial (a,b)) = show a ++ showVar 1 b
+  show (Monomial (a,b)) | a==(-1) = "-" ++ showVar 1 b
+                        | otherwise = show a ++ showVar 1 b
     where showVar _ [] = ""
           showVar k (y:[]) | y<0 = "x_" ++ (show k) ++ "^(" ++ (show y) ++ ")"
                            | y==0 = ""
@@ -23,6 +22,7 @@ instance Show (Monomial ord) where
                            | y==1 = "x_"++(show k)++" * "++showVar (k+1) ys
                            | otherwise = "x_"++(show k)++"^"++(show y)++" * "++showVar (k+1) ys
           
+--Dummy phantom ord types. Requires -fglasgow-exts enabled.
 data Lex
 data Grlex
 data Grevlex
@@ -34,9 +34,12 @@ data Revlex
 -- of the monomial as a constant monomial. Signum returns one if all powers are at
 -- least zero and negative one otherwise.
 instance Num (Monomial ord) where
-  Monomial (a,as) + Monomial (b,bs) = if as==bs then Monomial (a+b, as) else 0
+  Monomial (a,as) + Monomial (b,bs) = if as==bs then 
+                                        if (a+b)==0 then 0
+                                        else Monomial (a+b, as) 
+                                      else 0
   Monomial (a,as) * Monomial (b,bs) = Monomial (a*b, zipWith (+) as bs)
-  fromInteger 1 = Monomial (1, [])
+  fromInteger a = Monomial (fromInteger a, [])
   abs (Monomial (a,as)) = Monomial (Q (toRational (sum as)), [])
   signum (Monomial (_,[])) = 1
   signum (Monomial (q,(a:as))) | a>=0 = signum (Monomial (q,as))
@@ -54,3 +57,6 @@ instance Ord (Monomial Lex) where
     headCompare (a:as) | a>0 = GT
                        | a<0 = LT
                        | a==0 = headCompare as
+                                
+powerList :: Monomial t -> [Int]
+powerList (Monomial (a,b)) = b
