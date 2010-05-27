@@ -4,9 +4,12 @@ module Yaiba.Monomial where
 
 import Math.Algebra.Field.Base
 
-newtype Monomial ord = Monomial (Q, [Int]) deriving (Eq)
+newtype Monomial ord = Monomial (Q, [Int])
                                                
 unMon (Monomial (a,b)) = b
+
+instance Eq (Monomial ord) where
+  Monomial a == Monomial b = a==b
 
 instance Show (Monomial ord) where
   show (Monomial (a,b)) = show a ++ showVar 1 b
