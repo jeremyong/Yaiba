@@ -5,6 +5,7 @@ module Yaiba.Polynomial where
 
 import Data.Map
 import Yaiba.Monomial
+import qualified Data.Array.Parallel.Unlifted as U
 import Math.Algebra.Field.Base
 import Data.Maybe
 import Prelude hiding (null,
@@ -12,6 +13,8 @@ import Prelude hiding (null,
                        map)
 
 newtype Polynomial ord = Polynomial (Map (Monomial ord) Q)
+
+--instance Elt (Polynomial ord)
 
 instance Show (Polynomial ord) where
   show (Polynomial a) = showTerm $ toList a
@@ -73,6 +76,8 @@ instance (Ord (Monomial ord)) => Num (Polynomial ord) where
 monMult :: (Ord (Monomial ord)) => Monomial ord -> Q -> Polynomial ord -> Polynomial ord
 monMult a b (Polynomial c) = Polynomial $ foldWithKey (f a b) empty c where
   f a b k v acc = unionWith (+) (singleton (a*k) (b*v)) acc
+
+--Divides the first polynomial by the second.
 
 {-
 quoRem :: (Ord (Monomial ord)) => 
