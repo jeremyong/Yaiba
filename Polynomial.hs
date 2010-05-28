@@ -49,6 +49,9 @@ instance Ord (Polynomial Lex) where
 insertTerm :: (Ord (Monomial ord)) => Polynomial ord -> Monomial ord -> Q -> Polynomial ord
 insertTerm (Polynomial a) b c = Polynomial (insertWith (+) b c a)
 
+prune :: Polynomial t -> Map (Monomial t) Q
+prune (Polynomial a) = a
+
 getMap :: Polynomial ord -> Map (Monomial ord) Q
 getMap (Polynomial a) = a
 
