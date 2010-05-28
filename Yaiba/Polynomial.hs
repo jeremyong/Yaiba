@@ -5,7 +5,7 @@ module Yaiba.Polynomial where
 
 import Data.Map
 import Yaiba.Monomial
-import qualified Data.Array.Parallel.Unlifted as U
+--import qualified Data.Array.Parallel.Unlifted as U
 import Math.Algebra.Field.Base
 import Data.Maybe
 import Prelude hiding (null,
@@ -61,7 +61,7 @@ insertTerm :: (Ord (Monomial ord)) => Polynomial ord -> Monomial ord -> Q -> Pol
 insertTerm (Polynomial a) b c = Polynomial (insertWith (+) b c a)
 
 prune :: (Ord (Monomial ord)) => Polynomial ord -> Polynomial ord
-prune (Polynomial a) = Polynomial $ filter (==0) a
+prune (Polynomial a) = Polynomial $ filter (/=0) a
 
 getMap :: Polynomial ord -> Map (Monomial ord) Q
 getMap (Polynomial a) = a

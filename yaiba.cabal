@@ -23,10 +23,14 @@ Library
   Build-Depends: 
         base                 == 4.*,
         dph-base             == 0.4.*,
-        repa                 == 1.1.*
+        repa                 == 1.1.*,
+        HaskellForMaths      == 0.1.*,
+        dph-prim-seq         == 0.4.*,
+        containers           == 0.3.*,
+        dph-par              == 0.4.*
 
   ghc-options:
-        -Odph -Wall -fno-warn-missing-signatures -fglasgow-exts
+        -Odph -Wall -fno-warn-missing-signatures -fglasgow-exts -XPArr
 
   extensions:
         UndecidableInstances
