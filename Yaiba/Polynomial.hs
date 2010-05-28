@@ -29,9 +29,9 @@ prettyLexPrint (Polynomial a) = showTerm $ reverse (toAscList a)
 showTerm :: (Num t1, Show t) => [(t, t1)] -> [Char]
 showTerm [] = ""
 showTerm ((a,b):[]) | b==0 = "" 
-                    | otherwise = (show a) ++ (show b)
+                    | otherwise = (show b) ++ (show a)
 showTerm ((a,b):as) | b==0 = showTerm as
-                    | otherwise = (show a) ++ (show b) ++ " + " ++ showTerm as
+                    | otherwise = (show b) ++ (show a) ++ " + " ++ showTerm as
 
 --An empty polynomial.
 nullPoly :: Polynomial ord
