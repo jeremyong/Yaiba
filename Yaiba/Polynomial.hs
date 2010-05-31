@@ -77,11 +77,15 @@ monMult :: (Ord (Monomial ord)) => Monomial ord -> Q -> Polynomial ord -> Polyno
 monMult a b (Polynomial c) = Polynomial $ foldWithKey (f a b) empty c where
   f a b k v acc = unionWith (+) (singleton (a*k) (b*v)) acc
 
---Divides the first polynomial by the second.
-
-{-
-quoRem :: (Ord (Monomial ord)) => 
-          Polynomial ord -> [Polynomial ord] -> ([Polynomial ord], Polynomial ord)
-quoRem a b = div a (sort b) [] 0 where
-  div 0 _ as r = (as, r)
-  div f fs as r = foldl -}
+--Divides the first polynomial by the second
+quoRem :: (Ord (Monomial ord)) =>
+          Polynomial ord -> Polynomial ord -> (Polynomial ord, Polynomial ord)
+quoRem a b = quoRem' a b nullPoly where
+  quoRem' rem d quo = let 
+      remLT = leadTerm rem
+      dLT = leadTerm d
+      remOd = (fst remLT)/(fst dLT)
+      remOdco = (snd remLT)/(snd dLT) in
+        case (signum remOd) of
+          -1 -> (quo, rem)
+          1 -> quoRem' (rem - (Polynomial (singleton (remOd*(fst dLT)) (remOdco*(snd dLT))))) d (quo + (Polynomial (singleton remOd remOdco)))

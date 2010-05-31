@@ -29,10 +29,12 @@ data Revlex
 
 -- Signum returns one if all powers are at least zero and negative one otherwise.
 instance Num (Monomial ord) where
+  a + b = Monomial []
   Monomial as * Monomial bs = Monomial $ zipWith (+) as bs
   signum (Monomial []) = 1
   signum (Monomial (a:as)) | a>=0 = signum (Monomial as)
                            | otherwise = -1
+  fromInteger 1 = Monomial [0]
 
 instance Fractional (Monomial ord) where
   recip (Monomial as) = Monomial $ map negate as
@@ -50,3 +52,6 @@ instance Ord (Monomial Lex) where
                                 
 powerList :: Monomial t -> [Int]
 powerList (Monomial b) = b
+
+isFactor :: Monomial ord -> Monomial ord -> Bool
+isFactor a b = signum (b/a) == 1
