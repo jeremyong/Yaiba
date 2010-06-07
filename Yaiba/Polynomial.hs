@@ -94,4 +94,4 @@ quoRem a b = quoRem' a b nullPoly where
       remOdco = (snd remLT)/(snd dLT) in
         case (signs remOd) of
           -1 -> (quo, rem)
-          1 -> quoRem' (rem - (Polynomial (singleton (remOd*(fst dLT)) (remOdco*(snd dLT))))) d (quo + (Polynomial (singleton remOd remOdco)))
+          1 -> quoRem' (rem - ((Polynomial (singleton remOd remOdco))*d)) d (quo + (Polynomial (singleton remOd remOdco)))
