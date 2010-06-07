@@ -4,19 +4,32 @@
 import Yaiba.Ideal
 import Yaiba.Polynomial
 import Yaiba.Monomial
-import Data.Map
-a = Polynomial $ fromList [(Monomial [3,2,55,0,1],-2/5),
-                           (Monomial [2,0,0,3,23],34),
-                           (Monomial [0,0,32,1,0],14.4),
-                           (Monomial [0,3,4,0,9],22)] :: Polynomial Lex
 
-b = Polynomial $ fromList [(Monomial [0,0,35,92,1],13/11),
-                           (Monomial [1,40,4,3,23],-4.2),
-                           (Monomial [0,0,0,1,3],44),
-                           (Monomial [2,55,0,23,4],30),
-                           (Monomial [23,0,4,545,55],2)] :: Polynomial Lex
-                                                            
-main = do putStrLn $ "a = " ++ (show a)
-          putStrLn $ "b = " ++ (show b)
-          putStrLn $ "a+b = " ++ (show (a+b))
-          putStrLn $ "a*b = " ++ (show (a*b))
+a = fromList [(Monomial [3],3),
+              (Monomial [2],-2),
+              (Monomial [1],4),
+              (Monomial [0],-3)] :: Polynomial Lex
+
+b = fromList [(Monomial [2],1),
+              (Monomial [1],3),
+              (Monomial [0],3)] :: Polynomial Lex
+{-                                              
+c = fromList [(Monomial [2,0],1),
+              (Monomial [1,1],2),
+              (Monomial [0,2],1),
+              (Monomial [0,0],3)] :: Polynomial Lex
+                                    
+d = fromList [(Monomial [1,0],1),
+              (Monomial [0,1],1)] :: Polynomial Lex
+-}                                                          
+main = do putStrLn $ "a = " ++ (pLp a)
+          putStrLn $ "b = " ++ (pLp b)
+          putStrLn $ "a+b = " ++ (pLp (a+b))
+          putStrLn $ "a*b = " ++ (pLp (a*b))
+          putStrLn $ "leadTerm a" ++ (show (leadTerm a))
+          putStrLn $ "leadTerm b" ++ (show (leadTerm b))
+          putStrLn $ "lTa/lTb" ++ (show ((fst (leadTerm a)) * (recip (fst (leadTerm b)))))
+          let x = fst (quoRem a b)
+          let y = snd (quoRem a b)
+          putStrLn $ "c/d = " ++ "("++pLp x++"," ++ pLp y++")"
+          --putStrLn $ "also = " ++ (pLp ((/.) c (Ideal [d])))

@@ -31,10 +31,13 @@ data Revlex
 instance Num (Monomial ord) where
   a + b = Monomial []
   Monomial as * Monomial bs = Monomial $ zipWith (+) as bs
-  signum (Monomial []) = 1
-  signum (Monomial (a:as)) | a>=0 = signum (Monomial as)
-                           | otherwise = -1
   fromInteger 1 = Monomial [0]
+  signum (Monomial []) = Monomial []
+  
+signs :: Monomial ord -> Int
+signs (Monomial []) = 1
+signs (Monomial (a:as)) | a>=0 = signs (Monomial as)
+                        | otherwise = -1
 
 instance Fractional (Monomial ord) where
   recip (Monomial as) = Monomial $ map negate as
