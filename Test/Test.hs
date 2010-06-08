@@ -34,5 +34,7 @@ f'_2 = fromList [(Monomial [0,2],1),
 main = do 
   -- Example 1 from CLO \S2.3
   putStrLn $ "f/[f_1,f_2] produces remainder " ++ (pLp $ f /. (Ideal [f_1,f_2]))
-  -- Example 2 from CLS \S2.3
+  -- Example 2 from CLO \S2.3
   putStrLn $ "f'/[f'_1,f'_2] produces remainder " ++ (pLp $ f' /. (Ideal [f'_1,f'_2]))
+  -- Example 4 from CLO \S2.3
+  putStrLn $ "f'/[f'_2,f'_1] produces remainder " ++ (pLp $ f' /. (Ideal [f'_2,f'_1]))
