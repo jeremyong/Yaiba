@@ -1,5 +1,5 @@
 
-{-# OPTIONS_GHC -fglasgow-exts -XUndecidableInstances #-}
+{-# OPTIONS_GHC -fglasgow-exts -XUndecidableInstances -XBangPatterns #-}
 
 module Yaiba.Polynomial where
 
@@ -71,7 +71,12 @@ prune (Polynomial a) = Polynomial $ filter (/=0) a
 getMap :: Polynomial ord -> Map (Monomial ord) Q
 getMap (Polynomial a) = a
 
-leadTerm (Polynomial a) = findMax a
+--leadTerm nullPoly = (Monomial [],0)
+leadTerm :: Polynomial ord -> (Monomial ord, Q)
+leadTerm a = findMax $ getMap a
+
+numTerms :: Polynomial ord -> Int
+numTerms a = size $ getMap a
 
 instance (Ord (Monomial ord)) => Num (Polynomial ord) where
   Polynomial a + Polynomial b = prune $ Polynomial (unionWith (+) a b)
@@ -87,11 +92,12 @@ monMult a b (Polynomial c) = Polynomial $ foldWithKey (f a b) empty c where
 quoRem :: (Ord (Monomial ord)) =>
           Polynomial ord -> Polynomial ord -> (Polynomial ord, Polynomial ord)
 quoRem a b = quoRem' a b nullPoly where
-  quoRem' rem d quo = let 
-      remLT = leadTerm rem
-      dLT = leadTerm d
-      remOd = (fst remLT) * (recip (fst dLT))
-      remOdco = (snd remLT)/(snd dLT) in
-        case (signs remOd) of
-          -1 -> (quo, rem)
-          1 -> quoRem' (rem - ((Polynomial (singleton remOd remOdco))*d)) d (quo + (Polynomial (singleton remOd remOdco)))
+  quoRem' rem d quo | numTerms rem == 0 = (quo, nullPoly)
+                    | otherwise = let 
+    !remLT = leadTerm rem
+    !dLT = leadTerm d
+    !remOd = (fst remLT) * (recip (fst dLT))
+    !remOdco = (snd remLT)/(snd dLT) in
+    case (signs remOd) of
+      -1 -> (quo, rem)
+      1 -> quoRem' (rem - (monMult remOd remOdco d)) d (quo + (Polynomial (singleton remOd remOdco)))

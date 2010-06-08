@@ -7,21 +7,36 @@ module Yaiba.Ideal where
 --import Data.Array.Repa.Index
 --import Data.Array.Repa.Shape
 --import Data.Array.Parallel.Unlifted as U
-import Control.Concurrent
+import Yaiba.Monomial
 import Yaiba.Polynomial
 import Data.List
 
-newtype Ideal ord = Ideal [Polynomial ord] deriving (Eq, Show)
+newtype Ideal ord = Ideal [Polynomial ord] deriving (Eq)
 {-
 getPairs (Ideal as) = comb 2 as where
   comb 0 _ = [[]]
   comb n xs = [ y:ys | y:xs' <- tails xs, ys <- getPairs (n-1) xs' ]
   -}
+
 --Division algorithm (outputs remainder)
+{-
 (/.) r (Ideal []) = r
-(/.) d (Ideal ds) = divIdeal d ds False where
-  divIdeal a [] divOcc = if divOcc == True then (/.) a (Ideal ds) else a
-  divIdeal a (b:bs) divOcc = if x == nullPoly then 
-                               divIdeal a bs divOcc
-                             else divIdeal x bs True where
-                               x = snd (quoRem a b)
+(/.) d (Ideal ds) = let (a,b) = divIdeal d ds in
+  case b of
+    False -> a
+    True -> (/.) a (Ideal ds)
+-}
+{-
+divIdeal d ds = foldl' divIdeal' (d,False) ds where
+  divIdeal' (b,divOcc) a = let (x,y) = quoRem b a in
+    (x,y) `seq` if y == nullPoly then 
+                  (b,divOcc)
+                else (y,True)
+-}
+divIdeal :: (Ord (Monomial ord)) =>
+            Polynomial ord -> [Polynomial ord] -> Polynomial ord
+divIdeal r [] = r
+divIdeal q (d:ds) = let !(x,y) = quoRem q d 
+                    in if numTerms x == 0 then
+                         divIdeal q ds
+                       else divIdeal y ds
