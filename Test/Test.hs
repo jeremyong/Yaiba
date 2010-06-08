@@ -1,36 +1,38 @@
 
 --Testing program.
+--CLO refers to the text "Ideals, Varieties, and Algorithms"
+--by David Cox, John Little, and Donal O'Shea
 
 import Yaiba.Ideal
 import Yaiba.Polynomial
 import Yaiba.Monomial
 
-a = fromList [(Monomial [3],3),
-              (Monomial [2],-2),
-              (Monomial [1],4),
-              (Monomial [0],-3)] :: Polynomial Lex
+-- f = xy^2 + 1
+f = fromList [(Monomial [1,2],1),
+              (Monomial [0,0],1)] :: Polynomial Lex
 
-b = fromList [(Monomial [2],1),
-              (Monomial [1],3),
-              (Monomial [0],3)] :: Polynomial Lex
+-- f_1 = xy + 1
+f_1 = fromList [(Monomial [1,1],1),
+                (Monomial [0,0],1)] :: Polynomial Lex
+                                       
+-- f_2 = y + 1
+f_2 = fromList [(Monomial [0,1],1),
+                (Monomial [0,0],1)] :: Polynomial Lex
 
-c = fromList [(Monomial [2,0],1),
-              (Monomial [1,1],2),
-              (Monomial [0,2],1)] :: Polynomial Lex
-                                    
-d = fromList [(Monomial [1,0],1),
-              (Monomial [0,1],1)] :: Polynomial Lex
+-- f' = x^2y+xy^2+y^2
+f' = fromList [(Monomial [2,1],1),
+               (Monomial [1,2],1),
+               (Monomial [0,2],1)] :: Polynomial Lex
+-- f'_1 = xy-1
+f'_1 = fromList [(Monomial [1,1],1),
+                 (Monomial [0,0],-1)] :: Polynomial Lex
 
-main = do --putStrLn $ "a = " ++ (pLp a)
-          --putStrLn $ "b = " ++ (pLp b)
-          --putStrLn $ "a+b = " ++ (pLp (a+b))
-          --putStrLn $ "a*b = " ++ (pLp (a*b))
-          --putStrLn $ "leadTerm a" ++ (show (leadTerm a))
-          --putStrLn $ "leadTerm b" ++ (show (leadTerm b))
-          --putStrLn $ "lTa/lTb" ++ (show ((fst (leadTerm a)) * (recip (fst (leadTerm b)))))
-          --let x = fst (quoRem a b)
-          --let y = snd (quoRem a b)
-          --putStrLn $ "c/d = " ++ "("++pLp x++"," ++ pLp y++")"
-          --putStrLn $ "quo * b = " ++ (pLp (x*b+y))
-          putStrLn $ "also = " ++ (pLp (fst (divIdeal c [d])))
-          --putStrLn $ "quorem " ++ (pLp (fst (quoRem c d)))
+-- f'_2 = y^2-1
+f'_2 = fromList [(Monomial [0,2],1),
+                 (Monomial [0,0],-1)] :: Polynomial Lex
+
+main = do 
+  -- Example 1 from CLO \S2.3
+  putStrLn $ "f/[f_1,f_2] produces remainder " ++ (pLp $ f /. (Ideal [f_1,f_2]))
+  -- Example 2 from CLS \S2.3
+  putStrLn $ "f'/[f'_1,f'_2] produces remainder " ++ (pLp $ f' /. (Ideal [f'_1,f'_2]))
