@@ -97,7 +97,7 @@ monMult :: (Ord (Monomial ord)) => Monomial ord -> Q -> Polynomial ord -> Polyno
 monMult a b (Polynomial c) = Polynomial $ foldWithKey (f a b) empty c where
   f a' b' k v acc = unionWith (+) (singleton (a' * k) (b' * v)) acc
 
---Divides the first polynomial by the second
+--Divides the first polynomial by the second once
 quoRem :: (Ord (Monomial ord)) =>
           Polynomial ord -> Polynomial ord -> (Polynomial ord, Polynomial ord)
 quoRem a b = quoRem' a b nullPoly where
@@ -105,8 +105,22 @@ quoRem a b = quoRem' a b nullPoly where
                     | otherwise = let 
     !remLT = leadTerm rem
     !dLT = leadTerm d
-    !remOd = (fst remLT) * (recip (fst dLT))
-    !remOdco = (snd remLT)/(snd dLT) in
+    !remOd = (fst remLT) / (fst dLT)
+    !remOdco = (snd remLT) / (snd dLT) in
     case (signs remOd) of
       -1 -> (quo, rem)
-      1 -> quoRem' (rem - (monMult remOd remOdco d)) d (quo + (Polynomial (singleton remOd remOdco)))
+      1 -> (quo + (Polynomial (singleton remOd remOdco)), rem - (monMult remOd remOdco d))
+
+--Divides the first polynomial by the second the entire way through
+quoRem'' :: (Ord (Monomial ord)) =>
+           Polynomial ord -> Polynomial ord -> (Polynomial ord, Polynomial ord)
+quoRem'' a b = quoRem''' a b nullPoly where
+  quoRem''' rem d quo | numTerms rem == 0 = (quo, nullPoly)
+                      | otherwise = let 
+    !remLT = leadTerm rem
+    !dLT = leadTerm d
+    !remOd = (fst remLT) / (fst dLT)
+    !remOdco = (snd remLT) / (snd dLT) in
+    case (signs remOd) of
+      -1 -> (quo, rem)
+      1 -> quoRem''' (rem - (monMult remOd remOdco d)) d (quo + (Polynomial (singleton remOd remOdco)))
