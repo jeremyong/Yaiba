@@ -32,5 +32,5 @@ main = do --putStrLn $ "a = " ++ (pLp a)
           --let y = snd (quoRem a b)
           --putStrLn $ "c/d = " ++ "("++pLp x++"," ++ pLp y++")"
           --putStrLn $ "quo * b = " ++ (pLp (x*b+y))
-          putStrLn $ "also = " ++ (pLp ((divIdeal c [d])))
+          putStrLn $ "also = " ++ (pLp (fst (divIdeal c [d])))
           --putStrLn $ "quorem " ++ (pLp (fst (quoRem c d)))

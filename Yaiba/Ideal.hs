@@ -19,20 +19,23 @@ getPairs (Ideal as) = comb 2 as where
   -}
 
 --Division algorithm (outputs remainder)
-{-
+
 (/.) r (Ideal []) = r
 (/.) d (Ideal ds) = let (a,b) = divIdeal d ds in
   case b of
     False -> a
     True -> (/.) a (Ideal ds)
--}
-{-
+
+
+divIdeal :: (Ord (Monomial ord)) =>
+            Polynomial ord -> [Polynomial ord] -> (Polynomial ord, Bool)
 divIdeal d ds = foldl' divIdeal' (d,False) ds where
-  divIdeal' (b,divOcc) a = let (x,y) = quoRem b a in
-    (x,y) `seq` if y == nullPoly then 
-                  (b,divOcc)
-                else (y,True)
--}
+  divIdeal' (b,divOcc) a = let !(x,y) = quoRem b a 
+                           in if numTerms x == 0 then 
+                                (b,divOcc)
+                              else (y,True)
+                                   
+{-
 divIdeal :: (Ord (Monomial ord)) =>
             Polynomial ord -> [Polynomial ord] -> Polynomial ord
 divIdeal r [] = r
@@ -40,3 +43,4 @@ divIdeal q (d:ds) = let !(x,y) = quoRem q d
                     in if numTerms x == 0 then
                          divIdeal q ds
                        else divIdeal y ds
+-}
