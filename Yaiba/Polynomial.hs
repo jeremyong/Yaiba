@@ -10,7 +10,8 @@ import Yaiba.Monomial
 import Math.Algebra.Field.Base
 import Prelude hiding (null,
                        filter,
-                       map)
+                       map,
+                       rem)
 
 newtype Polynomial ord = Polynomial (Map (Monomial ord) Q)
 
@@ -26,11 +27,13 @@ pLp = prettyLexPrint
 prettyLexPrint :: Polynomial Lex -> [Char]
 prettyLexPrint (Polynomial a) = showTerm $ reverse (toAscList a)
   
-showTerm :: (Num t1, Show t) => [(t, t1)] -> [Char]
+
 showTerm [] = ""
-showTerm ((a,b):[]) | b==0 = "" 
+showTerm ((a,b):[]) | show a == " " = show b
+                    | b==0 = ""
                     | otherwise = if b/=1 then (show b) ++ (show a) else tail (show a)
-showTerm ((a,b):as) | b==0 = showTerm as
+showTerm ((a,b):as) | show a == " " = (show b) ++ showTerm as
+                    | b==0 = showTerm as
                     | otherwise = if b/=1 then (show b) ++ (show a) ++ " + " ++ showTerm as else (tail (show a)) ++ " + " ++ showTerm as
 
 --Constructors
@@ -39,12 +42,14 @@ showTerm ((a,b):as) | b==0 = showTerm as
 nullPoly :: Polynomial ord
 nullPoly = Polynomial empty
 
-isNull :: Polynomial t -> Bool
+isNull :: Polynomial ord -> Bool
 isNull (Polynomial a) = null a
           
-monPoly a b | b==0 = nullPoly 
-            | otherwise = Polynomial (singleton a b)
+monPoly :: (Monomial ord, Q) -> Polynomial ord
+monPoly (a,b) | b==0 = nullPoly 
+              | otherwise = Polynomial (singleton a b)
                           
+fromList :: (Ord (Monomial ord)) => [(Monomial ord, Q)] -> Polynomial ord
 fromList a = prune $ Polynomial (M.fromList a)
            
 --Dummy instance. Don't use, use "compare" instead
@@ -75,6 +80,10 @@ getMap (Polynomial a) = a
 leadTerm :: Polynomial ord -> (Monomial ord, Q)
 leadTerm a = findMax $ getMap a
 
+deleteFindLT :: Polynomial ord -> (Polynomial ord, Polynomial ord)
+deleteFindLT a = let (x,y) = deleteFindMax $ getMap a
+                 in ((monPoly x),Polynomial y)
+
 numTerms :: Polynomial ord -> Int
 numTerms a = size $ getMap a
 
@@ -86,7 +95,7 @@ instance (Ord (Monomial ord)) => Num (Polynomial ord) where
     
 monMult :: (Ord (Monomial ord)) => Monomial ord -> Q -> Polynomial ord -> Polynomial ord
 monMult a b (Polynomial c) = Polynomial $ foldWithKey (f a b) empty c where
-  f a b k v acc = unionWith (+) (singleton (a*k) (b*v)) acc
+  f a' b' k v acc = unionWith (+) (singleton (a' * k) (b' * v)) acc
 
 --Divides the first polynomial by the second
 quoRem :: (Ord (Monomial ord)) =>

@@ -10,16 +10,17 @@ instance Eq (Monomial ord) where
   Monomial as == Monomial bs = as==bs
 
 instance Show (Monomial ord) where
-  show (Monomial a) = showVar (1::Int) a
-    where showVar _ [] = ""
-          showVar k (y:[]) | y<0 = "*x_" ++ (show k) ++ "^(" ++ (show y) ++ ")"
-                           | y==0 = ""
-                           | y==1 = "*x_" ++ (show k)
-                           | otherwise = "*x_" ++ (show k) ++ "^(" ++ (show y) ++ ")"
-          showVar k (y:ys) | y<0 = "*x_" ++ (show k) ++ "^(" ++ (show y) ++ ")" ++ showVar (k+1) ys
-                           | y==0 = showVar (k+1) ys
-                           | y==1 = "*x_"++(show k)++showVar (k+1) ys
-                           | otherwise = "*x_"++(show k)++"^("++(show y)++")"++showVar (k+1) ys
+  show (Monomial a) | filter (/=0) a == [] = " "
+                    | otherwise = showVar (1::Int) a
+                        where showVar _ [] = ""
+                              showVar k (y:[]) | y<0 = "*x_" ++ (show k) ++ "^(" ++ (show y) ++ ")"
+                                               | y==0 = ""
+                                               | y==1 = "*x_" ++ (show k)
+                                               | otherwise = "*x_" ++ (show k) ++ "^(" ++ (show y) ++ ")"
+                              showVar k (y:ys) | y<0 = "*x_" ++ (show k) ++ "^(" ++ (show y) ++ ")" ++ showVar (k+1) ys
+                                               | y==0 = showVar (k+1) ys
+                                               | y==1 = "*x_"++(show k)++showVar (k+1) ys
+                                               | otherwise = "*x_"++(show k)++"^("++(show y)++")"++showVar (k+1) ys
 
 --Dummy phantom ord types. Requires -fglasgow-exts enabled.
 data Lex
@@ -29,7 +30,7 @@ data Revlex
 
 -- Signum returns one if all powers are at least zero and negative one otherwise.
 instance Num (Monomial ord) where
-  a + b = Monomial []
+  a + b = Monomial [0]
   Monomial as * Monomial bs = Monomial $ zipWith (+) as bs
   fromInteger 1 = Monomial [0]
   signum (Monomial []) = Monomial []
