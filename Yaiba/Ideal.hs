@@ -10,8 +10,10 @@ module Yaiba.Ideal where
 import Yaiba.Monomial
 import Yaiba.Polynomial
 import Data.List
+import Prelude hiding (rem)
 
 newtype Ideal ord = Ideal [Polynomial ord] deriving (Eq)
+
 {-
 getPairs (Ideal as) = comb 2 as where
   comb 0 _ = [[]]
@@ -20,13 +22,22 @@ getPairs (Ideal as) = comb 2 as where
 
 --Division algorithm (outputs remainder)
 
-(/.) r (Ideal []) = r
-(/.) d (Ideal ds) = let (a,b) = divIdeal d ds in
-  case b of
-    False -> a
-    True -> (/.) a (Ideal ds)
+(/.) :: (Ord (Monomial ord)) =>
+        Polynomial ord -> Ideal ord -> Polynomial ord
+(/.) p q = (/..) p q nullPoly
 
+(/..) dend (Ideal ds) rem | numTerms dend == 0 = rem
+                          | otherwise = let (a,b) = divIdeal dend ds 
+                                        in case b of
+                                          False -> let (lt,rest) = deleteFindLT dend
+                                                   in (/..) rest (Ideal ds) (rem + lt)
+                                          True -> (/..) a (Ideal ds) rem
+ 
 
+--Takes a dividend and a list of polynomials and divides until the lead term
+--of the remainder is not divisible by any of the divisors.
+--Outputs a tuple that gives the pseudo-eremainder and whether or not a
+--division occurred.
 divIdeal :: (Ord (Monomial ord)) =>
             Polynomial ord -> [Polynomial ord] -> (Polynomial ord, Bool)
 divIdeal d ds = foldl' divIdeal' (d,False) ds where
@@ -34,13 +45,3 @@ divIdeal d ds = foldl' divIdeal' (d,False) ds where
                            in if numTerms x == 0 then 
                                 (b,divOcc)
                               else (y,True)
-                                   
-{-
-divIdeal :: (Ord (Monomial ord)) =>
-            Polynomial ord -> [Polynomial ord] -> Polynomial ord
-divIdeal r [] = r
-divIdeal q (d:ds) = let !(x,y) = quoRem q d 
-                    in if numTerms x == 0 then
-                         divIdeal q ds
-                       else divIdeal y ds
--}
