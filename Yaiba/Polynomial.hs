@@ -18,23 +18,32 @@ newtype Polynomial ord = Polynomial (Map (Monomial ord) Q)
 --instance (Ord (Monomial ord)) => U.Elt (Polynomial ord)
 
 instance (Ord (Monomial ord)) => Show (Polynomial ord) where
-  show (Polynomial a) = showTerm $ toAscList a
+  show a | numTerms a == 0 = "0"
+         | otherwise = showTerm $ toAscList (getMap a)
 
 -- A shortened prettyLexPrint
 pLp :: Polynomial Lex -> [Char]
 pLp = prettyLexPrint
 
 prettyLexPrint :: Polynomial Lex -> [Char]
-prettyLexPrint (Polynomial a) = showTerm $ reverse (toAscList a)
+prettyLexPrint b@(Polynomial a) | numTerms b == 0 = "0" 
+                                | otherwise = showTerm $ reverse (toAscList a)
   
 
+showTerm :: [(Monomial ord, Q)] -> [Char]
 showTerm [] = ""
 showTerm ((a,b):[]) | show a == " " = show b
                     | b==0 = ""
-                    | otherwise = if b/=1 then (show b) ++ (show a) else tail (show a)
+                    | otherwise = if b/=1 then
+                                    (show b) ++ (show a) 
+                                  else
+                                    tail (show a)
 showTerm ((a,b):as) | show a == " " = (show b) ++ showTerm as
                     | b==0 = showTerm as
-                    | otherwise = if b/=1 then (show b) ++ (show a) ++ " + " ++ showTerm as else (tail (show a)) ++ " + " ++ showTerm as
+                    | otherwise = if b/=1 then
+                                    (show b) ++ (show a) ++ " + " ++ showTerm as 
+                                  else
+                                    (tail (show a)) ++ " + " ++ showTerm as
 
 --Constructors
 
@@ -44,7 +53,7 @@ nullPoly = Polynomial empty
 
 isNull :: Polynomial ord -> Bool
 isNull (Polynomial a) = null a
-          
+
 monPoly :: (Monomial ord, Q) -> Polynomial ord
 monPoly (a,b) | b==0 = nullPoly 
               | otherwise = Polynomial (singleton a b)
@@ -101,7 +110,7 @@ monMult a b (Polynomial c) = Polynomial $ foldWithKey (f a b) empty c where
 quoRem :: (Ord (Monomial ord)) =>
           Polynomial ord -> Polynomial ord -> (Polynomial ord, Polynomial ord)
 quoRem a b = quoRem' a b nullPoly where
-  quoRem' rem d quo | numTerms rem == 0 = (quo, nullPoly)
+  quoRem' rem d quo | isNull rem == True = (quo, nullPoly)
                     | otherwise = let 
     !remLT = leadTerm rem
     !dLT = leadTerm d
