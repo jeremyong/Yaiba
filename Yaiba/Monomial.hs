@@ -60,4 +60,4 @@ powerList (Monomial b) = b
 isFactor :: Monomial ord -> Monomial ord -> Bool
 isFactor a b = signum (b/a) == 1
 
-lcmMon (Monomial a) (Monomial b) = Monomial $ zipWith (+) a b
+lcmMon (Monomial a) (Monomial b) = Monomial $ zipWith (max) a b

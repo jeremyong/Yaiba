@@ -13,24 +13,22 @@ import Prelude hiding (rem)
 -- Computes the Groebner basis of an ideal a
 
 gB :: (Ord (Monomial ord)) => Ideal ord -> Ideal ord
-gB (Ideal a) = let (out,same) = f a (Ideal (map sPoly (getPairs a))) a False
-               in if same == False then
-                    gB out
-                  else
-                    out
+gB (Ideal a) = let (out,same) = gB' (map sPoly (getPairs a)) a a False
+               in case same of
+                 True -> gB out
+                 False -> out
 
 -- Accepts a list of polynomials and mutates it so that all
 -- S pairs not zero upon reduction are appended.
 
-f :: (Ord (Monomial ord)) =>
-     [Polynomial ord] -> Ideal ord -> [Polynomial ord] -> Bool
-     -> (Ideal ord, Bool)
-f [] _ as changed = (Ideal as, changed)
-f (x:xs) ys as changed = rem `par` if isNull rem == True then
-                           f xs ys as changed
-                         else
-                           f xs ys (x:as) True
-                         where rem = x /. ys
+gB' :: (Ord (Monomial ord)) =>
+       [Polynomial ord] -> [Polynomial ord] -> [Polynomial ord] -> Bool
+       -> (Ideal ord, Bool)
+gB' [] _ as changed = (Ideal as, changed)
+gB' (x:xs) ys as changed = rem `par` case isNull rem of
+  True -> gB' xs ys as changed
+  False -> gB' xs ys (x:as) True
+  where rem = x /. (Ideal ys)
 
 getPairs :: [a] -> [(a, a)]
 getPairs a = convToTups $ combinations 2 a 
