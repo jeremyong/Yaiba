@@ -1,3 +1,3 @@
 YAIBA
 
-This is Yet Another Implementation of Buchberger's Algorithm. It intends to use the Repa package to parallelize the algorithm efficiently in Haskell.
+This is Yet Another Implementation of Buchberger's Algorithm. It intends to use the Repa package in conjuction with the standard Control.Parallel libraries to parallelize the algorithm efficiently in Haskell.
