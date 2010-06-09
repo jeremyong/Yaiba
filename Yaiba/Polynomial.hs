@@ -29,7 +29,6 @@ prettyLexPrint :: Polynomial Lex -> [Char]
 prettyLexPrint b@(Polynomial a) | numTerms b == 0 = "0" 
                                 | otherwise = showTerm $ reverse (toAscList a)
   
-
 showTerm :: [(Monomial ord, Q)] -> [Char]
 showTerm [] = ""
 showTerm ((a,b):[]) | show a == " " = show b
@@ -101,7 +100,7 @@ instance (Ord (Monomial ord)) => Num (Polynomial ord) where
   --Polynomial a + Polynomial b = Polynomial $ differenceWith (\x y -> if x+y==0 then Nothing else Just (x+y)) a b
   a * Polynomial b = prune $ Polynomial (foldWithKey (\k v -> unionWith (+) (getMap (monMult k v a))) empty b)
   negate (Polynomial a) = Polynomial $ map negate a
-    
+
 monMult :: (Ord (Monomial ord)) => Monomial ord -> Q -> Polynomial ord -> Polynomial ord
 monMult a b (Polynomial c) = Polynomial $ foldWithKey (f a b) empty c where
   f a' b' k v acc = unionWith (+) (singleton (a' * k) (b' * v)) acc

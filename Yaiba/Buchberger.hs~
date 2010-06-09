@@ -1,0 +1,10 @@
+
+module Yaiba.Buchberger where
+
+import Yaiba.Monomial
+import Yaiba.Polynomial
+import Yaiba.Ideal
+
+groebnerBasis a = foldl f []
+
+g a = foldl g' a 
