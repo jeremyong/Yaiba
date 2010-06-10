@@ -41,7 +41,7 @@ h_1 = fromList [(Monomial [3,0],1),
 h_2 = fromList [(Monomial [2,1],1),
                 (Monomial [0,2],-2),
                 (Monomial [1,0],1)]
-h = Ideal [h_1,h_2] :: Ideal Lex
+h = Ideal [h_1,h_2] :: Ideal Grlex
 
 main = do 
   -- Example 1 from CLO \S2.3
@@ -54,4 +54,4 @@ main = do
   putStrLn $ "g/[g_1,g_2] produces remainder " ++ (pLp $ g /. (Ideal [g_1,g_2]))
   putStrLn $ "g/[g_2,g_1] prodcues remainder " ++ (pLp $ g /. (Ideal [g_2,g_1]))
   -- Example 1 from CLO \S2.7
-  putStrLn $ "A non-reduced GB of h is " ++ (printIdeal $ gB h)
+  putStrLn $ "A non-reduced GB of h is " ++ (show (getPolys $ gB h))

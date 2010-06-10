@@ -70,9 +70,19 @@ instance Ord (Polynomial Lex) where
                                         | null b = GT
                                         | top == EQ = compare taila tailb
                                         | otherwise = top where
-    top = compare (maxView a) (maxView b) --Will always return "Just ..."
+    top = compare (findMax a) (findMax b) --Will always return "Just ..."
     taila = Polynomial (deleteMax a)::Polynomial Lex
     tailb = Polynomial (deleteMax b)::Polynomial Lex
+
+instance Ord (Polynomial Grlex) where
+  compare (Polynomial a) (Polynomial b) | null a && null b = EQ
+                                        | null a = LT
+                                        | null b = GT
+                                        | top == EQ = compare taila tailb
+                                        | otherwise = top where
+    top = compare (findMax a) (findMax b) --Will always return "Just ..."
+    taila = Polynomial (deleteMax a)::Polynomial Grlex
+    tailb = Polynomial (deleteMax b)::Polynomial Grlex
 
 insertTerm :: (Ord (Monomial ord)) => Polynomial ord -> Monomial ord -> Q -> Polynomial ord
 insertTerm (Polynomial a) b c = Polynomial (insertWith (+) b c a)

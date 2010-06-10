@@ -35,6 +35,8 @@ instance Num (Monomial ord) where
   fromInteger 1 = Monomial [0]
   signum (Monomial []) = Monomial []
   
+degree (Monomial a) = sum a
+  
 signs :: Monomial ord -> Int
 signs (Monomial []) = 1
 signs (Monomial (a:as)) | a>=0 = signs (Monomial as)
@@ -45,15 +47,22 @@ instance Fractional (Monomial ord) where
   fromRational 1 = fromInteger 1
   
 instance Ord (Monomial Lex) where
-  compare x y = headCompare (powerList (x/y)) where
-    headCompare [] = EQ
-    headCompare (a:[]) | a>0 = GT
-                       | a<0 = LT
-                       | a==0 = EQ
-    headCompare (a:as) | a>0 = GT
-                       | a<0 = LT
-                       | a==0 = headCompare as
+  compare x y = headCompare (powerList (x/y))
+
+headCompare [] = EQ
+headCompare (a:[]) | a>0 = GT
+                   | a<0 = LT
+                   | a==0 = EQ
+headCompare (a:as) | a>0 = GT
+                   | a<0 = LT
+                   | a==0 = headCompare as
                                 
+instance Ord (Monomial Grlex) where
+  compare x y = case compare (degree x) (degree y) of
+    GT -> GT
+    LT -> LT
+    EQ -> headCompare (powerList (x/y))
+                     
 powerList :: Monomial t -> [Int]
 powerList (Monomial b) = b
 
