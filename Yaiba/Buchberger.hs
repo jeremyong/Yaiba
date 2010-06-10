@@ -24,6 +24,18 @@ gB' orig diff = let (new,changed) = gB'' (map sPoly (newPairs orig diff)) orig [
                   True -> gB' out new
                   False -> out
 
+nPgB :: (Ord (Monomial ord), Ord (Polynomial ord)) =>
+      Ideal ord -> Ideal ord
+nPgB a = Ideal $ nPgB' (getPolys $ sortIdeal a) []
+
+nPgB' :: (Ord (Monomial ord), Ord (Polynomial ord)) =>
+         [Polynomial ord] -> [Polynomial ord] -> [Polynomial ord]
+nPgB' orig diff = let (new,changed) = nPgB'' (map sPoly (newPairs orig diff)) orig [] False
+                      out = new ++ orig
+                  in case changed of
+                    True -> nPgB' out new
+                    False -> out
+
 -- Accepts a list of polynomials and mutates it so that all
 -- S pairs not zero upon reduction are appended.
 
@@ -37,6 +49,18 @@ gB'' [] _ as changed = (as, changed)
 gB'' (x:xs) ys as changed = rem `par` case isNull rem of
   True -> gB'' xs ys as changed
   False -> gB'' xs ys (x:as) True
+  where rem = x /. (Ideal ys)
+
+nPgB'' :: (Ord (Monomial ord), Ord (Polynomial ord)) =>
+        [Polynomial ord]
+        -> [Polynomial ord]
+        -> [Polynomial ord]
+        -> Bool
+        -> ([Polynomial ord], Bool)
+nPgB'' [] _ as changed = (as, changed)
+nPgB'' (x:xs) ys as changed = rem `seq` case isNull rem of
+  True -> nPgB'' xs ys as changed
+  False -> nPgB'' xs ys (x:as) True
   where rem = x /. (Ideal ys)
 
 sortIdeal :: (Ord (Polynomial ord)) => Ideal ord -> Ideal ord
