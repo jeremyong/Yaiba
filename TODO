@@ -1,3 +1,4 @@
-Instance "Polynomial ord" as a Repa array elt.
-Implement division algorithm.
+Write a nice parser.
+Test on multiple cores.
+Sweeten the algorithm with some sugar. Get the basic operations optimized properly.
 Finish the project.
