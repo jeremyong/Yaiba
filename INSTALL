@@ -1,0 +1,3 @@
+Run 'cabal install' in the parent directory.
+
+Compile the example with 'ghc -O2 -threaded Test --make'.
