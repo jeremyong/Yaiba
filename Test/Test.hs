@@ -11,26 +11,26 @@ import Data.Time.Clock (diffUTCTime, getCurrentTime)
 
 -- f = xy^2 + 1
 f = fromList [(Monomial [1,2],1),
-              (Monomial [0,0],1)] :: Polynomial Lex
+              (Monomial [0,0],1)]
 -- f_1 = xy + 1
 f_1 = fromList [(Monomial [1,1],1),
-                (Monomial [0,0],1)] :: Polynomial Lex
+                (Monomial [0,0],1)]
 -- f_2 = y + 1
 f_2 = fromList [(Monomial [0,1],1),
-                (Monomial [0,0],1)] :: Polynomial Lex
+                (Monomial [0,0],1)]
 -- f' = x^2y+xy^2+y^2
 f' = fromList [(Monomial [2,1],1),
                (Monomial [1,2],1),
-               (Monomial [0,2],1)] :: Polynomial Lex
+               (Monomial [0,2],1)]
 -- f'_1 = xy-1
 f'_1 = fromList [(Monomial [1,1],1),
-                 (Monomial [0,0],-1)] :: Polynomial Lex
+                 (Monomial [0,0],-1)]
 -- f'_2 = y^2-1
 f'_2 = fromList [(Monomial [0,2],1),
-                 (Monomial [0,0],-1)] :: Polynomial Lex
+                 (Monomial [0,0],-1)]
 -- g = xy^2 - x
 g = fromList [(Monomial [1,2],1),
-              (Monomial [1,0],-1)] :: Polynomial Lex                                   
+              (Monomial [1,0],-1)]                                   
 -- g_1 = xy+1
 g_1 = f_1
 
@@ -51,7 +51,7 @@ h'_2 = fromList [(Monomial [2,1],1),
 h = Ideal [h_1,h_2] :: Ideal Grlex
 h' = Ideal [h'_1,h'_2] :: Ideal Lex
 
-i = Ideal [f_1,f,f_2,g_1,g_2,h'_1,h'_2] :: Ideal Lex
+i = Ideal [f_1,f,f_2,f',f'_1,g,g_1,g_2,h_1,h_2] :: Ideal Grlex
 
 main = do 
 {-  -- Example 1 from CLO \S2.3
