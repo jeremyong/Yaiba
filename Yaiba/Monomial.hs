@@ -32,15 +32,17 @@ data Revlex
 instance Num (Monomial ord) where
   a + b = Monomial [0]
   Monomial as * Monomial bs = Monomial $ zipWith (+) as bs
-  fromInteger 1 = Monomial [0]
-  signum (Monomial []) = Monomial []
+  fromInteger _ = Monomial [0] --Don't use
+  signum _ = Monomial [0] --Don't use
+  abs _ = Monomial [0] --Don't use
   
+degree :: Monomial ord -> Int
 degree (Monomial a) = sum a
   
 signs :: Monomial ord -> Int
-signs (Monomial []) = 1
-signs (Monomial (a:as)) | a>=0 = signs (Monomial as)
-                        | otherwise = -1
+signs (Monomial as) = case any (<0) as of
+  True -> -1
+  False -> 1
 
 instance Fractional (Monomial ord) where
   recip (Monomial as) = Monomial $ map negate as
@@ -49,6 +51,7 @@ instance Fractional (Monomial ord) where
 instance Ord (Monomial Lex) where
   compare x y = headCompare (powerList (x/y))
 
+headCompare :: (Num t, Ord t) => [t] -> Ordering
 headCompare [] = EQ
 headCompare (a:[]) | a>0 = GT
                    | a<0 = LT
@@ -67,6 +70,6 @@ powerList :: Monomial t -> [Int]
 powerList (Monomial b) = b
 
 isFactor :: Monomial ord -> Monomial ord -> Bool
-isFactor a b = signum (b/a) == 1
+isFactor a b = signs (b/a) == 1
 
 lcmMon (Monomial a) (Monomial b) = Monomial $ zipWith (max) a b

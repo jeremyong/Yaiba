@@ -1,0 +1,10 @@
+
+{-# OPTIONS_GHC -fglasgow-exts -XUndecidableInstances -XPArr #-}
+
+module Yaiba.IdealSet where
+
+import Yaiba.Monomial
+import Yaiba.Polynomial
+import Data.Map
+
+newtype Ideal ord = Ideal (Map (Polynomial ord) (Monomial ord)) deriving (Eq)

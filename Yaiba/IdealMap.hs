@@ -1,7 +1,7 @@
 
-{-# OPTIONS_GHC -fglasgow-exts -XUndecidableInstances #-}
+{-# OPTIONS_GHC -fglasgow-exts -XUndecidableInstances -XPArr #-}
 
-module Yaiba.Ideal where
+module Yaiba.IdealSet where
 
 import Yaiba.Monomial
 import Yaiba.Polynomial

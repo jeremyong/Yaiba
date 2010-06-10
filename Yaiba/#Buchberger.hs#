@@ -33,7 +33,7 @@ newPolys a b = union (getSPolys a b) (getSPolys b b)
 getSPolys batter mix = foldlWithKey pair empty mix
   where pair acc k lt = union (mapWithKeys (sPoly k lt) batter) acc
 
-sPoly k lt
+sPoly k lt k' lt' = 
 
 sPoly (a,b) = let aLT = leadTerm a 
                   bLT = leadTerm b
