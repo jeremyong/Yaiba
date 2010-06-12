@@ -77,3 +77,32 @@ sPoly k k' = let l = lcmMon a1 b1
                  (a1,a2) = leadTerm k
                  (b1,b2) = leadTerm k'
              in (monMult (l/a1) (b2/a2) k) - (monMult (l/b1) 1 k')
+                
+-- Computes the Groebner basis of an ideal a
+nPgB :: (Ord (Monomial ord)) =>
+        Ideal ord -> Ideal ord
+nPgB (Ideal a) = Ideal $ nPgB' a empty
+
+nPgB' :: (Ord (Monomial ord)) =>
+         Map (Polynomial ord) (Monomial ord) ->
+         Map (Polynomial ord) (Monomial ord) ->
+         Map (Polynomial ord) (Monomial ord)
+nPgB' orig diff = let (new,changed) = nPgB'' (newPolys orig diff) orig
+                      out = union orig new --Hedge union algorithm is more efficient
+                                           --on union (bigger) (smaller)
+                  in case changed of
+                    True -> nPgB' out new --Repeat this until gB does nothing
+                    False -> out
+
+-- Accepts a set of polynomials and mutates it so that all
+-- S pairs not zero upon reduction are appended.
+
+nPgB'' :: (Ord (Monomial ord)) =>
+        Map (Sugar ord) (Polynomial ord) ->
+        Map (Polynomial ord) (Monomial ord) ->
+        (Map (Polynomial ord) (Monomial ord), Bool)
+nPgB'' sPolyMap oldMap = fold reduce (empty,False) sPolyMap
+  where reduce dividend (newMap,changed) = rem `seq` case isNull rem of
+          True -> (newMap,changed)
+          False -> (insert rem (fst $ leadTerm rem) newMap,True)
+          where rem =  dividend /. (Ideal oldMap)
