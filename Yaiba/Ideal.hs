@@ -12,6 +12,9 @@ newtype Ideal ord = Ideal (Map (Polynomial ord) (Monomial ord)) deriving (Eq)
 getPolys :: Ideal t -> [Polynomial t]
 getPolys (Ideal a) = keys a
 
+getPolyMap :: Ideal t -> Map (Polynomial t) (Monomial t)
+getPolyMap (Ideal a) = a
+
 (/.) :: (Ord (Monomial ord)) =>
         Polynomial ord -> Ideal ord -> Polynomial ord
 (/.) p i = (/..) p i nullPoly
@@ -27,7 +30,8 @@ getPolys (Ideal a) = keys a
              True -> (/..) new d remainder
              
 divByIdeal :: (Ord (Monomial ord)) =>
-              Polynomial ord -> Map (Polynomial ord) a -> (Polynomial ord, Bool)
+              Polynomial ord -> Map (Polynomial ord) (Monomial ord) -> 
+              (Polynomial ord, Bool)
 divByIdeal dividend divisors = foldlWithKey divByIdeal' (dividend, False) divisors where
   divByIdeal' (p,divOcc) divisor _ = let (quo,rem) = quoRem p divisor
                                      in case isNull quo of

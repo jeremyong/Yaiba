@@ -63,26 +63,15 @@ fromList a = prune $ Polynomial (M.fromList a)
 --Dummy instance. Don't use, use "compare" instead
 instance Eq (Polynomial ord) where
 
---Implements Lex comparison for Polynomials. Empty polynomials are equivalent.
-instance Ord (Polynomial Lex) where
+instance (Ord (Monomial ord)) => Ord (Polynomial ord) where
   compare (Polynomial a) (Polynomial b) | null a && null b = EQ
                                         | null a = LT
                                         | null b = GT
                                         | top == EQ = compare taila tailb
                                         | otherwise = top where
     top = compare (findMax a) (findMax b) --Will always return "Just ..."
-    taila = Polynomial (deleteMax a)::Polynomial Lex
-    tailb = Polynomial (deleteMax b)::Polynomial Lex
-
-instance Ord (Polynomial Grlex) where
-  compare (Polynomial a) (Polynomial b) | null a && null b = EQ
-                                        | null a = LT
-                                        | null b = GT
-                                        | top == EQ = compare taila tailb
-                                        | otherwise = top where
-    top = compare (findMax a) (findMax b) --Will always return "Just ..."
-    taila = Polynomial (deleteMax a)::Polynomial Grlex
-    tailb = Polynomial (deleteMax b)::Polynomial Grlex
+    taila = Polynomial (deleteMax a)
+    tailb = Polynomial (deleteMax b)
 
 insertTerm :: (Ord (Monomial ord)) => Polynomial ord -> Monomial ord -> Q -> Polynomial ord
 insertTerm (Polynomial a) b c = Polynomial (insertWith (+) b c a)
@@ -96,7 +85,8 @@ getMap (Polynomial a) = a
 
 --leadTerm nullPoly = (Monomial [],0)
 leadTerm :: Polynomial ord -> (Monomial ord, Q)
-leadTerm a = findMax $ getMap a
+leadTerm (Polynomial a) | null a == True = (Monomial [],0)
+                        | otherwise = findMax a
 
 deleteFindLT :: Polynomial ord -> (Polynomial ord, Polynomial ord)
 deleteFindLT a = let (x,y) = deleteFindMax $ getMap a
