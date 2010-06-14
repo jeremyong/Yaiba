@@ -56,9 +56,9 @@ h = Ideal $ M.fromList [(h_1,fst (leadTerm h_1)),(h_2,fst (leadTerm h_2))] :: Id
 i = Ideal [f_1,f,f_2,f',f'_1,g,g_1,g_2,h_1,h_2] :: Ideal Grlex
 -}
 j_1 = fromList [(Monomial [3,4,2,1,0,0,0,0],-1),(Monomial [0,0,1,0,0,0],1)]
-j_2 = fromList [(Monomial [2,1,1,1,0,0,0,0],-1),(Monomial [0,0,0,1,0,0],1)]
+j_2 = fromList [(Monomial [2,3,1,1,0,0,0,0],-1),(Monomial [0,0,0,1,0,0],1)]
 j_3 = fromList [(Monomial [1,2,2,1,0,0,0,0],-1),(Monomial [0,0,0,0,1,0],1)]
-j_4 = fromList [(Monomial [3,1,1,2,0,0,0,0],-1),(Monomial [0,0,0,0,0,1],1)]
+j_4 = fromList [(Monomial [3,1,3,2,0,0,0,0],-1),(Monomial [0,0,0,0,0,1],1)]
 j = Ideal $ M.fromList [(j_1,fst (leadTerm j_1)),(j_2,fst (leadTerm j_2)),(j_3,fst (leadTerm j_3)),(j_4, fst (leadTerm j_4))] :: Ideal Lex
 
 main = do 
