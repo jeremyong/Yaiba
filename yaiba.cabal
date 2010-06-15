@@ -11,13 +11,12 @@ Category:            Math
 Homepage:            http://github.com/jeremyong/Yaiba
 Bug-reports:         http://github.com/jeremyong/Yaiba/issues
 Description:
-        NOTE: You must use the GHC head branch > 6.13.20100309 to get decent performance.
-        Implementation of Buchberger's algorithm using the Repa array library.
+        Implementation of Buchberger's algorithm
 
 Synopsis:
-        Implementation of Buchberger's algorithms using the Repa array library.
+        Implementation of Buchberger's algorithms
 
-Tested-with: GHC == 6.13.20100309, GHC == 6.12.1
+Tested-with: GHC == 6.12.3, GHC == 6.12.2
 
 Library
   Build-Depends: 
