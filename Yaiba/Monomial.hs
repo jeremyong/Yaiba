@@ -4,23 +4,23 @@ module Yaiba.Monomial where
 
 import Math.Algebra.Field.Base
 
-newtype Monomial ord = Monomial [Int]
+newtype Monomial ord = M [Int]
 
 instance Eq (Monomial ord) where
-  Monomial as == Monomial bs = as==bs
+  M as == M bs = as==bs
 
 instance Show (Monomial ord) where
-  show (Monomial a) | filter (/=0) a == [] = " "
-                    | otherwise = showVar (1::Int) a
-                        where showVar _ [] = ""
-                              showVar k (y:[]) | y<0 = "*x_" ++ (show k) ++ "^(" ++ (show y) ++ ")"
-                                               | y==0 = ""
-                                               | y==1 = "*x_" ++ (show k)
-                                               | otherwise = "*x_" ++ (show k) ++ "^(" ++ (show y) ++ ")"
-                              showVar k (y:ys) | y<0 = "*x_" ++ (show k) ++ "^(" ++ (show y) ++ ")" ++ showVar (k+1) ys
-                                               | y==0 = showVar (k+1) ys
-                                               | y==1 = "*x_"++(show k)++showVar (k+1) ys
-                                               | otherwise = "*x_"++(show k)++"^("++(show y)++")"++showVar (k+1) ys
+  show (M a) | filter (/=0) a == [] = " "
+             | otherwise = showVar (1::Int) a where 
+                 showVar _ [] = ""
+                 showVar k (y:[]) | y<0 = "*x_" ++ (show k) ++ "^(" ++ (show y) ++ ")"
+                                  | y==0 = ""
+                                  | y==1 = "*x_" ++ (show k)
+                                  | otherwise = "*x_" ++ (show k) ++ "^(" ++ (show y) ++ ")"
+                 showVar k (y:ys) | y<0 = "*x_" ++ (show k) ++ "^(" ++ (show y) ++ ")" ++ showVar (k+1) ys
+                                  | y==0 = showVar (k+1) ys
+                                  | y==1 = "*x_"++(show k)++showVar (k+1) ys
+                                  | otherwise = "*x_"++(show k)++"^("++(show y)++")"++showVar (k+1) ys
 
 --Dummy phantom ord types. Requires -fglasgow-exts enabled.
 data Lex
@@ -30,22 +30,22 @@ data Revlex
 
 -- Signum returns one if all powers are at least zero and negative one otherwise.
 instance Num (Monomial ord) where
-  a + b = Monomial [0]
-  Monomial as * Monomial bs = Monomial $ zipWith (+) as bs
-  fromInteger _ = Monomial [0] --Don't use
-  signum _ = Monomial [0] --Don't use
-  abs _ = Monomial [0] --Don't use
+  a + b = M [0]
+  M as * M bs = M $ zipWith (+) as bs
+  fromInteger _ = M [0] --Don't use
+  signum _ = M [0] --Don't use
+  abs _ = M [0] --Don't use
   
 degree :: Monomial ord -> Int
-degree (Monomial a) = sum a
+degree (M a) = sum a
   
 signs :: Monomial ord -> Int
-signs (Monomial as) = case any (<0) as of
+signs (M as) = case any (<0) as of
   True -> -1
   False -> 1
 
 instance Fractional (Monomial ord) where
-  recip (Monomial as) = Monomial $ map negate as
+  recip (M as) = M $ map negate as
   fromRational 1 = fromInteger 1
   
 instance Ord (Monomial Lex) where
@@ -67,9 +67,10 @@ instance Ord (Monomial Grlex) where
     EQ -> headCompare (powerList (x/y))
                      
 powerList :: Monomial t -> [Int]
-powerList (Monomial b) = b
+powerList (M b) = b
 
 isFactor :: Monomial ord -> Monomial ord -> Bool
 isFactor a b = signs (b/a) == 1
 
-lcmMon (Monomial a) (Monomial b) = Monomial $ zipWith (max) a b
+lcmMon :: Monomial t -> Monomial t1 -> Monomial ord
+lcmMon (M a) (M b) = M $ zipWith (max) a b
