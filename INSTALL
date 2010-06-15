@@ -1,3 +1,9 @@
 Run 'cabal install' in the parent directory.
-
 Compile the example with 'ghc -O2 -threaded Test --make'.
+To run with threads, execute './Test +RTS -N -RTS'
+For textual runtime statistics, supply the '-s' flag between the RTS markers. The flags between +RTS and -RTS are not visible to the executable.
+
+For use with Threadscope:
+Compile the example with 'ghc -O2 -threaded -eventlog --make Test'.
+Run with ./Test +RTS -N -ls -RTS
+This will output the file Test.eventlog which can be opened with threadscope.
