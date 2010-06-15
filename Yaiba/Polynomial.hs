@@ -7,14 +7,9 @@ import Data.Map hiding (fromList)
 import qualified Data.Map as DM
 import Yaiba.Monomial
 import Math.Algebra.Field.Base
-import Prelude hiding (null,
-                       filter,
-                       map,
-                       rem)
+import Prelude hiding (null,filter,map,rem)
 
 newtype Polynomial ord = P (Map (Monomial ord) Q)
-
---instance (Ord (Monomial ord)) => U.Elt (Polynomial ord)
 
 instance (Ord (Monomial ord)) => Show (Polynomial ord) where
   show a | numTerms a == 0 = "0"
@@ -84,8 +79,11 @@ getMap (P a) = a
 
 --leadTerm nullPoly = (Monomial [],0)
 leadTerm :: Polynomial ord -> (Monomial ord, Q)
-leadTerm (P a) | null a == True = (M [],0)
+leadTerm (P a) | null a = (M [],0)
                | otherwise = findMax a
+                             
+monLT (P a) | null a = M []
+            | otherwise = fst $ findMax a
 
 deleteFindLT :: Polynomial ord -> (Polynomial ord, Polynomial ord)
 deleteFindLT a = let (x,y) = deleteFindMax $ getMap a
@@ -110,11 +108,11 @@ quoRem a b = quoRem' a b nullPoly where
   quoRem' rem d quo | isNull rem == True = (quo, nullPoly)
                     | otherwise = let remLT = leadTerm rem
                                       dLT = leadTerm d
-                                      remOd = (fst remLT) / (fst dLT)
-                                      remOdco = (snd remLT) / (snd dLT) 
+                                      !remOd = (fst remLT) / (fst dLT)
+                                      !remOdco = (snd remLT) / (snd dLT) 
                                   in case (signs remOd) of
-                                    -1 -> (quo, rem)
-                                    1 -> (quo + (P (singleton remOd remOdco)), rem - (monMult remOd remOdco d))
+                                    False -> (quo, rem)
+                                    True -> (quo + (P (singleton remOd remOdco)), rem - (monMult remOd remOdco d))
 
 --Divides the first polynomial by the second the entire way through
 quoRem'' :: (Ord (Monomial ord)) =>
@@ -122,10 +120,10 @@ quoRem'' :: (Ord (Monomial ord)) =>
 quoRem'' a b = quoRem''' a b nullPoly where
   quoRem''' rem d quo | numTerms rem == 0 = (quo, nullPoly)
                       | otherwise = let 
-    !remLT = leadTerm rem
-    !dLT = leadTerm d
+    remLT = leadTerm rem
+    dLT = leadTerm d
     !remOd = (fst remLT) / (fst dLT)
     !remOdco = (snd remLT) / (snd dLT) in
     case (signs remOd) of
-      -1 -> (quo, rem)
-      1 -> quoRem''' (rem - (monMult remOd remOdco d)) d (quo + (P (singleton remOd remOdco)))
+      False -> (quo, rem)
+      True -> quoRem''' (rem - (monMult remOd remOdco d)) d (quo + (P (singleton remOd remOdco)))

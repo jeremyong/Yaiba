@@ -30,23 +30,16 @@ data Revlex
 
 -- Signum returns one if all powers are at least zero and negative one otherwise.
 instance Num (Monomial ord) where
-  a + b = M [0]
   M as * M bs = M $ zipWith (+) as bs
-  fromInteger _ = M [0] --Don't use
-  signum _ = M [0] --Don't use
-  abs _ = M [0] --Don't use
   
 degree :: Monomial ord -> Int
 degree (M a) = sum a
   
-signs :: Monomial ord -> Int
-signs (M as) = case any (<0) as of
-  True -> -1
-  False -> 1
+signs :: Monomial ord -> Bool
+signs (M as) = any (<0) as
 
 instance Fractional (Monomial ord) where
   recip (M as) = M $ map negate as
-  fromRational 1 = fromInteger 1
   
 instance Ord (Monomial Lex) where
   compare x y = headCompare (powerList (x/y))
@@ -70,7 +63,7 @@ powerList :: Monomial t -> [Int]
 powerList (M b) = b
 
 isFactor :: Monomial ord -> Monomial ord -> Bool
-isFactor a b = signs (b/a) == 1
+isFactor a b = signs (b/a)
 
 lcmMon :: Monomial t -> Monomial t1 -> Monomial ord
 lcmMon (M a) (M b) = M $ zipWith (max) a b

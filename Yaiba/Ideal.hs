@@ -6,38 +6,32 @@ module Yaiba.Ideal where
 import Yaiba.Monomial
 import Yaiba.Polynomial
 import Yaiba.Sugar
-import Data.Map
+import Data.List
 import Debug.Trace
 
-newtype Ideal ord = I (Map (Polynomial ord) (Sugar ord)) deriving (Eq)
+newtype Ideal ord = I [Polynomial ord] deriving (Eq)
 
 getPolys :: Ideal ord -> [Polynomial ord]
-getPolys (I a) = keys a
-
-getPolyMap :: Ideal ord -> Map (Polynomial ord) (Sugar ord)
-getPolyMap (I a) = a
+getPolys (I a) = a
 
 (/.) :: (Ord (Monomial ord)) =>
         Polynomial ord -> Ideal ord -> Polynomial ord
-(/.) p i = (/..) p i nullPoly
-
-(/..) :: (Ord (Monomial ord)) =>
-         Polynomial ord -> Ideal ord -> Polynomial ord -> Polynomial ord
-(/..) dividend d remainder = case isNull dividend of
-  True -> remainder
-  False -> let (new,divOcc) = divByIdeal dividend d
-           in case divOcc of
-             False -> let (lt,rest) = deleteFindLT dividend
-                      in (/..) rest d (remainder + lt)
-             True -> (/..) new d remainder
+(/.) p i = let (/..) a b r = case isNull a of
+                 True -> r
+                 False -> let (new,divOcc) = divByIdeal a b
+                          in case divOcc of
+                            False -> let (lt,rest) = deleteFindLT a
+                                     in (/..) rest b (r + lt)
+                            True -> (/..) new b r
+           in (/..) p i nullPoly
              
 divByIdeal :: (Ord (Monomial ord)) =>
               Polynomial ord -> Ideal ord -> 
               (Polynomial ord, Bool)
-divByIdeal dividend (I divisors) = foldrWithKey divByIdeal' (dividend, False) divisors where
-  divByIdeal' divisor _ (p,divOcc) = case divOcc of
-    False -> let (quo,rem) = quoRem p divisor
-            in case isNull quo of
+divByIdeal p (I ds) = foldl divByIdeal' (p, False) ds where
+  divByIdeal' (p',divOcc) d = case divOcc of
+    False -> let (quo,rem) = quoRem p' d
+             in case isNull quo of
               True -> (p,divOcc)
               False -> (rem,True)
-    True -> (p,divOcc)
+    True -> (p',divOcc)
