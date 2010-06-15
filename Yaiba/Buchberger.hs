@@ -31,7 +31,7 @@ gB' orig diff = let (new,changed) = gB'' (newPolys orig diff) orig
 
 -- Accepts a set of polynomials and mutates it so that all
 -- S pairs not zero upon reduction are appended.
-
+{-
 gB'' :: (Ord (Monomial ord)) =>
         Map (Sugar ord) (Polynomial ord) ->
         Map (Polynomial ord) (Monomial ord) ->
@@ -41,7 +41,17 @@ gB'' sPolyMap oldMap = fold reduce (empty,False) sPolyMap
           True -> (newMap,changed)
           False -> (insert rem (fst $ leadTerm rem) newMap,True)
           where rem =  dividend /. (Ideal oldMap)
-                
+-}
+gB'' :: (Ord (Monomial ord)) =>
+        Map (Sugar ord) (Polynomial ord) ->
+        Map (Polynomial ord) (Monomial ord) ->
+        (Map (Polynomial ord) (Monomial ord), Bool)
+gB'' sPolyMap oldMap = fst (mapAccum reduce (empty,False) sPolyMap) where
+  reduce acc@(a,b) poly = let rem = poly /. (Ideal oldMap)
+                          in rem `par` case isNull rem of
+                            True -> (acc,poly)
+                            False -> ((insert rem (fst $ leadTerm rem) a,True),poly)
+
 newPolys :: (Ord (Monomial ord)) =>
             Map (Polynomial ord) (Monomial ord) ->
             Map (Polynomial ord) (Monomial ord) ->
