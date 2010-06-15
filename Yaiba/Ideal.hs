@@ -5,15 +5,17 @@ module Yaiba.Ideal where
 
 import Yaiba.Monomial
 import Yaiba.Polynomial
+import Yaiba.Sugar
 import Data.Map
+import Debug.Trace
 
-newtype Ideal ord = Ideal (Map (Polynomial ord) (Monomial ord)) deriving (Eq)
+newtype Ideal ord = I (Map (Polynomial ord) (Sugar ord)) deriving (Eq)
 
-getPolys :: Ideal t -> [Polynomial t]
-getPolys (Ideal a) = keys a
+getPolys :: Ideal ord -> [Polynomial ord]
+getPolys (I a) = keys a
 
-getPolyMap :: Ideal t -> Map (Polynomial t) (Monomial t)
-getPolyMap (Ideal a) = a
+getPolyMap :: Ideal ord -> Map (Polynomial ord) (Sugar ord)
+getPolyMap (I a) = a
 
 (/.) :: (Ord (Monomial ord)) =>
         Polynomial ord -> Ideal ord -> Polynomial ord
@@ -21,19 +23,21 @@ getPolyMap (Ideal a) = a
 
 (/..) :: (Ord (Monomial ord)) =>
          Polynomial ord -> Ideal ord -> Polynomial ord -> Polynomial ord
-(/..) dividend d@(Ideal divisors) remainder = case isNull dividend of
+(/..) dividend d remainder = case isNull dividend of
   True -> remainder
-  False -> let (new,divOcc) = divByIdeal dividend divisors
+  False -> let (new,divOcc) = divByIdeal dividend d
            in case divOcc of
              False -> let (lt,rest) = deleteFindLT dividend
                       in (/..) rest d (remainder + lt)
              True -> (/..) new d remainder
              
 divByIdeal :: (Ord (Monomial ord)) =>
-              Polynomial ord -> Map (Polynomial ord) (Monomial ord) -> 
+              Polynomial ord -> Ideal ord -> 
               (Polynomial ord, Bool)
-divByIdeal dividend divisors = foldlWithKey divByIdeal' (dividend, False) divisors where
-  divByIdeal' (p,divOcc) divisor _ = let (quo,rem) = quoRem p divisor
-                                     in case isNull quo of
-                                       True -> (p,divOcc)
-                                       False -> (rem,True)
+divByIdeal dividend (I divisors) = foldrWithKey divByIdeal' (dividend, False) divisors where
+  divByIdeal' divisor _ (p,divOcc) = case divOcc of
+    False -> let (quo,rem) = quoRem p divisor
+            in case isNull quo of
+              True -> (p,divOcc)
+              False -> (rem,True)
+    True -> (p,divOcc)

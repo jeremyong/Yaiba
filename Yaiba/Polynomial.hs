@@ -4,16 +4,15 @@
 module Yaiba.Polynomial where
 
 import Data.Map hiding (fromList)
-import qualified Data.Map as M
+import qualified Data.Map as DM
 import Yaiba.Monomial
---import qualified Data.Array.Parallel.Unlifted as U
 import Math.Algebra.Field.Base
 import Prelude hiding (null,
                        filter,
                        map,
                        rem)
 
-newtype Polynomial ord = Polynomial (Map (Monomial ord) Q)
+newtype Polynomial ord = P (Map (Monomial ord) Q)
 
 --instance (Ord (Monomial ord)) => U.Elt (Polynomial ord)
 
@@ -26,8 +25,8 @@ pLp :: Polynomial Lex -> [Char]
 pLp = prettyLexPrint
 
 prettyLexPrint :: Polynomial Lex -> [Char]
-prettyLexPrint b@(Polynomial a) | numTerms b == 0 = "0" 
-                                | otherwise = showTerm $ reverse (toAscList a)
+prettyLexPrint b@(P a) | numTerms b == 0 = "0" 
+                       | otherwise = showTerm $ reverse (toAscList a)
   
 showTerm :: [(Monomial ord, Q)] -> [Char]
 showTerm [] = ""
@@ -48,61 +47,60 @@ showTerm ((a,b):as) | show a == " " = (show b) ++ showTerm as
 
 --An empty polynomial.
 nullPoly :: Polynomial ord
-nullPoly = Polynomial empty
+nullPoly = P empty
 
 isNull :: Polynomial ord -> Bool
-isNull (Polynomial a) = null a
+isNull (P a) = null a
 
 monPoly :: (Monomial ord, Q) -> Polynomial ord
 monPoly (a,b) | b==0 = nullPoly 
-              | otherwise = Polynomial (singleton a b)
+              | otherwise = P (singleton a b)
                           
 fromList :: (Ord (Monomial ord)) => [(Monomial ord, Q)] -> Polynomial ord
-fromList a = prune $ Polynomial (M.fromList a)
+fromList a = prune $ P (DM.fromList a)
            
 --Dummy instance. Don't use, use "compare" instead
 instance Eq (Polynomial ord) where
 
 instance (Ord (Monomial ord)) => Ord (Polynomial ord) where
-  compare (Polynomial a) (Polynomial b) | null a && null b = EQ
-                                        | null a = LT
-                                        | null b = GT
-                                        | top == EQ = compare taila tailb
-                                        | otherwise = top where
-    top = compare (findMax a) (findMax b) --Will always return "Just ..."
-    taila = Polynomial (deleteMax a)
-    tailb = Polynomial (deleteMax b)
+  compare (P a) (P b) | null a && null b = EQ
+                      | null a = LT
+                      | null b = GT
+                      | top == EQ = compare taila tailb
+                      | otherwise = top where
+    top = compare (findMax a) (findMax b)
+    taila = P (deleteMax a)
+    tailb = P (deleteMax b)
 
 insertTerm :: (Ord (Monomial ord)) => Polynomial ord -> Monomial ord -> Q -> Polynomial ord
-insertTerm (Polynomial a) b c = Polynomial (insertWith (+) b c a)
+insertTerm (P a) b c = P (insertWith (+) b c a)
 
 --Removes elements that point to the zero element of the field.
 prune :: (Ord (Monomial ord)) => Polynomial ord -> Polynomial ord
-prune (Polynomial a) = Polynomial $ filter (/=0) a
+prune (P a) = P $ filter (/=0) a
 
 getMap :: Polynomial ord -> Map (Monomial ord) Q
-getMap (Polynomial a) = a
+getMap (P a) = a
 
 --leadTerm nullPoly = (Monomial [],0)
 leadTerm :: Polynomial ord -> (Monomial ord, Q)
-leadTerm (Polynomial a) | null a == True = (Monomial [],0)
-                        | otherwise = findMax a
+leadTerm (P a) | null a == True = (M [],0)
+               | otherwise = findMax a
 
 deleteFindLT :: Polynomial ord -> (Polynomial ord, Polynomial ord)
 deleteFindLT a = let (x,y) = deleteFindMax $ getMap a
-                 in ((monPoly x),Polynomial y)
+                 in ((monPoly x),P y)
 
 numTerms :: Polynomial ord -> Int
 numTerms a = size $ getMap a
 
 instance (Ord (Monomial ord)) => Num (Polynomial ord) where
-  Polynomial a + Polynomial b = prune $ Polynomial (unionWith (+) a b)
-  --Polynomial a + Polynomial b = Polynomial $ differenceWith (\x y -> if x+y==0 then Nothing else Just (x+y)) a b
-  a * Polynomial b = prune $ Polynomial (foldWithKey (\k v -> unionWith (+) (getMap (monMult k v a))) empty b)
-  negate (Polynomial a) = Polynomial $ map negate a
+  P a + P b = prune $ P (unionWith (+) a b)
+  a * P b = prune $ P (foldWithKey (\k v -> unionWith (+) (getMap (monMult k v a))) empty b)
+  negate (P a) = P $ map negate a
 
 monMult :: (Ord (Monomial ord)) => Monomial ord -> Q -> Polynomial ord -> Polynomial ord
-monMult a b (Polynomial c) = Polynomial $ foldWithKey (f a b) empty c where
+monMult a b (P c) = P $ foldWithKey (f a b) empty c where
   f a' b' k v acc = unionWith (+) (singleton (a' * k) (b' * v)) acc
 
 --Divides the first polynomial by the second once
@@ -110,14 +108,13 @@ quoRem :: (Ord (Monomial ord)) =>
           Polynomial ord -> Polynomial ord -> (Polynomial ord, Polynomial ord)
 quoRem a b = quoRem' a b nullPoly where
   quoRem' rem d quo | isNull rem == True = (quo, nullPoly)
-                    | otherwise = let 
-    !remLT = leadTerm rem
-    !dLT = leadTerm d
-    !remOd = (fst remLT) / (fst dLT)
-    !remOdco = (snd remLT) / (snd dLT) in
-    case (signs remOd) of
-      -1 -> (quo, rem)
-      1 -> (quo + (Polynomial (singleton remOd remOdco)), rem - (monMult remOd remOdco d))
+                    | otherwise = let remLT = leadTerm rem
+                                      dLT = leadTerm d
+                                      remOd = (fst remLT) / (fst dLT)
+                                      remOdco = (snd remLT) / (snd dLT) 
+                                  in case (signs remOd) of
+                                    -1 -> (quo, rem)
+                                    1 -> (quo + (P (singleton remOd remOdco)), rem - (monMult remOd remOdco d))
 
 --Divides the first polynomial by the second the entire way through
 quoRem'' :: (Ord (Monomial ord)) =>
@@ -131,4 +128,4 @@ quoRem'' a b = quoRem''' a b nullPoly where
     !remOdco = (snd remLT) / (snd dLT) in
     case (signs remOd) of
       -1 -> (quo, rem)
-      1 -> quoRem''' (rem - (monMult remOd remOdco d)) d (quo + (Polynomial (singleton remOd remOdco)))
+      1 -> quoRem''' (rem - (monMult remOd remOdco d)) d (quo + (P (singleton remOd remOdco)))
