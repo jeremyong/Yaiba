@@ -1,7 +1,0 @@
-
-module Yaiba.Sugar where
-
-newtype Sugar = Sugar (Monomial ord)
-
-instance (Ord (Monomial ord)) => Sugar where
-  (Sugar a) `compare` (Sugar b) = a `compare` b
