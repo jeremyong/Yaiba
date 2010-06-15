@@ -56,10 +56,10 @@ h = I $ DM.fromList [(h'_1,computeSugar h'_1 0),(h'_2,computeSugar h'_2 0)] :: I
 {-
 i = Ideal [f_1,f,f_2,f',f'_1,g,g_1,g_2,h_1,h_2] :: Ideal Grlex
 -}
-j_1 = fromList [(M [3,4,2,1,0,0,0,0],-1),(M [0,0,0,0,1,0,0,0],1)]
-j_2 = fromList [(M [2,3,1,1,0,0,0,0],-1),(M [0,0,0,0,0,1,0,0],1)]
-j_3 = fromList [(M [1,2,2,1,0,0,0,0],-1),(M [0,0,0,0,0,0,1,0],1)]
-j_4 = fromList [(M [3,1,3,2,0,0,0,0],-1),(M [0,0,0,0,0,0,0,1],1)]
+j_1 = fromList [(M [3,4,2,4,0,0,0,0],-1),(M [0,0,0,0,1,0,0,0],1)]
+j_2 = fromList [(M [2,3,4,1,0,0,0,0],-1),(M [0,0,0,0,0,1,0,0],1)]
+j_3 = fromList [(M [4,2,2,1,0,0,0,0],-1),(M [0,0,0,0,0,0,1,0],1)]
+j_4 = fromList [(M [3,2,3,4,0,0,0,0],-1),(M [0,0,0,0,0,0,0,1],1)]
 j = I $ DM.fromList [(j_1,computeSugar j_1 0),(j_2,computeSugar j_2 1),(j_3,computeSugar j_3 2),(j_4,computeSugar j_4 3)] :: Ideal Lex
 
 main = do {-
