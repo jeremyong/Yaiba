@@ -35,7 +35,7 @@ degree :: Mon ord -> Int
 degree (M a) = sum a
   
 signs :: Mon ord -> Bool
-signs (M as) = any (<0) as
+signs (M as) = all (>=0) as
 
 instance Fractional (Mon ord) where
   recip (M as) = M $ map negate as

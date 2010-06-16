@@ -107,15 +107,14 @@ monMult a b (P c) = P $ foldWithKey (f a b) empty c where
 --Divides the first polynomial by the second once
 quoRem :: (Ord (Mon ord)) =>
           Poly ord -> (Poly ord,Sugar ord) -> (Poly ord, Poly ord)
-quoRem a b = quoRem' a b nullPoly where
-  quoRem' rem d@(d',_) quo | isNull rem == True = (quo, nullPoly)
-                           | otherwise = let remLT = leadTerm rem
-                                             dLT = leadTerm d'
-                                             !remOd = (fst remLT) / (fst dLT)
-                                             !remOdco = (snd remLT) / (snd dLT) 
-                                         in case (signs remOd) of
-                                           False -> (quo, rem)
-                                           True -> (quo + (P (singleton remOd remOdco)), rem - (monMult remOd remOdco d'))
+quoRem rem (d,_) | isNull rem = (nullPoly, nullPoly)
+                 | otherwise = let (a1,a2) = leadTerm rem
+                                   (b1,b2) = leadTerm d
+                                   !remOd = a1/b1
+                                   !remOdco = a2/b2 
+                               in case isFactor b1 a1 of
+                                 False -> (nullPoly, rem)
+                                 True -> (P (singleton remOd remOdco), rem - (monMult remOd remOdco d))
 
 --Divides the first polynomial by the second the entire way through
 quoRem'' :: (Ord (Mon ord)) =>
