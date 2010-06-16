@@ -3,13 +3,14 @@
 module Yaiba.SPoly where
 
 import Data.Map
+import qualified Data.Set as Set
 import Data.Array.Parallel.Prelude
 import Yaiba.Sugar
 import Yaiba.Monomial
 import Yaiba.Polynomial
 import Yaiba.Ideal
 
-newtype SPoly ord = SP (Map (Sugar ord) [Poly ord])
+newtype SPoly ord = SP (Map (Sugar ord) (Set.Set (Poly ord)))
 
 sPoly :: (Ord (Mon ord)) => (Poly ord,Sugar ord) -> 
          (Poly ord, Sugar ord) -> Maybe (Poly ord, Sugar ord)
@@ -34,6 +35,6 @@ minimize :: [(Poly ord, Sugar ord)] -> [(Poly ord, Sugar ord)]
 minimize as = as
 
 getSPolys :: (Ord (Mon ord)) => Ideal ord -> Ideal ord -> SPoly ord
-getSPolys a b = SP $ foldl (\a (v,k) -> insertWith (++) k [v] a) empty (getSPolys' a b) where
+getSPolys a b = SP $ foldl (\a (v,k) -> insertWith Set.union k (Set.singleton v) a) empty (getSPolys' a b) where
   getSPolys' _ (I []) = []
   getSPolys' x@(I xs) (I (y:ys)) = syzygy x y ++ getSPolys' (I (y:xs)) (I ys)

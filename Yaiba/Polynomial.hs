@@ -16,7 +16,6 @@ instance (Ord (Mon ord)) => Show (Poly ord) where
   show a | numTerms a == 0 = "0"
          | otherwise = showTerm $ toAscList (getMap a)
 
--- A shortened prettyLexPrint
 pLp :: Poly Lex -> [Char]
 pLp = prettyLexPrint
 
@@ -55,7 +54,6 @@ monPoly (a,b) | b==0 = nullPoly
 fromList :: (Ord (Mon ord)) => [(Mon ord, Q)] -> Poly ord
 fromList a = prune $ P (DM.fromList a)
            
---Dummy instance. Don't use, use "compare" instead
 instance Eq (Poly ord) where
 
 instance (Ord (Mon ord)) => Ord (Poly ord) where
@@ -78,7 +76,6 @@ prune (P a) = P $ filter (/=0) a
 getMap :: Poly ord -> Map (Mon ord) Q
 getMap (P a) = a
 
---leadTerm nullPoly = (Monomial [],0)
 leadTerm :: Poly ord -> (Mon ord, Q)
 leadTerm (P a) | null a = (M [],0)
                | otherwise = findMax a
