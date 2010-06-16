@@ -28,5 +28,7 @@ syzygy (I as) b = foldl (\x y -> f (sPoly b y) x) DM.empty as where
   f Nothing acc = acc
   f (Just (sp,sug)) acc = DM.insertWith (+:+) sug [:sp:] acc
   
+getSPolys :: (Ord (Mon t)) =>
+             Ideal t -> Ideal t -> DM.Map (Sugar t) [:Poly t:]
 getSPolys _ (I []) = DM.empty
 getSPolys x@(I xs) (I (y:ys)) = DM.unionWith (+:+) (syzygy x y) (getSPolys (I (y:xs)) (I ys))
