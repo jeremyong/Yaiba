@@ -6,6 +6,7 @@ module Yaiba.Polynomial where
 import Data.Map hiding (fromList)
 import qualified Data.Map as DM
 import Yaiba.Monomial
+import Yaiba.Sugar
 import Math.Algebra.Field.Base
 import Prelude hiding (null,filter,map,rem)
 
@@ -16,10 +17,10 @@ instance (Ord (Mon ord)) => Show (Poly ord) where
          | otherwise = showTerm $ toAscList (getMap a)
 
 -- A shortened prettyLexPrint
-pLp :: Polynomial Lex -> [Char]
+pLp :: Poly Lex -> [Char]
 pLp = prettyLexPrint
 
-prettyLexPrint :: Polynomial Lex -> [Char]
+prettyLexPrint :: Poly Lex -> [Char]
 prettyLexPrint b@(P a) | numTerms b == 0 = "0" 
                        | otherwise = showTerm $ reverse (toAscList a)
   
@@ -102,20 +103,20 @@ monMult a b (P c) = P $ foldWithKey (f a b) empty c where
   f a' b' k v acc = unionWith (+) (singleton (a' * k) (b' * v)) acc
 
 --Divides the first polynomial by the second once
-quoRem :: (Ord (Monomial ord)) =>
-          Poly ord -> Poly ord -> (Poly ord, Poly ord)
+quoRem :: (Ord (Mon ord)) =>
+          Poly ord -> (Poly ord,Sugar ord) -> (Poly ord, Poly ord)
 quoRem a b = quoRem' a b nullPoly where
-  quoRem' rem d quo | isNull rem == True = (quo, nullPoly)
-                    | otherwise = let remLT = leadTerm rem
-                                      dLT = leadTerm d
-                                      !remOd = (fst remLT) / (fst dLT)
-                                      !remOdco = (snd remLT) / (snd dLT) 
-                                  in case (signs remOd) of
-                                    False -> (quo, rem)
-                                    True -> (quo + (P (singleton remOd remOdco)), rem - (monMult remOd remOdco d))
+  quoRem' rem d@(d',_) quo | isNull rem == True = (quo, nullPoly)
+                           | otherwise = let remLT = leadTerm rem
+                                             dLT = leadTerm d'
+                                             !remOd = (fst remLT) / (fst dLT)
+                                             !remOdco = (snd remLT) / (snd dLT) 
+                                         in case (signs remOd) of
+                                           False -> (quo, rem)
+                                           True -> (quo + (P (singleton remOd remOdco)), rem - (monMult remOd remOdco d'))
 
 --Divides the first polynomial by the second the entire way through
-quoRem'' :: (Ord (Monomial ord)) =>
+quoRem'' :: (Ord (Mon ord)) =>
            Poly ord -> Poly ord -> (Poly ord, Poly ord)
 quoRem'' a b = quoRem''' a b nullPoly where
   quoRem''' rem d quo | numTerms rem == 0 = (quo, nullPoly)

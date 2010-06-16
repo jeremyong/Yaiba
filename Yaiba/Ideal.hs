@@ -7,15 +7,14 @@ import Yaiba.Monomial
 import Yaiba.Polynomial
 import Yaiba.Sugar
 import Data.List
-import Debug.Trace
 
-newtype Ideal ord = I [Polynomial ord] deriving (Eq)
+newtype Ideal ord = I [(Poly ord,Sugar ord)] deriving (Eq)
 
-getPolys :: Ideal ord -> [Polynomial ord]
-getPolys (I a) = a
+getPolys :: Ideal ord -> [Poly ord]
+getPolys (I a) = map fst a
 
-(/.) :: (Ord (Monomial ord)) =>
-        Polynomial ord -> Ideal ord -> Polynomial ord
+(/.) :: (Ord (Mon ord)) =>
+        Poly ord -> Ideal ord -> Poly ord
 (/.) p i = let (/..) a b r = case isNull a of
                  True -> r
                  False -> let (new,divOcc) = divByIdeal a b
@@ -25,9 +24,9 @@ getPolys (I a) = a
                             True -> (/..) new b r
            in (/..) p i nullPoly
              
-divByIdeal :: (Ord (Monomial ord)) =>
-              Polynomial ord -> Ideal ord -> 
-              (Polynomial ord, Bool)
+divByIdeal :: (Ord (Mon ord)) =>
+              Poly ord -> Ideal ord -> 
+              (Poly ord, Bool)
 divByIdeal p (I ds) = foldl divByIdeal' (p, False) ds where
   divByIdeal' (p',divOcc) d = case divOcc of
     False -> let (quo,rem) = quoRem p' d
