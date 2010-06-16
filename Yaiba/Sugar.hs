@@ -10,8 +10,8 @@ newtype Sugar ord = S (Mon ord,Q,Int)
 
 instance Eq (Sugar ord) where --Dummy instance, use compare instead
 
-instance (Ord (Mon ord)) => Ord (Sugar ord) where
+instance Ord (Sugar ord) where
   compare (S (_,_,a)) (S (_,_,b)) = compare a b
   
-instance (Ord (Mon ord)) => Show (Sugar ord) where
+instance Show (Sugar ord) where
   show (S (a,b,c)) = "("++(show a)++", "++(show b)++", "++(show c)++")"
