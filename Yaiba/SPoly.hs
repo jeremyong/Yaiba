@@ -7,6 +7,7 @@ import Data.Array.Parallel.Prelude
 import Yaiba.Sugar
 import Yaiba.Monomial
 import Yaiba.Polynomial
+import Yaiba.Ideal
 
 newtype SPoly ord = SP (DM.Map (Sugar ord) [:Poly ord:])
 
@@ -21,7 +22,11 @@ sPoly (a,S (a1,a2,a3)) (b,S (b1,b2,b3)) = let l = lcmMon a1 b1
                                             False -> Just (sp,S (spLT,co,sug))
                                             True -> Nothing
 
-
-syzygy as b = SP $ foldl (\x y -> f (sPoly b y) x) DM.empty as where
+syzygy :: (Ord (Mon ord)) =>
+          Ideal ord -> (Poly ord, Sugar ord) -> DM.Map (Sugar ord) [:Poly ord:]
+syzygy (I as) b = foldl (\x y -> f (sPoly b y) x) DM.empty as where
   f Nothing acc = acc
   f (Just (sp,sug)) acc = DM.insertWith (+:+) sug [:sp:] acc
+  
+getSPolys _ (I []) = DM.empty
+getSPolys x@(I xs) (I (y:ys)) = DM.unionWith (+:+) (syzygy x y) (getSPolys (I (y:xs)) (I ys))
