@@ -19,4 +19,4 @@ sPoly (a,S (a1,a2,a3)) (b,S (b1,b2,b3)) = let l = lcmMon a1 b1
                                               sug = spLTdeg + max (a3-spLTdeg) (b3-spLTdeg)
                                           in (sp,S (spLT,co,sug))
 
-syzygy as b = map (sPoly b) as
+syzygy as b = (map (sPoly b) as)
