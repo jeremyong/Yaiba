@@ -7,13 +7,14 @@ import Yaiba.Monomial
 import Yaiba.Polynomial
 import Yaiba.Sugar
 import Data.List
+import qualified Data.Set as Set
 
 newtype Ideal ord = I [(Poly ord,Sugar ord)] deriving (Eq)
 
 getPolys :: Ideal ord -> [Poly ord]
 getPolys (I a) = map fst a
 
-initSugars as = map (\a -> (a,S $ deg a)) as
+initSugars as = Set.toList $ Set.map (\a -> (a,S $ deg a)) as
 
 (/.) :: (Ord (Mon ord)) =>
         Poly ord -> Ideal ord -> Poly ord

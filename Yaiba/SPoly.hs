@@ -37,4 +37,4 @@ minimize as = as
 getSPolys :: (Ord (Mon ord)) => Ideal ord -> Ideal ord -> SPoly ord
 getSPolys a b = SP $ foldl (\a (v,k) -> insertWith Set.union k (Set.singleton v) a) empty (getSPolys' a b) where
   getSPolys' _ (I []) = []
-  getSPolys' x@(I xs) (I (y:ys)) = syzygy x y ++ getSPolys' (I (y:xs)) (I ys)
+  getSPolys' x@(I xs) (I (y:ys)) = (minimize $ syzygy x y) ++ getSPolys' (I (y:xs)) (I ys)
