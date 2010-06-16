@@ -7,7 +7,12 @@ import Data.Map
 import Yaiba.Sugar
 import Yaiba.Polynomial
 
-newtype SPoly ord = SP (Map (Sugar ord) [:Polynomial ord:])
+newtype SPoly ord = SP (Map (Sugar ord) [:Poly ord:])
+
+sPoly a b = let (a1,a2) = leadTerm a
+                (b1,b2) = leadTerm b
+                l = lcmMon a1 b1
+            in (monMult (l/a1) (b2/a2) a) - (monMult (l/b1) 1 b)
 
 syzygy [] _ = SP empty
---syzygy ms a = 
+syzygy as b = map (\x -> 

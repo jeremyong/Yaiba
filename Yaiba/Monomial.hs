@@ -4,12 +4,12 @@ module Yaiba.Monomial where
 
 import Math.Algebra.Field.Base
 
-newtype Monomial ord = M [Int]
+newtype Mon ord = M [Int]
 
-instance Eq (Monomial ord) where
+instance Eq (Mon ord) where
   M as == M bs = as==bs
 
-instance Show (Monomial ord) where
+instance Show (Mon ord) where
   show (M a) | filter (/=0) a == [] = " "
              | otherwise = showVar (1::Int) a where 
                  showVar _ [] = ""
@@ -28,20 +28,19 @@ data Grlex
 data Grevlex
 data Revlex
 
--- Signum returns one if all powers are at least zero and negative one otherwise.
-instance Num (Monomial ord) where
+instance Num (Mon ord) where
   M as * M bs = M $ zipWith (+) as bs
   
-degree :: Monomial ord -> Int
+degree :: Mon ord -> Int
 degree (M a) = sum a
   
-signs :: Monomial ord -> Bool
+signs :: Mon ord -> Bool
 signs (M as) = any (<0) as
 
-instance Fractional (Monomial ord) where
+instance Fractional (Mon ord) where
   recip (M as) = M $ map negate as
   
-instance Ord (Monomial Lex) where
+instance Ord (Mon Lex) where
   compare x y = headCompare (powerList (x/y))
 
 headCompare :: (Num t, Ord t) => [t] -> Ordering
@@ -53,17 +52,17 @@ headCompare (a:as) | a>0 = GT
                    | a<0 = LT
                    | a==0 = headCompare as
                                 
-instance Ord (Monomial Grlex) where
+instance Ord (Mon Grlex) where
   compare x y = case compare (degree x) (degree y) of
     GT -> GT
     LT -> LT
     EQ -> headCompare (powerList (x/y))
                      
-powerList :: Monomial t -> [Int]
+powerList :: Mon t -> [Int]
 powerList (M b) = b
 
-isFactor :: Monomial ord -> Monomial ord -> Bool
+isFactor :: Mon ord -> Mon ord -> Bool
 isFactor a b = signs (b/a)
 
-lcmMon :: Monomial t -> Monomial t1 -> Monomial ord
+lcmMon :: Mon t -> Mon t1 -> Mon ord
 lcmMon (M a) (M b) = M $ zipWith (max) a b

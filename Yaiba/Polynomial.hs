@@ -9,9 +9,9 @@ import Yaiba.Monomial
 import Math.Algebra.Field.Base
 import Prelude hiding (null,filter,map,rem)
 
-newtype Polynomial ord = P (Map (Monomial ord) Q)
+newtype Poly ord = P (Map (Mon ord) Q)
 
-instance (Ord (Monomial ord)) => Show (Polynomial ord) where
+instance (Ord (Mon ord)) => Show (Poly ord) where
   show a | numTerms a == 0 = "0"
          | otherwise = showTerm $ toAscList (getMap a)
 
@@ -23,7 +23,7 @@ prettyLexPrint :: Polynomial Lex -> [Char]
 prettyLexPrint b@(P a) | numTerms b == 0 = "0" 
                        | otherwise = showTerm $ reverse (toAscList a)
   
-showTerm :: [(Monomial ord, Q)] -> [Char]
+showTerm :: [(Mon ord, Q)] -> [Char]
 showTerm [] = ""
 showTerm ((a,b):[]) | show a == " " = show b
                     | b==0 = ""
@@ -41,23 +41,23 @@ showTerm ((a,b):as) | show a == " " = (show b) ++ showTerm as
 --Constructors
 
 --An empty polynomial.
-nullPoly :: Polynomial ord
+nullPoly :: Poly ord
 nullPoly = P empty
 
-isNull :: Polynomial ord -> Bool
+isNull :: Poly ord -> Bool
 isNull (P a) = null a
 
-monPoly :: (Monomial ord, Q) -> Polynomial ord
+monPoly :: (Mon ord, Q) -> Poly ord
 monPoly (a,b) | b==0 = nullPoly 
               | otherwise = P (singleton a b)
                           
-fromList :: (Ord (Monomial ord)) => [(Monomial ord, Q)] -> Polynomial ord
+fromList :: (Ord (Mon ord)) => [(Mon ord, Q)] -> Poly ord
 fromList a = prune $ P (DM.fromList a)
            
 --Dummy instance. Don't use, use "compare" instead
-instance Eq (Polynomial ord) where
+instance Eq (Poly ord) where
 
-instance (Ord (Monomial ord)) => Ord (Polynomial ord) where
+instance (Ord (Mon ord)) => Ord (Poly ord) where
   compare (P a) (P b) | null a && null b = EQ
                       | null a = LT
                       | null b = GT
@@ -67,43 +67,43 @@ instance (Ord (Monomial ord)) => Ord (Polynomial ord) where
     taila = P (deleteMax a)
     tailb = P (deleteMax b)
 
-insertTerm :: (Ord (Monomial ord)) => Polynomial ord -> Monomial ord -> Q -> Polynomial ord
+insertTerm :: (Ord (Mon ord)) => Poly ord -> Mon ord -> Q -> Poly ord
 insertTerm (P a) b c = P (insertWith (+) b c a)
 
 --Removes elements that point to the zero element of the field.
-prune :: (Ord (Monomial ord)) => Polynomial ord -> Polynomial ord
+prune :: (Ord (Mon ord)) => Poly ord -> Poly ord
 prune (P a) = P $ filter (/=0) a
 
-getMap :: Polynomial ord -> Map (Monomial ord) Q
+getMap :: Poly ord -> Map (Mon ord) Q
 getMap (P a) = a
 
 --leadTerm nullPoly = (Monomial [],0)
-leadTerm :: Polynomial ord -> (Monomial ord, Q)
+leadTerm :: Poly ord -> (Mon ord, Q)
 leadTerm (P a) | null a = (M [],0)
                | otherwise = findMax a
                              
 monLT (P a) | null a = M []
             | otherwise = fst $ findMax a
 
-deleteFindLT :: Polynomial ord -> (Polynomial ord, Polynomial ord)
+deleteFindLT :: Poly ord -> (Poly ord, Poly ord)
 deleteFindLT a = let (x,y) = deleteFindMax $ getMap a
                  in ((monPoly x),P y)
 
-numTerms :: Polynomial ord -> Int
+numTerms :: Poly ord -> Int
 numTerms a = size $ getMap a
 
-instance (Ord (Monomial ord)) => Num (Polynomial ord) where
+instance (Ord (Mon ord)) => Num (Poly ord) where
   P a + P b = prune $ P (unionWith (+) a b)
   a * P b = prune $ P (foldWithKey (\k v -> unionWith (+) (getMap (monMult k v a))) empty b)
   negate (P a) = P $ map negate a
 
-monMult :: (Ord (Monomial ord)) => Monomial ord -> Q -> Polynomial ord -> Polynomial ord
+monMult :: (Ord (Mon ord)) => Mon ord -> Q -> Poly ord -> Poly ord
 monMult a b (P c) = P $ foldWithKey (f a b) empty c where
   f a' b' k v acc = unionWith (+) (singleton (a' * k) (b' * v)) acc
 
 --Divides the first polynomial by the second once
 quoRem :: (Ord (Monomial ord)) =>
-          Polynomial ord -> Polynomial ord -> (Polynomial ord, Polynomial ord)
+          Poly ord -> Poly ord -> (Poly ord, Poly ord)
 quoRem a b = quoRem' a b nullPoly where
   quoRem' rem d quo | isNull rem == True = (quo, nullPoly)
                     | otherwise = let remLT = leadTerm rem
@@ -116,7 +116,7 @@ quoRem a b = quoRem' a b nullPoly where
 
 --Divides the first polynomial by the second the entire way through
 quoRem'' :: (Ord (Monomial ord)) =>
-           Polynomial ord -> Polynomial ord -> (Polynomial ord, Polynomial ord)
+           Poly ord -> Poly ord -> (Poly ord, Poly ord)
 quoRem'' a b = quoRem''' a b nullPoly where
   quoRem''' rem d quo | numTerms rem == 0 = (quo, nullPoly)
                       | otherwise = let 
