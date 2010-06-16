@@ -86,6 +86,8 @@ leadTerm (P a) | null a = (M [],0)
 monLT (P a) | null a = M []
             | otherwise = fst $ findMax a
 
+deg a = degree $ monLT a
+
 deleteFindLT :: Poly ord -> (Poly ord, Poly ord)
 deleteFindLT a = let (x,y) = deleteFindMax $ getMap a
                  in ((monPoly x),P y)

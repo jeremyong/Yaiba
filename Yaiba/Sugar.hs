@@ -6,12 +6,12 @@ import Yaiba.Monomial
 import Math.Algebra.Field.Base
 
 --Sugar tuples consist of the LT and the sugar itself
-newtype Sugar ord = S (Mon ord,Q,Int)
+newtype Sugar ord = S Int
 
 instance Eq (Sugar ord) where --Dummy instance, use compare instead
 
 instance Ord (Sugar ord) where
-  compare (S (_,_,a)) (S (_,_,b)) = compare a b
+  compare (S a) (S b) = compare a b
   
 instance Show (Sugar ord) where
-  show (S (a,b,c)) = "("++(show a)++", "++(show b)++", "++(show c)++")"
+  show (S a) = show a
