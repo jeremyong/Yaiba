@@ -13,7 +13,7 @@ import qualified Data.Set as DS
 import Data.Time.Clock (diffUTCTime, getCurrentTime)
 
 j_1 = fromList [(M [3,4,10,4,0,0,0,0],-1),(M [0,0,0,0,1,0,0,0],1)]
-j_2 = fromList [(M [2,3,3,3,0,0,0,0],-1),(M [0,0,0,0,0,1,0,0],1)]
+j_2 = fromList [(M [2,5,3,2,0,0,0,0],-1),(M [0,0,0,0,0,1,0,0],1)]
 j_3 = fromList [(M [4,3,5,4,0,0,0,0],-1),(M [0,0,0,0,0,0,1,0],1)]
 j_4 = fromList [(M [3,2,3,5,0,0,0,0],-1),(M [0,0,0,0,0,0,0,1],1)]::Poly Lex
 j' = j_1:j_2:j_3:j_4:[]
