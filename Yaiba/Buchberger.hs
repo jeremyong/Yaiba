@@ -21,9 +21,9 @@ gB a = gB' a (getSPolys (I []) a) where
                              else let ((_,polys),rest) = deleteFindMin spolys
                                       ((_,polys'),rest') = deleteFindMin rest
                                       redPolys = initSugars $ DS.filter (not.isNull) $ 
-                                                 DS.map (\x -> x /. d) polys
+                                                 DS.map (/. d) polys
                                       redPolys' = initSugars $ DS.filter (not.isNull) $ 
-                                                  DS.map (\x -> x /. d) polys'
+                                                  DS.map (/. d) polys'
                                       initRed = if null rest then
                                                   redPolys
                                                 else
@@ -45,23 +45,23 @@ gB a = gB' a (getSPolys (I []) a) where
                                       M doubPivot = monLT (DS.findMax polys)
                                       pivot = P $ singleton (M $ DL.map (`quot` 2) doubPivot) 1
                                       (top,bot) = let (t,occ,b) = DS.splitMember pivot polys
-                                                  in case occ of
-                                                    True -> (DS.insert pivot t, b)
-                                                    False -> (t, b)
-                                      topPolys = initSugars $ DS.filter (not.isNull) $ 
-                                                 DS.map (\x -> x /. d) top
-                                      botPolys = initSugars $ DS.filter (not.isNull) $ 
-                                                 DS.map (\x -> x /. d) bot
-                                      allPolys = initSugars $ DS.filter (not.isNull) $ 
-                                                 DS.map (\x -> x /. d) polys
+                                                  in if occ then
+                                                       (DS.insert pivot t, b)
+                                                     else (t, b)
+                                      topPolys = initSugars $ DS.filter (not.isNull) 
+                                                 $ DS.map (/. d) top
+                                      botPolys = initSugars $ DS.filter (not.isNull) 
+                                                 $ DS.map (/. d) bot
+                                      allPolys = initSugars $ DS.filter (not.isNull) 
+                                                 $ DS.map (/. d) polys
                                       initRed = if length allPolys > 5 then
-                                                  topPolys `par` (botPolys `pseq` topPolys++botPolys)
+                                                  topPolys `par` 
+                                                  (botPolys `pseq` topPolys++botPolys)
                                                 else
                                                   allPolys
                                       SP new = getSPolys d (I $ initRed)
                                       nextSMap = SP $ unionWith DS.union rest new
-                                  in gB' (I $ ds++initRed) nextSMap
-
+                                  in gB' (I $ ds ++ initRed) nextSMap
 
 -- | Non-parallelized implementation.
 nPgB :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
@@ -70,7 +70,7 @@ nPgB a = gB' a (getSPolys (I []) a) where
                                d 
                              else let ((_,polys),rest) = deleteFindMin spolys
                                       redPolys = DS.filter (not.isNull) $ 
-                                                 DS.map (\x -> x /. d) polys
+                                                 DS.map (/. d) polys
                                       initRed = initSugars redPolys
                                       SP new = getSPolys d (I initRed)
                                       nextSMap = SP $ unionWith DS.union rest new

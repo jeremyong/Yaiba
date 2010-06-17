@@ -20,13 +20,14 @@ sPoly :: (Ord (Mon ord)) => (Poly ord,Sugar ord) ->
 sPoly (a,S a') (b,S b') = let (a1,a2) = leadTerm a
                               (b1,b2) = leadTerm b
                               l = lcmMon a1 b1
-                              sp = (monMult (l/a1) b2 a) - (monMult (l/b1) a2 b)
+                              sp = monMult (l/a1) b2 a - monMult (l/b1) a2 b
                               (spLT,_) = leadTerm sp
                               spLTdeg = degree spLT
                               sug = spLTdeg + max (a'-spLTdeg) (b'-spLTdeg)
-                          in case a1 * b1 == l of
-                            False -> Just (sp,S sug,l)
-                            True -> Nothing
+                          in if a1 * b1 == l then
+                               Nothing
+                             else
+                               Just (sp,S sug,l)
 
 -- | Convolves a supplied Poly with an ideal, generating S-Polys and
 -- throwing away those for which the lead terms are relatively prime.
@@ -49,4 +50,4 @@ getSPolys a b = SP $ foldl (\acc (v,k) -> insertWith DS.union k (DS.singleton v)
                            empty 
                            (getSPolys' a b) where
   getSPolys' _ (I []) = []
-  getSPolys' x@(I xs) (I (y:ys)) = (minimize $ syzygy x y) ++ getSPolys' (I (y:xs)) (I ys)
+  getSPolys' x@(I xs) (I (y:ys)) = minimize (syzygy x y) ++ getSPolys' (I (y:xs)) (I ys)

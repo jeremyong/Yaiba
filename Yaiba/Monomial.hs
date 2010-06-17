@@ -15,14 +15,14 @@ instance Show (Mon ord) where
   show (M a) | filter (/=0) a == [] = " "
              | otherwise = showVar (1::Int) a where 
                  showVar _ [] = ""
-                 showVar k (y:[]) | y<0 = "*x_" ++ (show k) ++ "^(" ++ (show y) ++ ")"
+                 showVar k (y:[]) | y<0 = "*x_" ++ show k ++ "^(" ++ show y ++ ")"
                                   | y==0 = ""
-                                  | y==1 = "*x_" ++ (show k)
-                                  | otherwise = "*x_" ++ (show k) ++ "^(" ++ (show y) ++ ")"
-                 showVar k (y:ys) | y<0 = "*x_" ++ (show k) ++ "^(" ++ (show y) ++ ")" ++ showVar (k+1) ys
+                                  | y==1 = "*x_" ++ show k
+                                  | otherwise = "*x_" ++ show k ++ "^(" ++ show y ++ ")"
+                 showVar k (y:ys) | y<0 = "*x_" ++ show k ++ "^(" ++ show y ++ ")" ++ showVar (k+1) ys
                                   | y==0 = showVar (k+1) ys
-                                  | y==1 = "*x_"++(show k)++showVar (k+1) ys
-                                  | otherwise = "*x_"++(show k)++"^("++(show y)++")"++showVar (k+1) ys
+                                  | y==1 = "*x_"++ show k ++showVar (k+1) ys
+                                  | otherwise = "*x_"++ show k ++"^("++ show y ++")"++showVar (k+1) ys
 
 --Dummy phantom ord types. Requires -fglasgow-exts enabled.
 data Lex
@@ -67,4 +67,4 @@ isFactor :: Mon ord -> Mon ord -> Bool
 isFactor a b = signs (b/a)
 
 lcmMon :: Mon t -> Mon t1 -> Mon ord
-lcmMon (M a) (M b) = M $ zipWith (max) a b
+lcmMon (M a) (M b) = M $ zipWith max a b
