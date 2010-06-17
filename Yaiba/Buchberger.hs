@@ -54,24 +54,24 @@ gB a = gB' a (getSPolys (I []) a) where
                                                  $ DS.map (/. d) bot
                                       allPolys = initSugars $ DS.filter (not.isNull) 
                                                  $ DS.map (/. d) polys
-                                      initRed = if length allPolys > 1 then
+                                      initRed = if length allPolys > 3 then
                                                   topPolys `par` 
                                                   (botPolys `pseq` topPolys++botPolys)
                                                 else
                                                   allPolys
                                       SP new = getSPolys d (I $ initRed)
                                       nextSMap = SP $ unionWith DS.union rest new
-                                  in gB' (I $ DL.foldl (\a x -> DL.insert x a) ds initRed) nextSMap
+                                  in gB' (I $ DL.foldl (\acc x -> DL.insert x acc) ds initRed) nextSMap
 
 -- | Non-parallelized implementation.
 nPgB :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
 nPgB a = gB' a (getSPolys (I []) a) where
   gB' d@(I ds) (SP spolys) = if null spolys then 
                                d 
-                             else let ((_,polys),rest) = (show $ DS.size polys) `trace` deleteFindMin spolys
+                             else let ((_,polys),rest) = deleteFindMin spolys
                                       redPolys = DS.filter (not.isNull) $ 
                                                  DS.map (/. d) polys
                                       initRed = initSugars redPolys
                                       SP new = getSPolys d (I initRed)
                                       nextSMap = SP $ unionWith DS.union rest new
-                                  in gB' (I $ ds++initRed) nextSMap
+                                  in (show $ DS.size polys) `trace` gB' (I $ ds++initRed) nextSMap
