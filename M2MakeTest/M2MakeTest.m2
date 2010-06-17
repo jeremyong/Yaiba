@@ -22,14 +22,13 @@ end
 
 restart
 load "M2MakeTest.m2"
-matrixSize = 3
-R = QQ[x_1..x_(2*(matrixSize^2)),MonomialOrder=>{Weights=>{1,1,1,1},Lex}]
+matrixSize = 4
+R = QQ[x_1..x_(2*(matrixSize^2)),MonomialOrder=>{Weights=>toList((2*matrixSize^2):1),Lex}]
 varsA = take(gens R,matrixSize^2)
 varsB = drop(gens R,matrixSize^2)
 A = matrix pack(varsA,matrixSize)
 B = matrix pack(varsB,matrixSize)
 I = ideal flatten entries (A*B - B*A)
-leadTerm I
 
 makeExample(I)
 makePolynomial(first I_*)
