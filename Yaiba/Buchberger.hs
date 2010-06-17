@@ -1,5 +1,4 @@
 {-# OPTIONS_GHC -fglasgow-exts -XUndecidableInstances -XBangPatterns #-}
-{-# LANGUAGE PArr #-}
 -- | Generates a Groebner basis of a supplied ideal.
 module Yaiba.Buchberger where
 
@@ -54,7 +53,7 @@ gB a = gB' a (getSPolys (I []) a) where
                                                  $ DS.map (/. d) bot
                                       allPolys = initSugars $ DS.filter (not.isNull) 
                                                  $ DS.map (/. d) polys
-                                      initRed = if length allPolys > 5 then
+                                      initRed = if length allPolys > 1 then
                                                   topPolys `par` 
                                                   (botPolys `pseq` topPolys++botPolys)
                                                 else
