@@ -10,6 +10,7 @@ import Data.Map hiding (filter,map)
 import qualified Data.List as DL hiding (null)
 import Control.Parallel
 import qualified Data.Set as DS
+import Debug.Trace
 import Prelude hiding (rem,null,map,filter)
 {-
 -- | Parallelizes to depth 2 in the SPoly map.
@@ -60,14 +61,14 @@ gB a = gB' a (getSPolys (I []) a) where
                                                   allPolys
                                       SP new = getSPolys d (I $ initRed)
                                       nextSMap = SP $ unionWith DS.union rest new
-                                  in gB' (I $ ds ++ initRed) nextSMap
+                                  in gB' (I $ DL.foldl (\a x -> DL.insert x a) ds initRed) nextSMap
 
 -- | Non-parallelized implementation.
 nPgB :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
 nPgB a = gB' a (getSPolys (I []) a) where
   gB' d@(I ds) (SP spolys) = if null spolys then 
                                d 
-                             else let ((_,polys),rest) = deleteFindMin spolys
+                             else let ((_,polys),rest) = (show $ DS.size polys) `trace` deleteFindMin spolys
                                       redPolys = DS.filter (not.isNull) $ 
                                                  DS.map (/. d) polys
                                       initRed = initSugars redPolys
