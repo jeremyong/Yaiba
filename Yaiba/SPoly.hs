@@ -33,7 +33,7 @@ syzygy (I as) b = foldl (\x y -> f (sPoly b y) x) [] as where
 
 minimize :: [(Poly ord, Sugar ord, Mon ord)] -> [(Poly ord, Sugar ord)]
 minimize as = DL.map (\(a,b,_) -> (a,b)) $ DL.filter (\(_,_,x) -> isMinimal x) as where
-  isMinimal a = not $ DL.null $ DL.filter (\(_,_,x) -> a /= x && not (isFactor x a)) as
+  isMinimal a = DL.null $ DL.filter (\(_,_,x) -> a /= x && isFactor x a) as
 
 getSPolys :: (Ord (Mon ord)) => Ideal ord -> Ideal ord -> SPoly ord
 getSPolys a b = SP $ foldl (\acc (v,k) -> insertWith DS.union k (DS.singleton v) acc) 
