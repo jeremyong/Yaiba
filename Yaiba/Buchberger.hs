@@ -62,7 +62,7 @@ gB a = gB' a (getSPolys (I []) a) where
                                                   allPolys
                                       SP new = getSPolys d (I $ initRed)
                                       nextSMap = SP $ unionWith DS.union rest new
-                                  in gB' (I $ DL.nub $ ds++initRed) nextSMap
+                                  in gB' (I $ ds++initRed) nextSMap
                                   --in ("Length top: "++show (DL.length topPolys)++"and length bot: "++show (DL.length botPolys)) `trace` gB' (I $ ds++initRed) nextSMap
 
 -- | Non-parallelized implementation.
