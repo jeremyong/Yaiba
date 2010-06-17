@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -fglasgow-exts -XUndecidableInstances #-}
+{-# OPTIONS_GHC -XBangPatterns -fglasgow-exts -XUndecidableInstances #-}
 -- | Ideals are represented as lists of tuples consisting of
 -- a Poly and a Sugar.
 module Yaiba.Ideal where
@@ -21,10 +21,10 @@ initSugars as = Set.toList $ Set.map (\a -> (a,S $ deg a)) as
 (/.) :: (Ord (Mon ord)) =>
         Poly ord -> Ideal ord -> Poly ord
 (/.) p i = let (/..) a b r = if isNull a then r else
-                               let (new,divOcc) = divByIdeal a b
-                               in if divOcc then (/..) new b r else
-                                    let (lt,rest) = deleteFindLT a
-                                    in (/..) rest b (r + lt)
+                                let !(new,divOcc) = divByIdeal a b
+                                in if divOcc then (/..) new b r else
+                                     let !(lt,rest) = deleteFindLT a
+                                     in (/..) rest b (r + lt)
            in (/..) p i nullPoly
              
 -- | Auxilliary function to /.
@@ -33,6 +33,6 @@ divByIdeal :: (Ord (Mon ord)) =>
               (Poly ord, Bool)
 divByIdeal p (I ds) = foldl divByIdeal' (p, False) ds where
   divByIdeal' (p',divOcc) d = if divOcc then (p',divOcc) else
-                                let (quo,rem) = quoRem p' d
+                                let !(quo,rem) = quoRem p' d
                                 in if isNull quo then (p,divOcc) else
                                      (rem,True)
