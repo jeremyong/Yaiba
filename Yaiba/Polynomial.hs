@@ -128,10 +128,10 @@ quoRem :: (Ord (Mon ord)) =>
            Poly ord -> (Poly ord,Sugar ord) -> (Poly ord, Poly ord)
 quoRem a (b,_) = quoRem' a b nullPoly where
   quoRem' rem d quo | numTerms rem == 0 = (quo, nullPoly)
-                    | otherwise = let (a1,a2) = leadTerm rem
-                                      (b1,b2) = leadTerm d
-                                      remOd = a1/b1
-                                      remOdco = a2/b2
+                    | otherwise = let !(a1,a2) = leadTerm rem
+                                      !(b1,b2) = leadTerm d
+                                      !remOd = a1/b1
+                                      !remOdco = a2/b2
                                   in if isFactor b1 a1 then
                                        quoRem' (rem - monMult remOd remOdco d) d (quo + P (singleton remOd remOdco))
                                      else

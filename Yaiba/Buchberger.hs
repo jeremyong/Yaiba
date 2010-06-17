@@ -37,33 +37,37 @@ gB a = gB' a (getSPolys (I []) a) where
 -}
 -- | Partitions each value in an SPoly map and executes in parallel if the
 -- value list is sufficiently long.
-gB :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
-gB a = gB' a (getSPolys (I []) a) where
-  gB' d@(I ds) (SP spolys) = if null spolys then 
-                               d 
-                             else let ((_,polys),rest) = deleteFindMin spolys
-                                      --M doubPivot = monLT (DS.findMax polys)
-                                      --pivot = P $ singleton (M $ DL.map (`quot` 2) doubPivot) 1
-                                      --(top,bot) = let (t,occ,b) = DS.splitMember pivot polys
-                                      --            in if occ then
-                                      --                 (DS.insert pivot t, b)
-                                      --               else (t, b)
-                                      (top,bot,_) = DS.fold (\p (x,y,z) -> if z `mod` 2 == 0 then (DS.insert p x,y,z+1) else (x,DS.insert p y,z+1)) (DS.empty,DS.empty,0::Int) polys
-                                      topPolys = initSugars $ DS.filter (not.isNull) 
-                                                 $ DS.map (/. d) top
-                                      botPolys = initSugars $ DS.filter (not.isNull) 
-                                                 $ DS.map (/. d) bot
-                                      allPolys = initSugars $ DS.filter (not.isNull) 
-                                                 $ DS.map (/. d) polys
-                                      initRed = if length allPolys > 10 then
-                                                  topPolys `par` 
-                                                  (botPolys `pseq` topPolys++botPolys)
-                                                else
-                                                  allPolys
-                                      SP new = getSPolys d (I $ initRed)
-                                      nextSMap = SP $ unionWith DS.union rest new
-                                  in gB' (I $ ds++initRed) nextSMap
-                                  --in ("Length top: "++show (DL.length topPolys)++"and length bot: "++show (DL.length botPolys)) `trace` gB' (I $ ds++initRed) nextSMap
+gB :: (Ord (Mon ord)) => Ideal ord -> Int -> Ideal ord
+gB a m = gB' a (getSPolys (I []) a) m where
+  gB' d@(I ds) (SP spolys) n = if null spolys then 
+                                 d 
+                               else let ((sug,polys),rest) = deleteFindMin spolys
+                                        --M doubPivot = monLT (DS.findMax polys)
+                                        --pivot = P $ singleton (M $ DL.map (`quot` 2) doubPivot) 1
+                                        --(top,bot) = let (t,occ,b) = DS.splitMember pivot polys
+                                        --            in if occ then
+                                        --                 (DS.insert pivot t, b)
+                                        --               else (t, b)
+                                        (top,bot,_) = DS.fold (\p (x,y,z) -> if z `mod` 2 == 0 then (DS.insert p x,y,z+1) else (x,DS.insert p y,z+1)) (DS.empty,DS.empty,0::Int) polys
+                                        topPolys = initSugars $ DS.filter (not.isNull)
+                                                   $ DS.map (/. d) top
+                                        botPolys = initSugars $ DS.filter (not.isNull) 
+                                                   $ DS.map (/. d) bot
+                                        allPolys = initSugars $ DS.filter (not.isNull) 
+                                                   $ DS.map (/. d) polys
+                                        initRed = if DS.size polys > 10 then
+                                                     topPolys++botPolys
+                                                   else
+                                                     allPolys
+                                        --initRed = topPolys++botPolys
+                                        SP new = getSPolys d (I $ initRed)
+                                        nextSMap = SP $ unionWith DS.union rest new
+                                        --in gB' (I $ ds++initRed) nextSMap
+                                    in --("Length top: "++show (DL.length topPolys)++" and length bot: "++show (DL.length botPolys)++" and the sugar degree is "++show sug) `trace` 
+                                       if (n==1) then
+                                         botPolys `par` (topPolys `pseq` (I $ ds ++ topPolys ++ botPolys))
+                                       else
+                                         (botPolys `par` (topPolys `pseq` gB' (I $ ds++topPolys++botPolys) nextSMap (n-1)))
 
 -- | Non-parallelized implementation.
 nPgB :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
