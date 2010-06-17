@@ -1,5 +1,7 @@
 {-# OPTIONS_GHC -fglasgow-exts #-}
-
+-- | At present, Mon ord is a list of integers (the multidegree of a monomial).
+-- It is not checked that the lists are of the same length when initialized.
+-- After initialization, all Mon lists are mostly-guaranteed to have the same length.
 module Yaiba.Monomial where
 
 import Math.Algebra.Field.Base
