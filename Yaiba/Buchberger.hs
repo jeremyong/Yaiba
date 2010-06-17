@@ -61,7 +61,7 @@ gB a = gB' a (getSPolys (I []) a) where
                                                   allPolys
                                       SP new = getSPolys d (I $ initRed)
                                       nextSMap = SP $ unionWith DS.union rest new
-                                  in gB' (I $ DL.foldl (\acc x -> DL.insert x acc) ds initRed) nextSMap
+                                  in "Length top: "++DL.length topPolys++"and length bot: "++DL.length botPolys `trace` gB' (I $ DL.union ds initRed) nextSMap
 
 -- | Non-parallelized implementation.
 nPgB :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
