@@ -51,7 +51,133 @@
 ></TD
 ></TR
 ><TR
+><TD CLASS="section1"
+>Description</TD
+></TR
+><TR
+><TD CLASS="doc"
+>An object of type SPoly ord is a map from a Sugar to a list of
+ all Polys with that sugar.
+</TD
+></TR
+><TR
 ><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Synopsis</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>newtype</SPAN
+>  <A HREF="#t%3ASPoly"
+>SPoly</A
+> ord = <A HREF="#v%3ASP"
+>SP</A
+> (Map (<A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord) (Set (<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord)))</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AsPoly"
+>sPoly</A
+> :: Ord (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; (<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord) -&gt; (<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord) -&gt; Maybe (<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord, <A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Asyzygy"
+>syzygy</A
+> :: Ord (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; (<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord) -&gt; [(<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord, <A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord)]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aminimize"
+>minimize</A
+> ::  [(<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord, <A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord)] -&gt; [(<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord)]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AgetSPolys"
+>getSPolys</A
+> :: Ord (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord</TD
+></TR
+></TABLE
 ></TD
 ></TR
 ><TR
@@ -141,6 +267,11 @@
 > ord)</TD
 ></TR
 ><TR
+><TD CLASS="doc"
+>Auxilliary function to syzygy
+</TD
+></TR
+><TR
 ><TD CLASS="s15"
 ></TD
 ></TR
@@ -169,6 +300,12 @@
 > ord)]</TD
 ></TR
 ><TR
+><TD CLASS="doc"
+>Convolves a supplied Poly with an ideal, generating S-Polys and
+ throwing away those for which the lead terms are relatively prime.
+</TD
+></TR
+><TR
 ><TD CLASS="s15"
 ></TD
 ></TR
@@ -193,6 +330,13 @@
 > ord)]</TD
 ></TR
 ><TR
+><TD CLASS="doc"
+>Extracts the minimal generating set in the third component of the argument,
+ assumed to be the LCM of the LTs of the Polys used to generate the S-Poly in the
+ first component.
+</TD
+></TR
+><TR
 ><TD CLASS="s15"
 ></TD
 ></TR
@@ -213,6 +357,11 @@
 > ord -&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
 >SPoly</A
 > ord</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Convolves two lists, returning an SPoly map using syzygy and minimize.
+</TD
 ></TR
 ><TR
 ><TD CLASS="s15"

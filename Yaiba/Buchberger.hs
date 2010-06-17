@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -fglasgow-exts -XUndecidableInstances -XBangPatterns #-}
 {-# LANGUAGE PArr #-}
-
+-- | Generates a Groebner basis of a supplied ideal.
 module Yaiba.Buchberger where
 
 import Yaiba.Monomial
@@ -13,6 +13,7 @@ import Control.Parallel
 import qualified Data.Set as DS
 import Prelude hiding (rem,null,map,filter)
 {-
+-- | Parallelizes to depth 2 in the SPoly map.
 gB :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
 gB a = gB' a (getSPolys (I []) a) where
   gB' d@(I ds) (SP spolys) = if null spolys then 
@@ -34,6 +35,8 @@ gB a = gB' a (getSPolys (I []) a) where
                                                    SP $ unionWith DS.union rest' new
                                   in gB' (I $ ds++initRed) nextSMap
 -}
+-- | Partitions each value in an SPoly map and executes in parallel if the
+-- value list is sufficiently long.
 gB :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
 gB a = gB' a (getSPolys (I []) a) where
   gB' d@(I ds) (SP spolys) = if null spolys then 
@@ -59,9 +62,10 @@ gB a = gB' a (getSPolys (I []) a) where
                                       nextSMap = SP $ unionWith DS.union rest new
                                   in gB' (I $ ds++initRed) nextSMap
 
-{-
-gB :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
-gB a = gB' a (getSPolys (I []) a) where
+
+-- | Non-parallelized implementation.
+nPgB :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
+nPgB a = gB' a (getSPolys (I []) a) where
   gB' d@(I ds) (SP spolys) = if null spolys then 
                                d 
                              else let ((_,polys),rest) = deleteFindMin spolys
@@ -70,4 +74,4 @@ gB a = gB' a (getSPolys (I []) a) where
                                       initRed = initSugars redPolys
                                       SP new = getSPolys d (I initRed)
                                       nextSMap = SP $ unionWith DS.union rest new
-                                  in initRed `par` gB' (I $ ds++initRed) nextSMap-}
+                                  in gB' (I $ ds++initRed) nextSMap

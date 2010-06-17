@@ -1,6 +1,6 @@
-
 {-# OPTIONS_GHC -fglasgow-exts -XUndecidableInstances #-}
-
+-- | Ideals are represented as lists of tuples consisting of
+-- a Poly and a Sugar.
 module Yaiba.Ideal where
 
 import Yaiba.Monomial
@@ -16,6 +16,7 @@ getPolys (I a) = map fst a
 
 initSugars as = Set.toList $ Set.map (\a -> (a,S $ deg a)) as
 
+-- | Reduces a polynomial by an ideal completely.
 (/.) :: (Ord (Mon ord)) =>
         Poly ord -> Ideal ord -> Poly ord
 (/.) p i = let (/..) a b r = case isNull a of
@@ -27,6 +28,7 @@ initSugars as = Set.toList $ Set.map (\a -> (a,S $ deg a)) as
                             True -> (/..) new b r
            in (/..) p i nullPoly
              
+-- | Auxilliary function to /.
 divByIdeal :: (Ord (Mon ord)) =>
               Poly ord -> Ideal ord -> 
               (Poly ord, Bool)

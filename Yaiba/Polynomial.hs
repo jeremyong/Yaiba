@@ -1,6 +1,6 @@
 
 {-# OPTIONS_GHC -fglasgow-exts -XUndecidableInstances -XBangPatterns #-}
-
+-- | A Poly is synonymous to a map from Mon lists to a rational number
 module Yaiba.Polynomial where
 
 import Data.Map hiding (fromList)
@@ -38,22 +38,21 @@ showTerm ((a,b):as) | show a == " " = (show b) ++ showTerm as
                                   else
                                     (tail (show a)) ++ " + " ++ showTerm as
 
---Constructors
+-- | Constructors
 
---An empty polynomial.
+-- | Creates an empty polynomial.
 nullPoly :: Poly ord
 nullPoly = P empty
 
-isNull :: Poly ord -> Bool
-isNull (P a) = null a
-
+-- | Creates a single termed polynomial.
 monPoly :: (Mon ord, Q) -> Poly ord
 monPoly (a,b) | b==0 = nullPoly 
               | otherwise = P (singleton a b)
                           
+-- | Creates a polynomial from a list.
 fromList :: (Ord (Mon ord)) => [(Mon ord, Q)] -> Poly ord
 fromList a = prune $ P (DM.fromList a)
-           
+
 instance Eq (Poly ord) where
 
 instance (Ord (Mon ord)) => Ord (Poly ord) where
@@ -69,26 +68,34 @@ instance (Ord (Mon ord)) => Ord (Poly ord) where
 insertTerm :: (Ord (Mon ord)) => Poly ord -> Mon ord -> Q -> Poly ord
 insertTerm (P a) b c = P (insertWith (+) b c a)
 
---Removes elements that point to the zero element of the field.
+isNull :: Poly ord -> Bool
+isNull (P a) = null a
+
+-- | Removes elements that point to the zero element of the field.
 prune :: (Ord (Mon ord)) => Poly ord -> Poly ord
 prune (P a) = P $ filter (/=0) a
 
 getMap :: Poly ord -> Map (Mon ord) Q
 getMap (P a) = a
 
+-- | Returns a tuple of the lead term Mon list and its coefficient.
 leadTerm :: Poly ord -> (Mon ord, Q)
 leadTerm (P a) | null a = (M [],0)
                | otherwise = findMax a
                              
+-- | Just returns the lead term Mon list.
 monLT (P a) | null a = M []
             | otherwise = fst $ findMax a
 
+-- | The degree of the poly.
 deg a = degree $ monLT a
 
+-- | Returns a tuple of the lead term as Poly and the rest of the supplied Poly.
 deleteFindLT :: Poly ord -> (Poly ord, Poly ord)
 deleteFindLT a = let (x,y) = deleteFindMax $ getMap a
                  in ((monPoly x),P y)
 
+-- | The length of the poly
 numTerms :: Poly ord -> Int
 numTerms a = size $ getMap a
 
@@ -97,6 +104,7 @@ instance (Ord (Mon ord)) => Num (Poly ord) where
   a * P b = prune $ P (foldWithKey (\k v -> unionWith (+) (getMap (monMult k v a))) empty b)
   negate (P a) = P $ map negate a
 
+-- | Scales every term of a Polynomial by a Mon list and rational number.
 monMult :: (Ord (Mon ord)) => Mon ord -> Q -> Poly ord -> Poly ord
 monMult a b (P c) = P $ foldWithKey (f a b) empty c where
   f a' b' k v acc = unionWith (+) (singleton (a' * k) (b' * v)) acc
@@ -114,7 +122,8 @@ quoRem rem (d,_) | isNull rem = (nullPoly, nullPoly)
                                  False -> (nullPoly, rem)
                                  True -> (P (singleton remOd remOdco), rem - (monMult remOd remOdco d))
 -}
---Divides the first polynomial by the second the entire way through
+
+-- | Divides the first polynomial by the second repeatedly until it fails.
 quoRem :: (Ord (Mon ord)) =>
            Poly ord -> (Poly ord,Sugar ord) -> (Poly ord, Poly ord)
 quoRem a (b,_) = quoRem''' a b nullPoly where

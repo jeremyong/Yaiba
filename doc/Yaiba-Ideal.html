@@ -51,7 +51,95 @@
 ></TD
 ></TR
 ><TR
+><TD CLASS="section1"
+>Description</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Ideals are represented as lists of tuples consisting of
+ a Poly and a Sugar.
+</TD
+></TR
+><TR
 ><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Synopsis</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>newtype</SPAN
+>  <A HREF="#t%3AIdeal"
+>Ideal</A
+> ord = <A HREF="#v%3AI"
+>I</A
+> [(<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord)]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AgetPolys"
+>getPolys</A
+> ::  <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; [<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3A%2F."
+>(/.)</A
+> :: Ord (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; <A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AdivByIdeal"
+>divByIdeal</A
+> :: Ord (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; (<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, Bool)</TD
+></TR
+></TABLE
 ></TD
 ></TR
 ><TR
@@ -172,6 +260,11 @@
 > ord</TD
 ></TR
 ><TR
+><TD CLASS="doc"
+>Reduces a polynomial by an ideal completely.
+</TD
+></TR
+><TR
 ><TD CLASS="s15"
 ></TD
 ></TR
@@ -192,6 +285,11 @@
 > ord -&gt; (<A HREF="Yaiba-Polynomial.html#t%3APoly"
 >Poly</A
 > ord, Bool)</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Auxilliary function to /.
+</TD
 ></TR
 ><TR
 ><TD CLASS="s15"
