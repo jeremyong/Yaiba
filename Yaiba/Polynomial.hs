@@ -1,4 +1,3 @@
-
 {-# OPTIONS_GHC -fglasgow-exts -XUndecidableInstances -XBangPatterns #-}
 -- | A Poly is synonymous to a map from Mon lists to a rational number
 module Yaiba.Polynomial where
@@ -53,8 +52,9 @@ monPoly (a,b) | b==0 = nullPoly
 fromList :: (Ord (Mon ord)) => [(Mon ord, Q)] -> Poly ord
 fromList a = prune $ P (DM.fromList a)
 
-instance Eq (Poly ord) where
-
+instance (Ord (Mon ord)) => Eq (Poly ord) where
+  a == b = isNull $ a-b
+  
 instance (Ord (Mon ord)) => Ord (Poly ord) where
   compare (P a) (P b) | null a && null b = EQ
                       | null a = LT

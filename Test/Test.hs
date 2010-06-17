@@ -16,9 +16,9 @@ import System.IO
 j_1 = fromList [(M [3,42,10,4,0,0,0,0],-1),(M [0,0,0,0,1,0,0,0],1)]
 j_2 = fromList [(M [21,5,3,12,0,0,0,0],-1),(M [0,0,0,0,0,1,0,0],1)]
 j_3 = fromList [(M [4,13,5,41,0,0,0,0],-1),(M [0,0,0,0,0,0,1,0],1)]
-j_4 = fromList [(M [7,22,13,5,0,0,0,0],-1),(M [0,0,0,0,0,0,0,1],1)]::Poly Lex
+j_4 = fromList [(M [7,22,13,5,0,0,0,0],-1),(M [0,0,0,0,0,0,0,1],1)]
 j' = j_1:j_2:j_3:j_4:[]
-j = I $ initSugars (DS.fromList j') :: Ideal Lex
+j = I $ initSugars (DS.fromList j') :: Ideal Grlex
 
 f = "output"
 

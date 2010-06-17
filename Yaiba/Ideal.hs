@@ -8,8 +8,9 @@ import Yaiba.Polynomial
 import Yaiba.Sugar
 import Data.List
 import qualified Data.Set as Set
+import Prelude hiding (rem)
 
-newtype Ideal ord = I [(Poly ord,Sugar ord)] deriving (Eq)
+newtype Ideal ord = I [(Poly ord,Sugar ord)]
 
 getPolys :: Ideal ord -> [Poly ord]
 getPolys (I a) = map fst a

@@ -5,11 +5,12 @@
 module Yaiba.Monomial where
 
 import Math.Algebra.Field.Base
+import Data.List
 
 newtype Mon ord = M [Int]
 
 instance Eq (Mon ord) where
-  M as == M bs = as==bs
+  a == b = all (==0) (powerList $ a/b)
 
 instance Show (Mon ord) where
   show (M a) | filter (/=0) a == [] = " "
