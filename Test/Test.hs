@@ -27,8 +27,10 @@ main = do
   putStrLn "8"
   putStrLn ("Lex")
   putStrLn (show (getPolys j))
-  putStrLn (gb) {-
+  start <- getCurrentTime
+  putStrLn (gb) 
+  end <- getCurrentTime
+  putStrLn (show (end `diffUTCTime` start)) {-
   start <- getCurrentTime
   putStrLn $ "A (parallel) non-reduced GB of j is " ++ gb
-  end <- getCurrentTime
   putStrLn $ show (end `diffUTCTime` start) ++ " elapsed."-}
