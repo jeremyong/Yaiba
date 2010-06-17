@@ -12,7 +12,28 @@ import qualified Data.List as DL hiding (null)
 import Control.Parallel
 import qualified Data.Set as DS
 import Prelude hiding (rem,null,map,filter)
-
+{-
+gB :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
+gB a = gB' a (getSPolys (I []) a) where
+  gB' d@(I ds) (SP spolys) = if null spolys then 
+                               d 
+                             else let ((_,polys),rest) = deleteFindMin spolys
+                                      ((_,polys'),rest') = deleteFindMin rest
+                                      redPolys = initSugars $ DS.filter (not.isNull) $ 
+                                                 DS.map (\x -> x /. d) polys
+                                      redPolys' = initSugars $ DS.filter (not.isNull) $ 
+                                                  DS.map (\x -> x /. d) polys'
+                                      initRed = if null rest then
+                                                  redPolys
+                                                else
+                                                  redPolys `par` (redPolys' `pseq` redPolys ++ redPolys')
+                                      SP new = getSPolys d (I $ initRed)
+                                      nextSMap = if null rest then
+                                                   SP $ unionWith DS.union rest new
+                                                 else
+                                                   SP $ unionWith DS.union rest' new
+                                  in gB' (I $ ds++initRed) nextSMap
+-}
 gB :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
 gB a = gB' a (getSPolys (I []) a) where
   gB' d@(I ds) (SP spolys) = if null spolys then 
@@ -37,7 +58,7 @@ gB a = gB' a (getSPolys (I []) a) where
                                       SP new = getSPolys d (I $ initRed)
                                       nextSMap = SP $ unionWith DS.union rest new
                                   in gB' (I $ ds++initRed) nextSMap
-                                     
+
 {-
 gB :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
 gB a = gB' a (getSPolys (I []) a) where
