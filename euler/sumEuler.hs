@@ -2,8 +2,9 @@
 
 import Control.Parallel
 import Control.Parallel.Strategies
-import Data.List
-import Prelude hiding (gcd)
+import qualified Data.List as DL
+import qualified Data.Map as DM
+import Prelude hiding (gcd, map, filter)
 import System.IO
 import GHC.Conc (numCapabilities)
 
@@ -16,10 +17,12 @@ class Cluster c where
 instance Cluster [] where
   singleton list       = [list]
   cluster   n []       = []
-  cluster   n list     = foldl split (replicate n []) list where
-                           split (b:bs) a = bs ++ a:b
+  cluster   n list     = DM.elems $ fst $ foldl split (DM.empty,0) list where
+                             split (acc,z) a = (DM.insertWith (\v vs -> v ++ vs) (z `mod` n) [a] acc, z+1)
+--  cluster   n list     = foldl split (replicate n []) list where
+--                           split (b:bs) a = bs ++ [a:b]
   decluster buckets    = concat buckets
-  lift      f          = map f
+  lift      f          = DL.map f
 
 mkList :: Int -> [Int]
 mkList n = [1..(n-1)]
@@ -32,14 +35,14 @@ relprime :: Int -> Int -> Bool
 relprime x y = gcd x y == 1
 
 euler :: Int -> Int
-euler n = length (filter (relprime n) (mkList n))
+euler n = length (DL.filter (relprime n) (mkList n))
 
 sumEuler :: Int -> Int -> Int
 sumEuler z n = sum ((lift worker) (cluster z (mkList n)) `using` parList rwhnf) where
-                  worker = sum . map euler
+                  worker = sum . DL.map euler
 
 sumEuler2 :: Int -> Int -> Int
-sumEuler2 c n = sum (map euler (mkList n) `using` parListChunk c rwhnf )
+sumEuler2 c n = sum (DL.map euler (mkList n) `using` parListChunk c rwhnf )
 
 main = do
    let a = 20000
