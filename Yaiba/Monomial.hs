@@ -6,15 +6,16 @@ module Yaiba.Monomial where
 
 import Math.Algebra.Field.Base
 import Data.List
+import Data.Array.Unboxed
 
-newtype Mon ord = M [Int]
+data Mon ord = M (UArray Int Int) | Constant
 
 instance Eq (Mon ord) where
   a == b = all (==0) (powerList $ a/b)
 
 instance Show (Mon ord) where
-  show (M a) | filter (/=0) a == [] = " "
-             | otherwise = showVar (1::Int) a where 
+  show (M a) | filter (/=0) (elems a) == [] = " "
+             | otherwise = showVar (1::Int) (elems a) where 
                  showVar _ [] = ""
                  showVar k (y:[]) | y<0 = "*x_" ++ show k ++ "^(" ++ show y ++ ")"
                                   | y==0 = ""
@@ -32,16 +33,22 @@ data Grevlex
 data Revlex
 
 instance Num (Mon ord) where
-  M as * M bs = M $ zipWith (+) as bs
-  
+  a * Constant = a
+  Constant * a = a
+  M as * M bs = let numVars = rangeSize (bounds as) - 1
+                in M $ array (0,numVars) [(z,as!z + bs!z) | z <- [0..(numVars)]]
+  fromInteger a = Constant
+
 degree :: Mon ord -> Int
-degree (M a) = sum a
+degree Constant = 0
+degree (M a) = sum [ a!z | z <- indices a ]
   
 signs :: Mon ord -> Bool
-signs (M as) = all (>=0) as
+signs (M as) = all (>=0) [ as!z | z <- indices as ]
 
 instance Fractional (Mon ord) where
-  recip (M as) = M $ map negate as
+  recip (M as) = M $ array (bounds as) [ (z,negate (as!z)) | z <- indices as ]
+  fromRational a = Constant
   
 instance Ord (Mon Lex) where
   compare x y = headCompare (powerList (x/y))
@@ -62,10 +69,10 @@ instance Ord (Mon Grlex) where
     EQ -> headCompare (powerList (x/y))
                      
 powerList :: Mon t -> [Int]
-powerList (M b) = b
+powerList (M b) = [b!z|z<-indices b]
 
 isFactor :: Mon ord -> Mon ord -> Bool
 isFactor a b = signs (b/a)
 
 lcmMon :: Mon t -> Mon t1 -> Mon ord
-lcmMon (M a) (M b) = M $ zipWith max a b
+lcmMon (M a) (M b) = M $ array (bounds a) [(z,max (a!z) (b!z)) | z <- indices a ]

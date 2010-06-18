@@ -3,7 +3,7 @@ infile = openIn "output"
 infileString = lines read(infile,10000000)
 numVars = poly(infileString#0)
 monOrder = infileString#1
-R = QQ[x_1..x_numVars,MonomialOrder=>{Weights=>toList(numVars:1),Lex}]
+R = QQ[x_1..x_numVars,MonomialOrder=>{Lex}] --Weights=>toList(numVars:1),
 origIdeal = ideal value ("{" | substring((1,#infileString#2 - 2), infileString#2) | "}")
 gbList = value ("{" | substring((1,#infileString#3 - 2), infileString#3) | "}")
 -- are they the same ideal?
