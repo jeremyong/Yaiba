@@ -15,29 +15,67 @@ import qualified Data.Set as DS
 import Debug.Trace
 import GHC.Conc (numCapabilities)
 import Prelude hiding (rem,null,map,filter)
+
+class Cluster c where
+  singleton :: c a -> c (c a)
+  cluster :: Int -> c a -> c (c a)
+  decluster :: c (c a) -> c a
+  lift :: (c a -> b) -> (c (c a) -> c b)
+
+instance Cluster [] where
+  singleton list = [list]
+  cluster _ [] = []
+  cluster n list = elems $ fst $ foldl f (empty,0) list where
+    f (acc,z) a = (insertWith (\v vs -> v ++ vs) (z `mod` n) [a] acc, z+1)
+  decluster = DL.concat
+  lift = DL.map 
+
 reducePolys :: (Ord (Mon ord)) => Ideal ord -> [Poly ord] -> [Poly ord]
 reducePolys d = DL.map (/. d)
 
 -- | Partitions each value in an SPoly map and executes in parallel if the
 -- value list is sufficiently long.
-{-
+
 gB :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
-gB a = gB' a [] (getSPolys (I []) a) where
-  gB' d@(I ds) newStuff (SP sPolys) = let newDivisors = ds ++ newStuff
-                                          SP newSMap = getSPolys d (I newStuff)
-                                          updatedSMap = unionWith DS.union sPolys newSMap
-                                      in if null updatedSMap then
-                                           I $ ds ++ newStuff
-                                         else let ((_,polys),rest) = deleteFindMin updatedSMap
-                                                  binSize = ceiling $ 
-                                                            (fromIntegral (DS.size polys) :: Float)
-                                                            / (fromIntegral numCapabilities :: Float)
-                                                  allPolys = reducePolys (I newDivisors) polys
-                                              in gB' (I newDivisors) (allPolys `using` parListChunk binSize rwhnf) (SP rest)-}
+gB a = gB' a (getSPolys (I []) a) where
+      gB' d@(I ds) (SP sPolys) = let ((_,polys),rest) = deleteFindMin sPolys
+                                     polyList = DS.toList polys
+                                     binSize = ceiling $
+                                               (fromIntegral (DS.size polys) :: Float)
+                                               / (fromIntegral numCapabilities :: Float)
+                                     allPolys = decluster ((lift worker2) (cluster binSize polyList) `using` parList rwhnf) where
+                                       worker1 = (\x -> initSugars $ DL.filter (not.isNull) x)
+                                       worker2 = worker1 . reducePolys (I ds)
+                                     newDivisors = ds ++ allPolys
+                                     SP newSMap = getSPolys d (I allPolys)
+                                     updatedSMap = unionWith DS.union rest newSMap
+                                 in if null sPolys then
+                                      d
+                                    else
+                                      gB' (I newDivisors) (SP updatedSMap)
 
 gB'' :: (Ord (Mon ord)) => Ideal ord -> Int -> Ideal ord
+gB'' a = gB' a (getSPolys (I []) a) where
+  gB' d@(I ds) (SP sPolys) n = let ((_,polys),rest) = deleteFindMin sPolys
+                                   polyList = DS.toList polys
+                                   binSize = ceiling $
+                                             (fromIntegral (DS.size polys) :: Float)
+                                             / (fromIntegral numCapabilities :: Float)
+                                   allPolys = DL.concat ((lift worker2) (cluster binSize polyList) `using` parList rwhnf) where
+                                                  worker1 = (\x -> initSugars $ DL.filter (not.isNull) x)
+                                                  worker2 = worker1 . reducePolys (I ds)
+                                   newDivisors = ds ++ allPolys
+                                   SP newSMap = getSPolys d (I allPolys)
+                                   updatedSMap = unionWith DS.union rest newSMap
+                               in if n == 0 || null sPolys then
+                                      d
+                                  else
+                                      gB' (I newDivisors) (SP updatedSMap) (n-1)
+
+{-
+gB'' :: (Ord (Mon ord)) => Ideal ord -> Int -> Ideal ord
 gB'' a = gB' a [] (getSPolys (I []) a) where
-  gB' d@(I ds) new (SP sPolys) n = if n==0 then I newDivisors else
+  gB' d@(I ds) new (SP sPolys) n = if n==0 then d else
                                      let new' = initSugars $ DL.filter (not.isNull) new
                                          newDivisors = ds ++ new'
                                          SP newSMap = getSPolys d (I new')
@@ -49,4 +87,4 @@ gB'' a = gB' a [] (getSPolys (I []) a) where
                                                    / (fromIntegral numCapabilities :: Float)
                                          allPolys = reducePolys (I newDivisors) polyList
                                                     `using` parListChunk binSize rwhnf
-                                     in gB' (I newDivisors) allPolys (SP rest) (n-1)
+                                     in gB' (I newDivisors) allPolys (SP rest) (n-1)-}
