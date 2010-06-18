@@ -43,11 +43,12 @@ p =I $ initSugars $ [p_1,p_2,p_3,p_4,p_5,p_6,p_7,p_8,p_9,p_10,p_11,p_12,p_13,p_1
 f = "output"
 
 main = do 
-  let gb = show $ (getPolys $ gB j)
-  --let gb = show $ (getPolys $ gB'' j 500)
+  --let gb = show $ (getPolys $ gB j)
+  let gb = show $ (leadTerm $ last $ getPolys $ gB'' p 3)
   putStrLn "8"
   putStrLn ("Lex")
-  putStrLn (show (getPolys j))
+  --putStrLn (show (getPolys j))
+  putStrLn (show (getPolys p))
   start <- getCurrentTime
   putStrLn (gb) 
   end <- getCurrentTime
