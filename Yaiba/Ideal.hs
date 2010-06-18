@@ -15,7 +15,7 @@ newtype Ideal ord = I [(Poly ord,Sugar ord)]
 getPolys :: Ideal ord -> [Poly ord]
 getPolys (I a) = map fst a
 
-initSugars as = Set.toList $ Set.map (\a -> (a,S $ deg a)) as
+initSugars as = map (\a -> (a,S $ deg a)) as
 
 -- | Reduces a polynomial by an ideal completely.
 (/.) :: (Ord (Mon ord)) =>
