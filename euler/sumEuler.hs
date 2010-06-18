@@ -16,8 +16,8 @@ class Cluster c where
 instance Cluster [] where
   singleton list       = [list]
   cluster   n []       = []
-  cluster   n list     = let (chunk,rest) = splitAt n list
-                         in chunk:(cluster n rest)
+  cluster   n list     = foldl split (replicate n []) list where
+                           split (b:bs) a = bs ++ a:b
   decluster buckets    = concat buckets
   lift      f          = map f
 
@@ -43,6 +43,6 @@ sumEuler2 c n = sum (map euler (mkList n) `using` parListChunk c rwhnf )
 
 main = do
    let a = 20000
-   let se = show $ sumEuler2 (quot a numCapabilities) a
---   let se = show $ sumEuler (quot a numCapabilities) a
+--   let se = show $ sumEuler2 (quot a numCapabilities) a
+   let se = show $ sumEuler (quot a numCapabilities) a
    putStrLn(se)
