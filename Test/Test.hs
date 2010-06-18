@@ -15,10 +15,10 @@ import qualified Data.Set as DS
 import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import System.IO
 
-j_1 = fromList [(M [3,42,10,4,0,0,0,0],-1),(M [0,0,0,0,1,0,0,0],1)]
-j_2 = fromList [(M [21,5,3,12,0,0,0,0],-1),(M [0,0,0,0,0,1,0,0],1)]
-j_3 = fromList [(M [4,13,5,41,0,0,0,0],-1),(M [0,0,0,0,0,0,1,0],1)]
-j_4 = fromList [(M [7,22,13,5,0,0,0,0],-1),(M [0,0,0,0,0,0,0,1],1)]
+j_1 = fromList [(M [3,9,2,4,0,0,0,0],-1),(M [0,0,0,0,1,0,0,0],1)]
+j_2 = fromList [(M [5,5,3,7,0,0,0,0],-1),(M [0,0,0,0,0,1,0,0],1)]
+j_3 = fromList [(M [4,5,5,6,0,0,0,0],-1),(M [0,0,0,0,0,0,1,0],1)]
+j_4 = fromList [(M [7,8,4,5,0,0,0,0],-1),(M [0,0,0,0,0,0,0,1],1)]
 j' = j_1:j_2:j_3:j_4:[]
 j = I $ (initSugars j') :: Ideal Lex
 
@@ -43,10 +43,11 @@ p =I $ initSugars $ [p_1,p_2,p_3,p_4,p_5,p_6,p_7,p_8,p_9,p_10,p_11,p_12,p_13,p_1
 f = "output"
 
 main = do 
-  let gb = show $ (leadTerm $ last $ getPolys $ gB'' p 3)
+  let gb = show $ (getPolys $ gB j)
+  --let gb = show $ (getPolys $ gB'' j 500)
   putStrLn "8"
   putStrLn ("Lex")
-  putStrLn (show (getPolys p))
+  putStrLn (show (getPolys j))
   start <- getCurrentTime
   putStrLn (gb) 
   end <- getCurrentTime

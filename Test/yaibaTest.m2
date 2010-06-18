@@ -11,3 +11,10 @@ assert(origIdeal == ideal gbList)
 -- is it a GB?
 ltList = apply(gbList, f -> leadTerm f)
 assert(ideal leadTerm origIdeal == ideal ltList)
+
+I = ideal mingens ideal ltList
+J = ideal leadTerm origIdeal
+numgens I
+numgens J
+
+mingens (ideal leadTerm origIdeal / ideal ltList)
