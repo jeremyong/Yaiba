@@ -8,13 +8,13 @@ import Data.Version (Version(..))
 import System.Environment (getEnv)
 
 version :: Version
-version = Version {versionBranch = [0,0,2,0], versionTags = []}
+version = Version {versionBranch = [0,2,2], versionTags = []}
 
 bindir, libdir, datadir, libexecdir :: FilePath
 
 bindir     = "/Users/jeremy/.cabal/bin"
-libdir     = "/Users/jeremy/.cabal/lib/Yaiba-0.0.2.0/ghc-6.12.3"
-datadir    = "/Users/jeremy/.cabal/share/Yaiba-0.0.2.0"
+libdir     = "/Users/jeremy/.cabal/lib/Yaiba-0.2.2/ghc-6.12.3"
+datadir    = "/Users/jeremy/.cabal/share/Yaiba-0.2.2"
 libexecdir = "/Users/jeremy/.cabal/libexec"
 
 getBinDir, getLibDir, getDataDir, getLibexecDir :: IO FilePath

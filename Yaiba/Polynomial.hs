@@ -2,11 +2,13 @@
 -- | A Poly is synonymous to a map from Mon lists to a rational number
 module Yaiba.Polynomial where
 
-import Data.Map hiding (fromList)
+import Data.Map hiding (fromList,(!))
 import qualified Data.Map as DM
 import Yaiba.Monomial
 import Yaiba.Sugar
 import Math.Algebra.Field.Base
+import Data.Array.Unboxed
+import qualified Data.List as DL
 import Prelude hiding (null,filter,map,rem)
 
 newtype Poly ord = P (Map (Mon ord) Q)
@@ -49,8 +51,8 @@ monPoly (a,b) | b==0 = nullPoly
               | otherwise = P $ singleton a b
                           
 -- | Creates a polynomial from a list.
-fromList :: (Ord (Mon ord)) => [(Mon ord, Q)] -> Poly ord
-fromList a = prune $ P (DM.fromList a)
+fromList :: (Ord (Mon ord)) => [([Int], Q)] -> Poly ord
+fromList a = prune $ P $ DM.fromList $ DL.map (\(x,b) -> (M $ listArray (0,DL.length x-1) x,b)) a
 
 instance (Ord (Mon ord)) => Eq (Poly ord) where
   a == b = isNull $ a-b
@@ -80,11 +82,11 @@ getMap (P a) = a
 
 -- | Returns a tuple of the lead term Mon list and its coefficient.
 leadTerm :: Poly ord -> (Mon ord, Q)
-leadTerm (P a) | null a = (M [],0)
+leadTerm (P a) | null a = (Constant,0)
                | otherwise = findMax a
                              
 -- | Just returns the lead term Mon list.
-monLT (P a) | null a = M []
+monLT (P a) | null a = Constant
             | otherwise = fst $ findMax a
 
 -- | The degree of the poly.

@@ -1,5 +1,5 @@
 Name:                Yaiba
-Version:             0.0.2.0
+Version:             0.2.2
 License:             BSD3
 License-file:        LICENSE
 Author:              Jeremy Ong
@@ -25,10 +25,11 @@ Library
         HaskellForMaths      == 0.1.*,
         containers           == 0.3.*,
         dph-par              == 0.4.*,
-        parallel             == 2.2.0.*
+        parallel             == 2.2.0.*,
+        array                == 0.3.0.*
 
   ghc-options:
-        -Odph -Wall -fno-warn-missing-signatures -fglasgow-exts -XPArr -fdph-par
+        -Odph -Wall -fno-warn-missing-signatures -fglasgow-exts -fdph-par
 
   extensions:
         UndecidableInstances
