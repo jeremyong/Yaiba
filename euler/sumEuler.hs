@@ -5,6 +5,7 @@ import Control.Parallel.Strategies
 import Data.List
 import Prelude hiding (gcd)
 import System.IO
+import GHC.Conc (numCapabilities)
 
 mkList :: Int -> [Int]
 mkList n = [1..(n-1)]
@@ -28,5 +29,6 @@ sumEuler2 c n = sum (map euler (mkList n) `using` parListChunk c rwhnf )
 
 main = do
    let a = 20000
-   let se = show $ sumEuler2 (quot a 2) a
+   let se = show $ sumEuler2 (quot a numCapabilities) a
+--   let se = show $ sumEuler (quot a numCapabilities) a
    putStrLn(se)
