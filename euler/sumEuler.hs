@@ -7,6 +7,20 @@ import Prelude hiding (gcd)
 import System.IO
 import GHC.Conc (numCapabilities)
 
+class Cluster c where
+  singleton :: c a -> c (c a)
+  cluster   :: Int -> c a -> c (c a)
+  decluster :: c (c a) -> c a
+  lift      :: (c a -> a) -> (c (c a) -> c a)
+
+instance Cluster [] where
+  singleton list       = [list]
+  cluster   n []       = []
+  cluster   n list     = let (chunk,rest) = splitAt n list
+                         in chunk:(cluster n rest)
+  decluster buckets    = concat buckets
+  lift      f          = map f
+
 mkList :: Int -> [Int]
 mkList n = [1..(n-1)]
 
@@ -20,9 +34,9 @@ relprime x y = gcd x y == 1
 euler :: Int -> Int
 euler n = length (filter (relprime n) (mkList n))
 
---sumEuler :: Int -> Int -> Int
---sumEuler z n = sum ((lift worker) (cluster z (mkList n)) ‘using‘ parList rwhnf) where
---                  worker = sum . map euler
+sumEuler :: Int -> Int -> Int
+sumEuler z n = sum ((lift worker) (cluster z (mkList n)) `using` parList rwhnf) where
+                  worker = sum . map euler
 
 sumEuler2 :: Int -> Int -> Int
 sumEuler2 c n = sum (map euler (mkList n) `using` parListChunk c rwhnf )
