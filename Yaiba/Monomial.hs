@@ -7,7 +7,7 @@ module Yaiba.Monomial where
 import Math.Algebra.Field.Base
 import Data.List
 
-newtype Mon ord = M [Int]
+data Mon ord = M [Int] | Constant
 
 instance Eq (Mon ord) where
   a == b = all (==0) (powerList $ a/b)
@@ -32,15 +32,17 @@ data Grevlex
 data Revlex
 
 instance Num (Mon ord) where
+  Constant * Constant = Constant
+  Constant * M as = (M as)
+  M as * Constant = (M as)
   M as * M bs = M $ zipWith (+) as bs
   
 degree :: Mon ord -> Int
+degree Constant = 0
 degree (M a) = sum a
   
-signs :: Mon ord -> Bool
-signs (M as) = all (>=0) as
-
 instance Fractional (Mon ord) where
+  recip Constant = Constant
   recip (M as) = M $ map negate as
   
 instance Ord (Mon Lex) where
@@ -65,7 +67,20 @@ powerList :: Mon t -> [Int]
 powerList (M b) = b
 
 isFactor :: Mon ord -> Mon ord -> Bool
-isFactor a b = signs (b/a)
+isFactor Constant Constant = True
+isFactor Constant (M as)   = True
+isFactor (M as) Constant   = False
+isFactor a b               = all (>=0) cs where
+                                (M cs) = b/a
 
 lcmMon :: Mon t -> Mon t1 -> Mon ord
-lcmMon (M a) (M b) = M $ zipWith max a b
+lcmMon Constant Constant = Constant
+lcmMon Constant (M a)    = (M a)
+lcmMon (M a) Constant    = (M a)
+lcmMon (M a) (M b)       = M $ zipWith max a b
+
+gcdMon :: Mon t -> Mon t1 -> Mon ord
+gcdMon Constant Constant = Constant
+gcdMon Constant (M a)    = Constant
+gcdMon (M a) Constant    = Constant
+gcdMon (M a) (M b)       = M $ zipWith max a b
