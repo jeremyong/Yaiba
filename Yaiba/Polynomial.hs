@@ -4,6 +4,7 @@ module Yaiba.Polynomial where
 
 import Data.Map hiding (fromList)
 import qualified Data.Map as DM
+import qualified Data.Vector.Unboxed as DVU
 import Yaiba.Monomial
 import Yaiba.Sugar
 import Math.Algebra.Field.Base
@@ -80,11 +81,11 @@ getMap (P a) = a
 
 -- | Returns a tuple of the lead term Mon list and its coefficient.
 leadTerm :: Poly ord -> (Mon ord, Q)
-leadTerm (P a) | null a = (M [],0)
+leadTerm (P a) | null a = (Constant,0)
                | otherwise = findMax a
                              
 -- | Just returns the lead term Mon list.
-monLT (P a) | null a = M []
+monLT (P a) | null a = Constant
             | otherwise = fst $ findMax a
 
 -- | The degree of the poly.

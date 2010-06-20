@@ -20,6 +20,7 @@ Tested-with: GHC == 6.12.3, GHC == 6.12.2
 
 Library
   Build-Depends:
+        vector               == 0.6.*,
         base                 == 4.*,
         dph-base             == 0.4.*,
         HaskellForMaths      == 0.1.*,
