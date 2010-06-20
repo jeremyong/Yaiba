@@ -45,7 +45,7 @@ f = "output"
 
 main = do 
   --let gb = show $ (getPolys $ gB j)
-  let gb = show $ (P.leadTerm $ last $ getPolys $ gB'' p 2)
+  let gb = show $ (P.leadTerm $ last $ getPolys $ gB'' p 3)
   putStrLn "8"
   putStrLn ("Lex")
   --putStrLn (show (getPolys j))
