@@ -57,14 +57,14 @@ instance (Ord (Mon ord)) => Eq (Poly ord) where
   a == b = isNull $ a-b
   
 instance (Ord (Mon ord)) => Ord (Poly ord) where
-  compare (P a) (P b) | null a && null b = EQ
-                      | null a = LT
-                      | null b = GT
-                      | top == EQ = compare taila tailb
-                      | otherwise = top where
-    top = compare (findMax a) (findMax b)
-    taila = P (deleteMax a)
-    tailb = P (deleteMax b)
+    compare (P a) (P b) | null a && null b = EQ
+                        | null a = LT
+                        | null b = GT
+                        | top == EQ = compare taila tailb
+                        | otherwise = top where
+                        top = compare (findMax a) (findMax b)
+                        taila = P (deleteMax a)
+                        tailb = P (deleteMax b)
 
 insertTerm :: (Ord (Mon ord)) => Poly ord -> Mon ord -> Q -> Poly ord
 insertTerm (P a) b c = P (insertWith (+) b c a)
@@ -100,15 +100,29 @@ deleteFindLT a = let (x,y) = deleteFindMax $ getMap a
 numTerms :: Poly ord -> Int
 numTerms a = size $ getMap a
 
+maybeAdd a _ b = let sum = a+b
+                 in if sum==0 then Nothing else Just sum
+
+instance (Ord (Mon ord)) => Num (Poly ord) where
+    P a + P b = P $ fst (mapAccumWithKey addPrune a b) where
+                                           addPrune acc mon coef = (updateWithKey (maybeAdd coef) mon acc,0)
+    a * P b = fst (mapAccumWithKey polyFoil nullPoly b) where
+                                           polyFoil acc mon coef = (acc + monMult mon coef a,0)
+    negate (P a) = P $ map negate a
+
+{-
 instance (Ord (Mon ord)) => Num (Poly ord) where
   P a + P b = prune $ P (unionWith (+) a b)
   a * P b = prune $ P (foldWithKey (\k v -> unionWith (+) (getMap (monMult k v a))) empty b)
   negate (P a) = P $ map negate a
-
+-}
 -- | Scales every term of a Polynomial by a Mon list and rational number.
+monMult mon coef (P poly) = P $ map (*coef) $ mapKeysMonotonic (multiply mon) poly
+{-
 monMult :: (Ord (Mon ord)) => Mon ord -> Q -> Poly ord -> Poly ord
-monMult a b (P c) = P $ foldWithKey (f a b) empty c where
+monMult a b (P c) = P (foldWithKey (f a b) empty c) where
   f a' b' k v = unionWith (+) (singleton (multiply a' k) (b' * v))
+-}
 
 --Divides the first polynomial by the second once
 {-
