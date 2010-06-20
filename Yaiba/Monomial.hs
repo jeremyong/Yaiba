@@ -17,42 +17,25 @@ data Grevlex
 data Revlex
 
 instance Eq (Mon ord) where
-  a == b = DVU.all (==0) (powerList $ divide a b)
+  Constant == Constant = True
+  Constant == (M as)   = False
+  (M as) == Constant   = False  
+  (M as) == (M bs)     = DVU.and (DVU.zipWith (==) as bs)
 
 instance Show (Mon ord) where
   show Constant = " "
   show (M a) | DVU.filter (/=0) a == DVU.empty = " "
-             | otherwise = let multVars = fst $ DVU.foldl (\acc@(str,n) a -> (str ++ (showVar n a),n+1)) ("",1) a
+             | otherwise = let multVars = fst $ DVU.foldl (\(str,n) a -> (str ++ (showVar n a),n+1)) ("",1) a
                            in take (length multVars - 1) multVars
 
---instance Num (Mon ord) where
---  Constant * Constant = Constant
---  Constant * M as = (M as)
---  M as * Constant = (M as)
---  M as * M bs = M $ DVU.zipWith (+) as bs
-  
---instance Fractional (Mon ord) where
---  recip Constant = Constant
---  recip (M as) = M $ DVU.map negate as
-
 instance Ord (Mon Lex) where
-  compare x y = lexCompare (powerList (divide x y))
+  compare x y = lexCompare x y
 
 instance Ord (Mon Grlex) where
   compare x y = case compare (degree x) (degree y) of
     GT -> GT
     LT -> LT
-    EQ -> lexCompare (powerList (divide x y))
-
---instance Num (Mon ord) where
---  Constant * Constant = Constant
---  Constant * M as = (M as)
---  M as * Constant = (M as)
---  M as * M bs = M $ DVU.zipWith (+) as bs
-  
---instance Fractional (Mon ord) where
---  recip Constant = Constant
---  recip (M as) = M $ DVU.map negate as
+    EQ -> lexCompare x y
 
 multiply :: (Mon ord) -> (Mon ord) -> (Mon ord)
 multiply Constant Constant = Constant
@@ -68,26 +51,26 @@ divide (M as) (M bs) = M $ DVU.zipWith (-) as bs
 
 showVar :: Int -> Int -> String
 showVar n a | a==0      = ""
+            | a==1      = "x_" ++ show n ++ "*"
             | a>0&&a<10 = "x_" ++ show n ++ "^" ++ show a ++ "*"
             | otherwise = "x_" ++ show n ++ "^(" ++ show a ++ ")*"
 
-lexCompare :: (DVU.Vector Int) -> Ordering
-lexCompare a = let h = DVU.head a
-                   t = DVU.tail a
-               in if a == DVU.empty then
-                      EQ
-                  else case compare h 0 of 
-                         GT -> GT
-                         LT -> LT
-                         EQ -> lexCompare t
+lexCompare :: (Mon ord) -> (Mon ord) -> Ordering
+lexCompare (M as) (M bs) = let ha = DVU.unsafeHead as
+                               ta = DVU.tail as
+                               hb = DVU.unsafeHead bs
+                               tb = DVU.tail bs
+                           in if as == DVU.empty then
+                                  EQ
+                              else case compare ha hb of 
+                                     GT -> GT
+                                     LT -> LT
+                                     EQ -> lexCompare (M ta) (M tb)
                                 
 degree :: Mon ord -> Int
 degree Constant = 0
 degree (M a) = DVU.sum a
   
-powerList :: Mon ord -> (DVU.Vector Int)
-powerList (M b) = b
-
 isFactor :: Mon ord -> Mon ord -> Bool
 isFactor Constant Constant = True
 isFactor Constant (M _)    = True
