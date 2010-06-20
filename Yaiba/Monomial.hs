@@ -14,7 +14,6 @@ data Mon ord = M (DVU.Vector Int) | Constant
 data Lex
 data Grlex
 data Grevlex
-data Revlex
 
 instance Eq (Mon ord) where
   Constant == Constant = True
@@ -37,6 +36,15 @@ instance Ord (Mon Grlex) where
     LT -> LT
     EQ -> lexCompare x y
 
+instance Ord (Mon Grevlex) where
+  compare x y = case compare (degree x) (degree y) of
+    GT -> GT
+    LT -> LT
+    EQ -> grevlexCompare x y
+
+fromList :: [Int] -> Mon ord
+fromList ds = M (DVU.fromList ds :: DVU.Vector Int)
+
 multiply :: (Mon ord) -> (Mon ord) -> (Mon ord)
 multiply Constant Constant = Constant
 multiply Constant (M as) = M as
@@ -55,17 +63,35 @@ showVar n a | a==0      = ""
             | a>0&&a<10 = "x_" ++ show n ++ "^" ++ show a ++ "*"
             | otherwise = "x_" ++ show n ++ "^(" ++ show a ++ ")*"
 
+maybeHead :: (Eq a, DVU.Unbox a) => (DVU.Vector a) -> Maybe a
+maybeHead as = if as == DVU.empty then Nothing else Just $ DVU.unsafeHead as
+
+maybeLast :: (Eq a, DVU.Unbox a) => (DVU.Vector a) -> Maybe a
+maybeLast as = if as == DVU.empty then Nothing else Just $ DVU.unsafeLast as
+
 lexCompare :: (Mon ord) -> (Mon ord) -> Ordering
-lexCompare (M as) (M bs) = let ha = DVU.unsafeHead as
-                               ta = DVU.tail as
-                               hb = DVU.unsafeHead bs
-                               tb = DVU.tail bs
-                           in if as == DVU.empty then
-                                  EQ
-                              else case compare ha hb of 
-                                     GT -> GT
-                                     LT -> LT
-                                     EQ -> lexCompare (M ta) (M tb)
+lexCompare (M as) (M bs) = let a = maybeHead $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
+                           in case a of
+                                Nothing -> EQ
+                                (Just a) -> if a > 0 then GT else LT
+                           
+grevlexCompare :: (Mon ord) -> (Mon ord) -> Ordering
+grevlexCompare (M as) (M bs) = let a = maybeLast $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
+                               in case a of
+                                    Nothing -> EQ
+                                    (Just a) -> if a < 0 then GT else LT
+                           
+--lexCompare :: (Mon ord) -> (Mon ord) -> Ordering
+--lexCompare (M as) (M bs) = let ha = DVU.unsafeHead as
+--                               ta = DVU.tail as
+--                               hb = DVU.unsafeHead bs
+--                               tb = DVU.tail bs
+--                           in if as == DVU.empty then
+--                                  EQ
+--                              else case compare ha hb of 
+--                                     GT -> GT
+--                                     LT -> LT
+--                                     EQ -> lexCompare (M ta) (M tb)
                                 
 degree :: Mon ord -> Int
 degree Constant = 0
