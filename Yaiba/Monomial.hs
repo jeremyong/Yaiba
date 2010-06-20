@@ -47,15 +47,27 @@ fromList ds = M (DVU.fromList ds :: DVU.Vector Int)
 
 multiply :: (Mon ord) -> (Mon ord) -> (Mon ord)
 multiply Constant Constant = Constant
-multiply Constant (M as) = M as
-multiply (M as) Constant = M as
-multiply (M as) (M bs) = M $ DVU.zipWith (+) as bs
+multiply Constant (M as)   = M as
+multiply (M as) Constant   = M as
+multiply (M as) (M bs)     = M $ DVU.zipWith (+) as bs
+-- definition to make Constant work right - much slower
+--multiply (M as) (M bs)     = let cs = DVU.zipWith (+) as bs
+--                             in if DVU.any (/=0) cs then
+--                                    M cs
+--                                else
+--                                    Constant
 
 divide :: (Mon ord) -> (Mon ord) -> (Mon ord)
 divide Constant Constant = Constant
 divide Constant (M as)   = M $ DVU.map negate as
 divide (M as) Constant   = M as
 divide (M as) (M bs)     = M $ DVU.zipWith (-) as bs
+-- definition to make Constant work right - much slower
+--divide (M as) (M bs)     = let cs = DVU.zipWith (-) as bs
+--                             in if DVU.any (/=0) cs then
+--                                    M cs
+--                                else
+--                                    Constant
 
 showVar :: Int -> Int -> String
 showVar n a | a==0      = ""
@@ -81,18 +93,6 @@ grevlexCompare (M as) (M bs) = let a = maybeLast $ DVU.filter (/=0) (DVU.zipWith
                                     Nothing -> EQ
                                     (Just a) -> if a < 0 then GT else LT
                            
---lexCompare :: (Mon ord) -> (Mon ord) -> Ordering
---lexCompare (M as) (M bs) = let ha = DVU.unsafeHead as
---                               ta = DVU.tail as
---                               hb = DVU.unsafeHead bs
---                               tb = DVU.tail bs
---                           in if as == DVU.empty then
---                                  EQ
---                              else case compare ha hb of 
---                                     GT -> GT
---                                     LT -> LT
---                                     EQ -> lexCompare (M ta) (M tb)
-                                
 degree :: Mon ord -> Int
 degree Constant = 0
 degree (M a) = DVU.sum a
@@ -101,17 +101,22 @@ isFactor :: Mon ord -> Mon ord -> Bool
 isFactor Constant Constant = True
 isFactor Constant (M _)    = True
 isFactor (M _) Constant    = False
-isFactor a b               = DVU.all (>=0) cs where
-                                (M cs) = divide b a
+isFactor a b               = let mon = divide b a
+                             in case mon of
+                                  Constant -> True
+                                  (M cs) -> DVU.all (>=0) cs
 
 lcmMon :: Mon ord -> Mon ord -> Mon ord
 lcmMon Constant Constant = Constant
-lcmMon Constant (M a)    = (M a)
-lcmMon (M a) Constant    = (M a)
-lcmMon (M a) (M b)       = M $ DVU.zipWith max a b
+lcmMon Constant (M as)   = (M as)
+lcmMon (M as) Constant   = (M as)
+lcmMon (M as) (M bs)     = M $ DVU.zipWith max as bs
 
 gcdMon :: Mon ord -> Mon ord -> Mon ord
 gcdMon Constant Constant = Constant
 gcdMon Constant (M _)    = Constant
 gcdMon (M _) Constant    = Constant
-gcdMon (M a) (M b)       = M $ DVU.zipWith min a b
+gcdMon (M as) (M bs)     = let cs = DVU.zipWith min as bs
+                           in case DVU.all (==0) cs of
+                                True -> Constant
+                                False -> M cs
