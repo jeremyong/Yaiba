@@ -21,11 +21,11 @@ sPoly :: (Ord (Mon ord)) => (Poly ord,Sugar ord) ->
 sPoly (a,S a') (b,S b') = let (a1,a2) = leadTerm a
                               (b1,b2) = leadTerm b
                               l = lcmMon a1 b1
-                              sp = monMult (l/a1) b2 a - monMult (l/b1) a2 b
+                              sp = monMult (divide l a1) b2 a - monMult (divide l b1) a2 b
                               (spLT,_) = leadTerm sp
                               spLTdeg = degree spLT
                               sug = spLTdeg + max (a'-spLTdeg) (b'-spLTdeg)
-                          in if a1 * b1 == l then
+                          in if multiply a1 b1 == l then
                                Nothing
                              else
                                Just (sp,S sug,l)

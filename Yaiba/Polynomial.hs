@@ -108,7 +108,7 @@ instance (Ord (Mon ord)) => Num (Poly ord) where
 -- | Scales every term of a Polynomial by a Mon list and rational number.
 monMult :: (Ord (Mon ord)) => Mon ord -> Q -> Poly ord -> Poly ord
 monMult a b (P c) = P $ foldWithKey (f a b) empty c where
-  f a' b' k v = unionWith (+) (singleton (a' * k) (b' * v))
+  f a' b' k v = unionWith (+) (singleton (multiply a' k) (b' * v))
 
 --Divides the first polynomial by the second once
 {-
@@ -131,7 +131,7 @@ quoRem a (b,_) = quoRem' a b nullPoly where
   quoRem' rem d quo | numTerms rem == 0 = (quo, nullPoly)
                     | otherwise = let !(a1,a2) = leadTerm rem
                                       !(b1,b2) = leadTerm d
-                                      !remOd = a1/b1
+                                      !remOd = divide a1 b1
                                       !remOdco = a2/b2
                                   in if isFactor b1 a1 then
                                        quoRem' (rem - monMult remOd remOdco d) d (quo + P (singleton remOd remOdco))
