@@ -7,25 +7,13 @@ import Yaiba.Polynomial
 import Yaiba.Ideal
 import Yaiba.SPoly
 import Yaiba.Map hiding (filter,map)
+import Yaiba.Cluster
 import qualified Data.List as DL hiding (null)
 import Control.Parallel.Strategies
 import qualified Data.Set as DS
 import GHC.Conc (numCapabilities)
 import Prelude hiding (rem,null,map,filter)
 
-class Cluster c where
-  singleton :: c a -> c (c a)
-  cluster :: Int -> c a -> c (c a)
-  decluster :: c (c a) -> c a
-  lift :: (c a -> b) -> c (c a) -> c b
-
-instance Cluster [] where
-  singleton list       = [list]
-  cluster   _ []       = []
-  cluster   n list     = elems $ fst $ DL.foldl' f (empty,0) list where
-                             f = \(!acc,!z) !a -> (insertWith (++) (z `mod` n) [a] acc, z+1)
-  decluster            = concat
-  lift                 = DL.map 
 
 reducePolys :: (Ord (Mon ord)) => Ideal ord -> [Poly ord] -> [Poly ord]
 reducePolys d = DL.map (/. d)
