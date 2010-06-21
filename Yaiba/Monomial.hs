@@ -84,7 +84,7 @@ lexCompare :: Mon ord -> Mon ord -> Ordering
 lexCompare (M as) (M bs) = let !a = maybeHead $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
                            in case a of
                                 Nothing -> EQ
-                                Just a -> if a > 0 then GT else LT
+                                Just x -> if x > 0 then GT else LT
                            
 grevlexCompare :: Mon ord -> Mon ord -> Ordering
 grevlexCompare (M as) (M bs) = let !a = maybeLast $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
