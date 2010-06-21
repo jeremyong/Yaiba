@@ -25,8 +25,8 @@ class Cluster c where
 instance Cluster [] where
   singleton list       = [list]
   cluster   _ []       = []
-  cluster   n list     = elems $ fst $ foldl f (empty,0) list where
-                             f (acc,z) a = (insertWith (\v vs -> v ++ vs) (z `mod` n) [a] acc, z+1)
+  cluster   n list     = elems $ fst $ DL.foldl' f (empty,0) list where
+                             f = (\(!acc,!z) !a -> (insertWith (\v vs -> v ++ vs) (z `mod` n) [a] acc, z+1))
   decluster            = concat
   lift                 = DL.map 
 
