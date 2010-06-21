@@ -7,7 +7,7 @@ import qualified Yaiba.Map as DM
 import qualified Data.Vector.Unboxed as DVU
 import Yaiba.Monomial
 import Yaiba.Sugar
-import Math.Algebra.Field.Base
+import Yaiba.Base
 import Data.Maybe
 import Prelude hiding (null,filter,map,rem)
 

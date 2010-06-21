@@ -4,7 +4,7 @@
 -- After initialization, all Mon lists are mostly-guaranteed to have the same length.
 module Yaiba.Monomial where
 
-import Math.Algebra.Field.Base
+import Yaiba.Base
 import qualified Data.List as DL
 import qualified Data.Vector.Unboxed as DVU
 

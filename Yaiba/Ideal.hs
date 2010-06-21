@@ -31,7 +31,7 @@ initSugars as = map (\a -> (a,S $ deg a)) as
 divByIdeal :: (Ord (Mon ord)) =>
               Poly ord -> Ideal ord -> 
               (Poly ord, Bool)
-divByIdeal p (I ds) = foldl divByIdeal' (p, False) ds where
+divByIdeal p (I ds) = foldl' divByIdeal' (p, False) ds where
   divByIdeal' (p',divOcc) d = if divOcc then (p',divOcc) else
                                 let !(quo,rem) = quoRem p' d
                                 in if isNull quo then (p,divOcc) else
