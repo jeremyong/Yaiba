@@ -8,13 +8,14 @@ import qualified Data.Vector.Unboxed as DVU
 import Yaiba.Monomial
 import Yaiba.Sugar
 import Math.Algebra.Field.Base
+import Data.Maybe
 import Prelude hiding (null,filter,map,rem)
 
 newtype Poly ord = P (Map (Mon ord) Q)
 
 instance (Ord (Mon ord)) => Show (Poly ord) where
   show a | numTerms a == 0 = "0"
-         | otherwise = showTerm $ toAscList (getMap a)
+         | otherwise = showTerm $ toDescList (getMap a)
 
 pLp :: Poly Lex -> String
 pLp = prettyLexPrint
@@ -28,15 +29,15 @@ showTerm [] = ""
 showTerm ((a,b):[]) | show a == " " = show b
                     | b==0 = ""
                     | otherwise = if b/=1 then
-                                    show b ++ show a 
+                                    show b ++ "*" ++ show a 
                                   else
-                                    tail $ show a
+                                    show a
 showTerm ((a,b):as) | show a == " " = show b ++ showTerm as
                     | b==0 = showTerm as
                     | otherwise = if b/=1 then
-                                    show b ++ show a ++ " + " ++ showTerm as 
+                                    show b ++ "*" ++ show a ++ " + " ++ showTerm as 
                                   else
-                                    tail (show a) ++ " + " ++ showTerm as
+                                    (show a) ++ " + " ++ showTerm as
 
 -- | Constructors
 
@@ -100,14 +101,17 @@ deleteFindLT a = let (x,y) = deleteFindMax $ getMap a
 numTerms :: Poly ord -> Int
 numTerms a = size $ getMap a
 
-maybeAdd a _ b = let sum = a+b
-                 in if sum==0 then Nothing else Just sum
+maybeAdd a Nothing = Just a
+maybeAdd a (Just b) = let sum = a+b
+                      in if sum==0 then Nothing else Just sum
 
 instance (Ord (Mon ord)) => Num (Poly ord) where
-    P a + P b = P $ fst (mapAccumWithKey addPrune a b) where
-                                           addPrune acc mon coef = (updateWithKey (maybeAdd coef) mon acc,0)
+    P a + P b | null a = P b
+              | null b = P a
+              | otherwise = P $ fst (mapAccumWithKey addPrune a b) where
+                                           addPrune acc mon coef = (alter (maybeAdd coef) mon acc,0)
     a * P b = fst (mapAccumWithKey polyFoil nullPoly b) where
-                                           polyFoil acc mon coef = (acc + monMult mon coef a,0)
+                                           polyFoil acc mon coef = (acc + (monMult mon coef a),0)
     negate (P a) = P $ map negate a
 
 {-
@@ -117,7 +121,14 @@ instance (Ord (Mon ord)) => Num (Poly ord) where
   negate (P a) = P $ map negate a
 -}
 -- | Scales every term of a Polynomial by a Mon list and rational number.
-monMult mon coef (P poly) = P $ map (*coef) $ mapKeysMonotonic (multiply mon) poly
+
+-- monMult mon coef (P poly) = P $ map (*coef) $ mapKeysMonotonic (multiply mon) poly
+monMult mon coef (P poly) = P $ mapKeysMonotonic (\k v -> (multiply mon k, v*coef)) poly
+
+mapKeysValuesMonotonic :: ((k1,v1)->(k2,v2)) -> Map k1 a -> Map k2 a
+mapKeysValuesMonotonic _ Tip = Tip
+mapKeysValuesMonotonic f (Bin sz k x l r) = let (newKey,newValue) = f (k,x)
+                                            in Bin sz newKey newValue (mapKeysMonotonic f l) (mapKeysMonotonic f r)
 {-
 monMult :: (Ord (Mon ord)) => Mon ord -> Q -> Poly ord -> Poly ord
 monMult a b (P c) = P (foldWithKey (f a b) empty c) where

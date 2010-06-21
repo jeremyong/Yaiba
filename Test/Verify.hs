@@ -16,21 +16,6 @@ import qualified Data.Vector.Unboxed as DVU
 import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import System.IO
 
-main = do 
-  --let gb = show $ (getPolys $ gB j)
-  let gb = show $ last $ show $ (getPolys $ gB'' p 3)
-  putStrLn "8"
-  putStrLn ("Lex")
-  --putStrLn (show (getPolys j))
-  putStrLn (show (getPolys p))
-  start <- getCurrentTime
-  putStrLn (gb) 
-  end <- getCurrentTime
-  putStrLn (show (end `diffUTCTime` start)) {-
-  start <- getCurrentTime
-  putStrLn $ "A (parallel) non-reduced GB of j is " ++ gb
-  putStrLn $ show (end `diffUTCTime` start) ++ " elapsed."-}
-
 j_1 = P.fromList [(M.fromList [3,9,2,4,0,0,0,0],-1),(M.fromList [0,0,0,0,1,0,0,0],1)]
 j_2 = P.fromList [(M.fromList [5,5,3,7,0,0,0,0],-1),(M.fromList [0,0,0,0,0,1,0,0],1)]
 j_3 = P.fromList [(M.fromList [4,5,5,6,0,0,0,0],-1),(M.fromList [0,0,0,0,0,0,1,0],1)]
@@ -55,3 +40,20 @@ p_14 = P.fromList [(M.fromList [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 p_15 = P.fromList [(M.fromList [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],-1),(M.fromList [0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0],-1),(M.fromList [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],-1),(M.fromList [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],1),(M.fromList [0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0],1),(M.fromList [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0],1),(M.fromList [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],-1),(M.fromList [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],1)]
 p_16 = P.fromList [(M.fromList [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],-1),(M.fromList [0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0],-1),(M.fromList [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],-1),(M.fromList [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],1),(M.fromList [0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0],1),(M.fromList [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0],1)]
 p =I $ initSugars $ [p_1,p_2,p_3,p_4,p_5,p_6,p_7,p_8,p_9,p_10,p_11,p_12,p_13,p_14,p_15,p_16] :: Ideal M.Grlex
+
+f = "output"
+
+main = do 
+  --let gb = show $ (getPolys $ gB j)
+  let gb = show $ (getPolys $ gB j)
+  putStrLn "8"
+  putStrLn ("Lex")
+  --putStrLn (show (getPolys j))
+  putStrLn (show (getPolys j))
+  start <- getCurrentTime
+  putStrLn (gb) 
+  end <- getCurrentTime
+  putStrLn (show (end `diffUTCTime` start)) {-
+  start <- getCurrentTime
+  putStrLn $ "A (parallel) non-reduced GB of j is " ++ gb
+  putStrLn $ show (end `diffUTCTime` start) ++ " elapsed."-}
