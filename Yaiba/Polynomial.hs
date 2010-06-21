@@ -115,9 +115,8 @@ instance (Ord (Mon ord)) => Num (Poly ord) where
     negate (P a) = P $ map negate a
 
 -- | Scales every term of a Polynomial by a Mon list and rational number.
-
-monMult mon coef (P poly) = P $ map (*coef) $ mapKeysMonotonic (multiply mon) poly
---monMult mon coef (P poly) = P $ mapKeysValuesMonotonic (\(k,v) -> (multiply mon k, v*coef)) poly
+--monMult mon coef (P poly) = P $ map (*coef) $ mapKeysMonotonic (multiply mon) poly
+monMult mon coef (P poly) = P $ mapKeysValuesMonotonic (\(k,v) -> (multiply mon k, v*coef)) poly
 
 -- | Divides the first polynomial by the second once
 quoRem' :: (Ord (Mon ord)) =>

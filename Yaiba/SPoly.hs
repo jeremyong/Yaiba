@@ -4,7 +4,7 @@
 -- all Polys with that sugar.
 module Yaiba.SPoly where
 
-import Data.Map
+import Yaiba.Map
 import qualified Data.List as DL
 import qualified Data.Set as DS
 import Yaiba.Sugar

@@ -7,7 +7,7 @@ import Yaiba.Polynomial
 import Yaiba.Ideal
 import Yaiba.Sugar
 import Yaiba.SPoly
-import Data.Map hiding (filter,map)
+import Yaiba.Map hiding (filter,map)
 import qualified Data.List as DL hiding (null)
 import Control.Parallel
 import Control.Parallel.Strategies
