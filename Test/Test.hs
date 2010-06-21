@@ -17,21 +17,21 @@ import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import System.IO
 
 main = do 
-  --let gb = show $ (getPolys $ gB j)
-  let gb = show $ last $ show $ (getPolys $ gB'' p 3)
+  let gb = show $ (getPolys $ gB j)
+  --let gb = show $ last $ show $ (getPolys $ gB'' p 3)
   putStrLn "8"
   putStrLn ("Lex")
-  --putStrLn (show (getPolys j))
-  putStrLn (show (getPolys p))
+  putStrLn (show (getPolys j))
+  --putStrLn (show (getPolys p))
   start <- getCurrentTime
   putStrLn (gb) 
   end <- getCurrentTime
   putStrLn (show (end `diffUTCTime` start))
 
-j_1 = P.fromList [(M.fromList [3,9,2,4,0,0,0,0],-1),(M.fromList [0,0,0,0,1,0,0,0],1)]
+j_1 = P.fromList [(M.fromList [3,14,2,4,0,0,0,0],-1),(M.fromList [0,0,0,0,1,0,0,0],1)]
 j_2 = P.fromList [(M.fromList [5,5,3,7,0,0,0,0],-1),(M.fromList [0,0,0,0,0,1,0,0],1)]
-j_3 = P.fromList [(M.fromList [4,5,5,6,0,0,0,0],-1),(M.fromList [0,0,0,0,0,0,1,0],1)]
-j_4 = P.fromList [(M.fromList [7,8,4,5,0,0,0,0],-1),(M.fromList [0,0,0,0,0,0,0,1],1)]
+j_3 = P.fromList [(M.fromList [4,5,8,6,0,0,0,0],-1),(M.fromList [0,0,0,0,0,0,1,0],1)]
+j_4 = P.fromList [(M.fromList [7,8,10,5,0,0,0,0],-1),(M.fromList [0,0,0,0,0,0,0,1],1)]
 j' = j_1:j_2:j_3:j_4:[]
 j = I $ (initSugars j') :: Ideal M.Lex
 

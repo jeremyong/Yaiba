@@ -17,36 +17,6 @@ instance (Ord (Mon ord)) => Show (Poly ord) where
   show (Term a b) = showTerm [(a,b)]
   show a | numTerms a == 0 = "0"
          | otherwise = showTerm $ YM.toDescList (getMap a)
-  
-showTerm :: [(Mon ord, Q)] -> String
-showTerm [] = ""
-showTerm ((a,b):[]) | show a == " " = show b
-                    | b==0 = ""
-                    | otherwise = if b/=1 then
-                                    show b ++ "*" ++ show a 
-                                  else
-                                    show a
-showTerm ((a,b):as) | show a == " " = show b ++ showTerm as
-                    | b==0 = showTerm as
-                    | otherwise = if b/=1 then
-                                    show b ++ "*" ++ show a ++ " + " ++ showTerm as 
-                                  else
-                                    show a ++ " + " ++ showTerm as
-
--- | Constructors
-
--- | Creates an empty polynomial.
-nullPoly :: Poly ord
-nullPoly = P YM.empty
-
--- | Creates a single termed polynomial.
-monPoly :: (Mon ord, Q) -> Poly ord
-monPoly (a,b) | b==0 = nullPoly 
-              | otherwise = Term a b
-                          
--- | Creates a polynomial from a list.
-fromList :: (Ord (Mon ord)) => [(Mon ord, Q)] -> Poly ord
-fromList a = prune $ P $ YM.fromList a
 
 instance (Ord (Mon ord)) => Eq (Poly ord) where
   a == b = if numTerms a == numTerms b then False
@@ -122,7 +92,7 @@ monMult mon coef (P poly) = P $ YM.mapKeysValuesMonotonic (\(k,v) -> (multiply m
 quoRem' :: (Ord (Mon ord)) =>
             Poly ord -> (Poly ord,Sugar ord) -> (Poly ord, Poly ord)
 quoRem' rem (d,_) | isNull rem = (nullPoly, nullPoly)
-                  | otherwise  = let (a1,a2) = leadTerm rem
+| otherwise  = let (a1,a2) = leadTerm rem
                                      (b1,b2) = leadTerm d
                                      remOd = divide a1 b1
                                      remOdco = a2/b2 

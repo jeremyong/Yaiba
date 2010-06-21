@@ -25,7 +25,7 @@ sPoly (a,S a') (b,S b') = let (a1,a2) = leadTerm a
                               (spLT,_) = leadTerm sp
                               spLTdeg = degree spLT
                               sug = spLTdeg + max (a'-spLTdeg) (b'-spLTdeg)
-                          in if g  == Constant then
+                          in if g == Constant then
                                Nothing
                              else
                                Just (sp,S sug,l)
