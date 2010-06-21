@@ -82,7 +82,7 @@ maybeLast :: (Eq a, DVU.Unbox a) => (DVU.Vector a) -> Maybe a
 maybeLast as = if as == DVU.empty then Nothing else Just $ DVU.unsafeLast as
 
 lexCompare :: (Mon ord) -> (Mon ord) -> Ordering
-lexCompare (M as) (M bs) = let a = maybeHead $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
+lexCompare (M as) (M bs) = let !a = maybeHead $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
                            in case a of
                                 Nothing -> EQ
                                 (Just a) -> if a > 0 then GT else LT
