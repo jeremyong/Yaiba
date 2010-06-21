@@ -2,6 +2,7 @@
 -- | A Poly is synonymous to a map from Mon lists to a rational number
 module Yaiba.Polynomial where
 
+<<<<<<< HEAD
 import Yaiba.Map hiding (fromList)
 import qualified Yaiba.Map as DM
 import qualified Data.Vector.Unboxed as DVU
@@ -9,6 +10,15 @@ import Yaiba.Monomial
 import Yaiba.Sugar
 import Yaiba.Base
 import Data.Maybe
+=======
+import Data.Map hiding (fromList,(!))
+import qualified Data.Map as DM
+import Yaiba.Monomial
+import Yaiba.Sugar
+import Math.Algebra.Field.Base
+import Data.Array.Unboxed
+import qualified Data.List as DL
+>>>>>>> 84616b6a7d42d40d4021be969ec904cc8b6984ed
 import Prelude hiding (null,filter,map,rem)
 
 newtype Poly ord = P (Map (Mon ord) Q)
@@ -51,8 +61,13 @@ monPoly (a,b) | b==0 = nullPoly
               | otherwise = P $ singleton a b
                           
 -- | Creates a polynomial from a list.
+<<<<<<< .merge_file_eptMii
 fromList :: (Ord (Mon ord)) => [(Mon ord, Q)] -> Poly ord
 fromList a = prune $ P $ DM.fromList a
+=======
+fromList :: (Ord (Mon ord)) => [([Int], Q)] -> Poly ord
+fromList a = prune $ P $ DM.fromList $ DL.map (\(x,b) -> (M $ listArray (0,DL.length x-1) x,b)) a
+>>>>>>> .merge_file_KTOnRh
 
 instance (Ord (Mon ord)) => Eq (Poly ord) where
   a == b = isNull $ a-b
