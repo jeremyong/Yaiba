@@ -17,12 +17,12 @@ import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import System.IO
 
 main = do 
-  let gb = show $ (getPolys $ gB j)
-  --let gb = show $ last $ show $ (getPolys $ gB'' p 3)
+  --let gb = show $ (getPolys $ gB j)
+  let gb = show $ last $ show $ (getPolys $ gB'' p 3)
   putStrLn "8"
   putStrLn ("Lex")
-  putStrLn (show (getPolys j))
-  --putStrLn (show (getPolys p))
+  --putStrLn (show (getPolys j))
+  putStrLn (show (getPolys p))
   start <- getCurrentTime
   putStrLn (gb) 
   end <- getCurrentTime

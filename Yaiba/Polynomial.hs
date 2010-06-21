@@ -32,6 +32,26 @@ instance (Ord (Mon ord)) => Ord (Poly ord) where
                         taila = P $ YM.deleteMax a
                         tailb = P $ YM.deleteMax b
 
+showTerm :: [(Mon ord, Q)] -> String
+showTerm [] = ""
+showTerm ((a,b):[]) | show a == " " = show b
+                    | b==0 = ""
+                    | otherwise = if b/=1 then
+                                    show b ++ "*" ++ show a 
+                                  else
+                                    show a
+showTerm ((a,b):as) | show a == " " = show b ++ showTerm as
+                    | b==0 = showTerm as
+                    | otherwise = if b/=1 then
+                                    show b ++ "*" ++ show a ++ " + " ++ showTerm as 
+                                  else
+                                    show a ++ " + " ++ showTerm as
+
+nullPoly = P YM.empty
+
+fromList :: (Ord (Mon ord)) => [(Mon ord, Q)] -> Poly ord
+fromList a = prune $ P $ YM.fromList a
+
 isNull :: Poly ord -> Bool
 isNull (P a) = YM.null a
 
@@ -57,8 +77,8 @@ deg = degree . monLT
 -- | Returns a tuple of the lead term as Poly and the rest of the supplied Poly.
 deleteFindLT :: Poly ord -> (Poly ord, Poly ord)
 deleteFindLT (Term a b) = (Term a b,nullPoly)
-deleteFindLT a = let (x,y) = YM.deleteFindMax $ getMap a
-                 in (monPoly x,P y)
+deleteFindLT a = let ((m,q),y) = YM.deleteFindMax $ getMap a
+                 in (Term m q,P y)
 
 -- | The length of the poly
 numTerms :: Poly ord -> Int

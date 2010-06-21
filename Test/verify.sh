@@ -1,6 +1,6 @@
 rm output
 cd ..
-#cabal install
+cabal install
 cd -
 ghc -O2 -threaded -eventlog --make Verify
 ./Verify +RTS -ls -N -s > output
