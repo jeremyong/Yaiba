@@ -18,7 +18,7 @@ import System.IO
 
 
 main = do 
-  let gb = show $ (last $ getPolys $ gB'' p 6)
+  let gb = show $ (last $ getPolys $ gB'' p 3)
   putStrLn "8"
   putStrLn ("Lex")
   --putStrLn (show (getPolys j))

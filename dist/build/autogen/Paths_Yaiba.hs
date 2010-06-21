@@ -12,10 +12,10 @@ version = Version {versionBranch = [0,2,2], versionTags = []}
 
 bindir, libdir, datadir, libexecdir :: FilePath
 
-bindir     = "/Users/jeremy/.cabal/bin"
-libdir     = "/Users/jeremy/.cabal/lib/Yaiba-0.2.2/ghc-6.12.3"
-datadir    = "/Users/jeremy/.cabal/share/Yaiba-0.2.2"
-libexecdir = "/Users/jeremy/.cabal/libexec"
+bindir     = "/home/jeremyong/.cabal/bin"
+libdir     = "/home/jeremyong/.cabal/lib/Yaiba-0.2.2/ghc-6.13.20100620"
+datadir    = "/home/jeremyong/.cabal/share/Yaiba-0.2.2"
+libexecdir = "/home/jeremyong/.cabal/libexec"
 
 getBinDir, getLibDir, getDataDir, getLibexecDir :: IO FilePath
 getBinDir = catch (getEnv "Yaiba_bindir") (\_ -> return bindir)

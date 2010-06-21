@@ -21,12 +21,21 @@ class Cluster c where
   lift :: (c a -> b) -> (c (c a) -> c b)
 
 instance Cluster [] where
+<<<<<<< HEAD
   singleton list = [list]
   cluster _ [] = []
   cluster n list = elems $ fst $ DL.foldl' f (empty,0) list where
     f (acc,z) a = (insertWith (\v vs -> v ++ vs) (z `mod` n) [a] acc, z+1)
   decluster = DL.concat
   lift = DL.map 
+=======
+  singleton list       = [list]
+  cluster   _ []       = []
+  cluster   n list     = elems $ fst $ DL.foldl' f (empty,0) list where
+                             f = (\(!acc,!z) !a -> (insertWith (\v vs -> v ++ vs) (z `mod` n) [a] acc, z+1))
+  decluster            = concat
+  lift                 = DL.map 
+>>>>>>> 06765081f6a79ffd7eff59e9ed3f2cce88d0f733
 
 reducePolys :: (Ord (Mon ord)) => Ideal ord -> [Poly ord] -> [Poly ord]
 reducePolys d = DL.map (/. d)

@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -fdph-par -fglasgow-exts -XUndecidableInstances #-}
+{-# OPTIONS_GHC -fdph-par -fglasgow-exts -XUndecidableInstances -XBangPatterns #-}
 {-# LANGUAGE PArr #-}
 -- | An object of type SPoly ord is a map from a Sugar to a list of
 -- all Polys with that sugar.
@@ -46,7 +46,11 @@ minimize as = DL.map (\(a,b,_) -> (a,b)) $ DL.filter (\(_,_,x) -> isMinimal x) a
 
 -- | Convolves two lists, returning an SPoly map using syzygy and minimize.
 getSPolys :: (Ord (Mon ord)) => Ideal ord -> Ideal ord -> SPoly ord
+<<<<<<< HEAD
 getSPolys a b@(I b') = SP $ DL.foldl' (\acc (v,k) -> insertWith DS.union k (DS.singleton v) acc) 
+=======
+getSPolys a b@(I b') = SP $ DL.foldl' (\(!acc) (!v,!k) -> insertWith DS.union k (DS.singleton v) acc) 
+>>>>>>> 06765081f6a79ffd7eff59e9ed3f2cce88d0f733
                        empty 
                        (getSPolys' a b) where
   getSPolys' _ (I []) = []
