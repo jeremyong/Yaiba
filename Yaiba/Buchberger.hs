@@ -5,7 +5,6 @@ module Yaiba.Buchberger where
 import Yaiba.Monomial
 import Yaiba.Polynomial
 import Yaiba.Ideal
-import Yaiba.Sugar
 import Yaiba.SPoly
 import Yaiba.Map hiding (filter,map)
 import qualified Data.List as DL hiding (null)

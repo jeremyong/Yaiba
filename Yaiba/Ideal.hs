@@ -7,7 +7,7 @@ import Yaiba.Monomial
 import Yaiba.Polynomial
 import Yaiba.Sugar
 import Data.List
-import qualified Data.Set as Set
+--import qualified Data.Set as Set
 import Prelude hiding (rem)
 
 newtype Ideal ord = I [(Poly ord,Sugar ord)]

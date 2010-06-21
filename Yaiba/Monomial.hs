@@ -4,8 +4,6 @@
 -- After initialization, all Mon lists are mostly-guaranteed to have the same length.
 module Yaiba.Monomial where
 
-import Yaiba.Base
-import qualified Data.List as DL
 import qualified Data.Vector.Unboxed as DVU
 
 data Mon ord = M (DVU.Vector Int) | Constant
@@ -17,8 +15,8 @@ data Grevlex
 
 instance Eq (Mon ord) where
   Constant == Constant = True
-  Constant == (M as)   = False
-  (M as) == Constant   = False  
+  Constant == (M _)   = False
+  (M _) == Constant   = False  
   (M as) == (M bs)     = DVU.and (DVU.zipWith (==) as bs)
 
 instance Show (Mon ord) where
@@ -91,7 +89,7 @@ grevlexCompare :: (Mon ord) -> (Mon ord) -> Ordering
 grevlexCompare (M as) (M bs) = let !a = maybeLast $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
                                in case a of
                                     Nothing -> EQ
-                                    (Just a) -> if a < 0 then GT else LT
+                                    (Just x) -> if x < 0 then GT else LT
                            
 degree :: Mon ord -> Int
 degree Constant = 0

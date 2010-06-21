@@ -1,3 +1,4 @@
+rm output
 cd ..
 cabal install
 cd -

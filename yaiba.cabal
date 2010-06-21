@@ -23,7 +23,7 @@ Library
         vector               == 0.6.*,
         base                 == 4.*,
         dph-base             == 0.4.*,
-        containers           == 0.3.*,
+        containers           == 0.3.0.*,
         dph-par              == 0.4.*,
         parallel             == 2.2.0.*,
         array                == 0.3.0.*
