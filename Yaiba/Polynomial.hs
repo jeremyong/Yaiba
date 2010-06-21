@@ -122,8 +122,8 @@ instance (Ord (Mon ord)) => Num (Poly ord) where
 -}
 -- | Scales every term of a Polynomial by a Mon list and rational number.
 
--- monMult mon coef (P poly) = P $ map (*coef) $ mapKeysMonotonic (multiply mon) poly
-monMult mon coef (P poly) = P $ mapKeysMonotonic (\k v -> (multiply mon k, v*coef)) poly
+monMult mon coef (P poly) = P $ map (*coef) $ mapKeysMonotonic (multiply mon) poly
+-- monMult mon coef (P poly) = P $ mapKeysMonotonic (\k v -> (multiply mon k, v*coef)) poly
 
 {-
 mapKeysValuesMonotonic :: ((k1,v1)->(k2,v2)) -> Map k1 a -> Map k2 a
