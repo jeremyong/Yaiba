@@ -9,10 +9,8 @@ import Yaiba.Sugar
 import Yaiba.SPoly
 import Yaiba.Map hiding (filter,map)
 import qualified Data.List as DL hiding (null)
-import Control.Parallel
 import Control.Parallel.Strategies
 import qualified Data.Set as DS
-import Debug.Trace
 import GHC.Conc (numCapabilities)
 import Prelude hiding (rem,null,map,filter)
 
@@ -25,7 +23,7 @@ class Cluster c where
 instance Cluster [] where
   singleton list = [list]
   cluster _ [] = []
-  cluster n list = elems $ fst $ foldl f (empty,0) list where
+  cluster n list = elems $ fst $ DL.foldl' f (empty,0) list where
     f (acc,z) a = (insertWith (\v vs -> v ++ vs) (z `mod` n) [a] acc, z+1)
   decluster = DL.concat
   lift = DL.map 
