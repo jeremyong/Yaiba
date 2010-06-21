@@ -80,10 +80,11 @@ lexCompare :: Mon ord -> Mon ord -> Ordering
 lexCompare Constant Constant = EQ
 lexCompare Constant (M as)   = if DVU.any (/=0) as then LT else EQ
 lexCompare (M as) Constant   = if DVU.all (==0) as then EQ else GT
-lexCompare (M as) (M bs)     = let !a = maybeHead $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
-                               in case a of
-                                    Nothing -> EQ
-                                    Just x -> if x > 0 then GT else LT
+lexCompare (M as) (M bs)     = compare as bs
+--lexCompare (M as) (M bs)     = let !a = maybeHead $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
+--                               in case a of
+--                                    Nothing -> EQ
+--                                    Just x -> if x > 0 then GT else LT
                            
 grevlexCompare :: Mon ord -> Mon ord -> Ordering
 grevlexCompare Constant Constant = EQ
