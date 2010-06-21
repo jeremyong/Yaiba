@@ -47,8 +47,8 @@ minimize as = DL.map (\(a,b,_) -> (a,b)) $ DL.filter (\(_,_,x) -> isMinimal x) a
 
 -- | Convolves two lists, returning an SPoly map using syzygy and minimize.
 getSPolys :: (Ord (Mon ord)) => Ideal ord -> Ideal ord -> SPoly ord
-getSPolys a b@(I b') = SP $ DL.foldl' (\(!acc) (!v,!k) -> insertWith DS.union k (DS.singleton v) acc) 
-                       empty 
-                       (getSPolys' a b) where
+getSPolys a b = SP $ DL.foldl' (\(!acc) (!v,!k) -> insertWith DS.union k (DS.singleton v) acc) 
+                empty 
+                (getSPolys' a b) where
   getSPolys' _ (I []) = []
   getSPolys' x@(I xs) (I (y:ys)) = minimize (syzygy x y) ++ getSPolys' (I (y:xs)) (I ys)

@@ -4,14 +4,11 @@ module Yaiba.Polynomial where
 
 import Yaiba.Map hiding (fromList)
 import qualified Yaiba.Map as DM
-import qualified Data.Vector.Unboxed as DVU
 import Yaiba.Monomial
 import Yaiba.Sugar
 import Yaiba.Base
 import Data.Maybe
-import qualified Data.List as DL
-
-import Prelude hiding (null,filter,map,rem)
+import Prelude hiding (null,filter,map,rem,sum)
 
 newtype Poly ord = P (Map (Mon ord) Q)
 
@@ -111,15 +108,16 @@ instance (Ord (Mon ord)) => Num (Poly ord) where
     P a + P b | null a = P b
               | null b = P a
               | otherwise = P $ fst (mapAccumWithKey addPrune a b) where
-                                           addPrune acc mon coef = (alter (maybeAdd coef) mon acc,0)
+                                           addPrune acc mon coef = (alter (maybeAdd coef) mon acc,True)
     a * P b = fst (mapAccumWithKey polyFoil nullPoly b) where
-                                           polyFoil acc mon coef = (acc + (monMult mon coef a),0)
+                                           polyFoil acc mon coef = (acc + (monMult mon coef a),True)
     negate (P a) = P $ map negate a
 
 -- | Scales every term of a Polynomial by a Mon list and rational number.
 monMult mon coef (P poly) = P $ mapKeysValuesMonotonic (\(k,v) -> (multiply mon k, v*coef)) poly
 
 -- | Divides the first polynomial by the second once
+{-
 quoRem' :: (Ord (Mon ord)) =>
             Poly ord -> (Poly ord,Sugar ord) -> (Poly ord, Poly ord)
 quoRem' rem (d,_) | isNull rem = (nullPoly, nullPoly)
@@ -130,8 +128,7 @@ quoRem' rem (d,_) | isNull rem = (nullPoly, nullPoly)
                                  in case isFactor b1 a1 of
                                       False -> (nullPoly, rem)
                                       True -> (P (singleton remOd remOdco), rem - (monMult remOd remOdco d))
-
-
+-}
 -- | Divides the first polynomial by the second repeatedly until it fails.
 quoRem :: (Ord (Mon ord)) =>
            Poly ord -> (Poly ord,Sugar ord) -> (Poly ord, Poly ord)
