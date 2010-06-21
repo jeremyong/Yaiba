@@ -61,8 +61,6 @@ divide Constant Constant = Constant
 divide Constant (M as)   = M $ DVU.map negate as
 divide (M as) Constant   = M as
 divide (M as) (M bs)     = M $ DVU.zipWith (-) as bs
--- definition to make Constant work right - much slower
---divide a@(M as) b@(M bs) = if a == b then Constant else M $ DVU.zipWith (-) as bs
 
 showVar :: Int -> Int -> String
 showVar n a | a==0      = ""

@@ -14,7 +14,6 @@ import qualified Data.Set as DS
 import GHC.Conc (numCapabilities)
 import Prelude hiding (rem,null,map,filter)
 
-
 reducePolys :: (Ord (Mon ord)) => Ideal ord -> [Poly ord] -> [Poly ord]
 reducePolys d = DL.map (/. d)
 --reducePolys _ []     = []
