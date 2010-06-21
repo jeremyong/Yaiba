@@ -15,7 +15,7 @@ newtype Ideal ord = I [(Poly ord,Sugar ord)]
 getPolys :: Ideal ord -> [Poly ord]
 getPolys (I a) = map fst a
 
-initSugars as = map (\a -> (a,S $ deg a)) as
+initSugars = map (\a -> (a,S $ deg a))
 
 -- | Reduces a polynomial by an ideal completely.
 (/.) :: (Ord (Mon ord)) =>
@@ -32,6 +32,6 @@ divByIdeal :: (Ord (Mon ord)) =>
               Poly ord -> Ideal ord -> 
               (Poly ord, Bool)
 divByIdeal p (I ds) = foldl' divByIdeal' (p, False) ds where
-  divByIdeal' = (\(!p',!divOcc) !d -> if divOcc then (p',divOcc) else
-                                          let !(quo,rem) = quoRem p' d
-                                          in if isNull quo then (p,divOcc) else (rem,True))
+  divByIdeal' = \(!p',!divOcc) !d -> if divOcc then (p',divOcc) else
+                                         let !(quo,rem) = quoRem p' d
+                                         in if isNull quo then (p,divOcc) else (rem,True)

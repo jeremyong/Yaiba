@@ -17,13 +17,13 @@ class Cluster c where
   singleton :: c a -> c (c a)
   cluster :: Int -> c a -> c (c a)
   decluster :: c (c a) -> c a
-  lift :: (c a -> b) -> (c (c a) -> c b)
+  lift :: (c a -> b) -> c (c a) -> c b
 
 instance Cluster [] where
   singleton list       = [list]
   cluster   _ []       = []
   cluster   n list     = elems $ fst $ DL.foldl' f (empty,0) list where
-                             f = (\(!acc,!z) !a -> (insertWith (\v vs -> v ++ vs) (z `mod` n) [a] acc, z+1))
+                             f = \(!acc,!z) !a -> (insertWith (++) (z `mod` n) [a] acc, z+1)
   decluster            = concat
   lift                 = DL.map 
 
@@ -40,8 +40,8 @@ gB a = gB' a (getSPolys (I []) a) where
                                    binSize = ceiling $
                                              (fromIntegral (DS.size polys) :: Float)
                                              / (fromIntegral numCapabilities :: Float)
-                                   allPolys = decluster ((lift worker2) (cluster binSize polyList) `using` parList rwhnf) where
-                                       worker1 = (\x -> initSugars $ DL.filter (not.isNull) x)
+                                   allPolys = decluster (lift worker2 (cluster binSize polyList) `using` parList rwhnf) where
+                                       worker1 = initSugars . DL.filter (not.isNull)
                                        worker2 = worker1 . reducePolys (I ds)
                                    newDivisors = ds ++ allPolys
                                    SP newSMap = getSPolys d (I allPolys)
@@ -58,8 +58,8 @@ gB'' a = gB' a (getSPolys (I []) a) where
                                    binSize = ceiling $
                                              (fromIntegral (DS.size polys) :: Float)
                                              / (fromIntegral numCapabilities :: Float)
-                                   allPolys = DL.concat ((lift worker2) (cluster binSize polyList) `using` parList rwhnf) where
-                                                  worker1 = (\x -> initSugars $ DL.filter (not.isNull) x)
+                                   allPolys = DL.concat (lift worker2 (cluster binSize polyList) `using` parList rwhnf) where
+                                                  worker1 = initSugars . DL.filter (not.isNull)
                                                   worker2 = worker1 . reducePolys (I ds)
                                    newDivisors = ds ++ allPolys
                                    SP newSMap = getSPolys d (I allPolys)
