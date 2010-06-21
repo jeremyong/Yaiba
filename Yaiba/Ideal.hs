@@ -32,13 +32,6 @@ divByIdeal :: (Ord (Mon ord)) =>
               Poly ord -> Ideal ord -> 
               (Poly ord, Bool)
 divByIdeal p (I ds) = foldl' divByIdeal' (p, False) ds where
-<<<<<<< HEAD
-  divByIdeal' (p',divOcc) d = if divOcc then (p',divOcc) else
-                                let !(quo,rem) = quoRem p' d
-                                in if isNull quo then (p,divOcc) else
-                                     (rem,True)
-=======
   divByIdeal' = (\(!p',!divOcc) !d -> if divOcc then (p',divOcc) else
                                           let !(quo,rem) = quoRem p' d
                                           in if isNull quo then (p,divOcc) else (rem,True))
->>>>>>> 06765081f6a79ffd7eff59e9ed3f2cce88d0f733
