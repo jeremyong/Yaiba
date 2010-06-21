@@ -10,7 +10,7 @@ import qualified Data.Vector.Unboxed as DVU
 
 data Mon ord = M (DVU.Vector Int) | Constant
 
---Dummy phantom ord types. Requires -fglasgow-exts enabled.
+-- | Dummy phantom ord types. Requires -fglasgow-exts enabled.
 data Lex
 data Grlex
 data Grevlex
@@ -88,7 +88,7 @@ lexCompare (M as) (M bs) = let !a = maybeHead $ DVU.filter (/=0) (DVU.zipWith (-
                                 (Just a) -> if a > 0 then GT else LT
                            
 grevlexCompare :: (Mon ord) -> (Mon ord) -> Ordering
-grevlexCompare (M as) (M bs) = let a = maybeLast $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
+grevlexCompare (M as) (M bs) = let !a = maybeLast $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
                                in case a of
                                     Nothing -> EQ
                                     (Just a) -> if a < 0 then GT else LT
@@ -101,7 +101,7 @@ isFactor :: Mon ord -> Mon ord -> Bool
 isFactor Constant Constant = True
 isFactor Constant (M _)    = True
 isFactor (M _) Constant    = False
-isFactor a b               = let mon = divide b a
+isFactor a b               = let !mon = divide b a
                              in case mon of
                                   Constant -> True
                                   (M cs) -> DVU.all (>=0) cs
@@ -116,7 +116,7 @@ gcdMon :: Mon ord -> Mon ord -> Mon ord
 gcdMon Constant Constant = Constant
 gcdMon Constant (M _)    = Constant
 gcdMon (M _) Constant    = Constant
-gcdMon (M as) (M bs)     = let cs = DVU.zipWith min as bs
+gcdMon (M as) (M bs)     = let !cs = DVU.zipWith min as bs
                            in case DVU.all (==0) cs of
                                 True -> Constant
                                 False -> M cs
