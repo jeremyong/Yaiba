@@ -125,10 +125,12 @@ instance (Ord (Mon ord)) => Num (Poly ord) where
 -- monMult mon coef (P poly) = P $ map (*coef) $ mapKeysMonotonic (multiply mon) poly
 monMult mon coef (P poly) = P $ mapKeysMonotonic (\k v -> (multiply mon k, v*coef)) poly
 
+{-
 mapKeysValuesMonotonic :: ((k1,v1)->(k2,v2)) -> Map k1 a -> Map k2 a
 mapKeysValuesMonotonic _ Tip = Tip
 mapKeysValuesMonotonic f (Bin sz k x l r) = let (newKey,newValue) = f (k,x)
-                                            in Bin sz newKey newValue (mapKeysMonotonic f l) (mapKeysMonotonic f r)
+                                           in Bin sz newKey newValue (mapKeysMonotonic f l) (mapKeysMonotonic f r)
+-}
 {-
 monMult :: (Ord (Mon ord)) => Mon ord -> Q -> Poly ord -> Poly ord
 monMult a b (P c) = P (foldWithKey (f a b) empty c) where
