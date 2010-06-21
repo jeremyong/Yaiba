@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -fglasgow-exts #-}
+{-# OPTIONS_GHC -fglasgow-exts -XBangPatterns #-}
 -- | At present, Mon ord is a list of integers (the multidegree of a monomial).
 -- It is not checked that the lists are of the same length when initialized.
 -- After initialization, all Mon lists are mostly-guaranteed to have the same length.
@@ -24,7 +24,7 @@ instance Eq (Mon ord) where
 instance Show (Mon ord) where
   show Constant = " "
   show (M a) | DVU.filter (/=0) a == DVU.empty = " "
-             | otherwise = let multVars = fst $ DVU.foldl (\(str,n) a -> (str ++ (showVar n a),n+1)) ("",1) a
+             | otherwise = let multVars = fst $ DVU.foldl (\(str,n) b -> (str ++ (showVar n b),n+1)) ("",1) a
                            in take (length multVars - 1) multVars
 
 instance Ord (Mon Lex) where
