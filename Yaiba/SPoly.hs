@@ -20,12 +20,13 @@ sPoly :: (Ord (Mon ord)) => (Poly ord,Sugar ord) ->
          (Poly ord, Sugar ord) -> Maybe (Poly ord, Sugar ord, Mon ord)
 sPoly (a,S a') (b,S b') = let (a1,a2) = leadTerm a
                               (b1,b2) = leadTerm b
+                              g = gcdMon a1 b1
                               l = lcmMon a1 b1
                               sp = monMult (divide l a1) b2 a - monMult (divide l b1) a2 b
                               (spLT,_) = leadTerm sp
                               spLTdeg = degree spLT
                               sug = spLTdeg + max (a'-spLTdeg) (b'-spLTdeg)
-                          in if multiply a1 b1 == l then
+                          in if g  == Constant then
                                Nothing
                              else
                                Just (sp,S sug,l)

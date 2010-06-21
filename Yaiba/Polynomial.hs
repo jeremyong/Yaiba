@@ -122,13 +122,13 @@ monMult mon coef (P poly) = P $ mapKeysValuesMonotonic (\(k,v) -> (multiply mon 
 quoRem' :: (Ord (Mon ord)) =>
             Poly ord -> (Poly ord,Sugar ord) -> (Poly ord, Poly ord)
 quoRem' rem (d,_) | isNull rem = (nullPoly, nullPoly)
-                  | otherwise = let (a1,a2) = leadTerm rem
-                                    (b1,b2) = leadTerm d
-                                    remOd = divide a1 b1
-                                    remOdco = a2/b2 
-                                in case isFactor b1 a1 of
-                                     False -> (nullPoly, rem)
-                                     True -> (P (singleton remOd remOdco), rem - (monMult remOd remOdco d))
+                  | otherwise  = let (a1,a2) = leadTerm rem
+                                     (b1,b2) = leadTerm d
+                                     remOd = divide a1 b1
+                                     remOdco = a2/b2 
+                                 in case isFactor b1 a1 of
+                                      False -> (nullPoly, rem)
+                                      True -> (P (singleton remOd remOdco), rem - (monMult remOd remOdco d))
 
 
 -- | Divides the first polynomial by the second repeatedly until it fails.
@@ -136,12 +136,12 @@ quoRem :: (Ord (Mon ord)) =>
            Poly ord -> (Poly ord,Sugar ord) -> (Poly ord, Poly ord)
 quoRem a (b,_) = quoRem' a b nullPoly where
   quoRem' rem d quo | numTerms rem == 0 = (quo, nullPoly)
-                    | otherwise = let !(a1,a2) = leadTerm rem
-                                      !(b1,b2) = leadTerm d
-                                      !remOd = divide a1 b1
-                                      !remOdco = a2/b2
-                                  in if isFactor b1 a1 then
-                                       quoRem' (rem - monMult remOd remOdco d) d (quo + P (singleton remOd remOdco))
-                                     else
-                                       (quo, rem)
+                    | otherwise         = let !(a1,a2) = leadTerm rem
+                                              !(b1,b2) = leadTerm d
+                                              !remOd = divide a1 b1
+                                              !remOdco = a2/b2
+                                          in if isFactor b1 a1 then
+                                                 quoRem' (rem - monMult remOd remOdco d) d (quo + P (singleton remOd remOdco))
+                                             else
+                                                 (quo, rem)
                                       
