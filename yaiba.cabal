@@ -20,9 +20,9 @@ Tested-with: GHC == 6.12.3, GHC == 6.12.2
 
 Library
   Build-Depends:
+        vector               == 0.6.*,
         base                 == 4.*,
         dph-base             == 0.4.*,
-        HaskellForMaths      == 0.1.*,
         containers           == 0.3.*,
         dph-par              == 0.4.*,
         parallel             == 2.2.0.*,
@@ -33,11 +33,20 @@ Library
 
   extensions:
         UndecidableInstances
+        DeriveDataTypeable
+        CPP
+        MagicHash
+        Rank2Types
 
   Exposed-modules:
+        Yaiba.Map
         Yaiba.Monomial
         Yaiba.Polynomial
         Yaiba.Ideal
         Yaiba.Sugar
         Yaiba.Buchberger
         Yaiba.SPoly
+        Yaiba.Base
+
+  include-dirs:
+        include

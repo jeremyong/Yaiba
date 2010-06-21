@@ -4,9 +4,6 @@
 -- the "sugar" of a polynomial.
 module Yaiba.Sugar where
 
-import Yaiba.Monomial
-import Math.Algebra.Field.Base
-
 newtype Sugar ord = S Int
 
 instance Eq (Sugar ord) where

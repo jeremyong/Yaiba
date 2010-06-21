@@ -2,20 +2,22 @@
 -- | A Poly is synonymous to a map from Mon lists to a rational number
 module Yaiba.Polynomial where
 
-import Data.Map hiding (fromList,(!))
-import qualified Data.Map as DM
+import Yaiba.Map hiding (fromList)
+import qualified Yaiba.Map as DM
+import qualified Data.Vector.Unboxed as DVU
 import Yaiba.Monomial
 import Yaiba.Sugar
-import Math.Algebra.Field.Base
-import Data.Array.Unboxed
+import Yaiba.Base
+import Data.Maybe
 import qualified Data.List as DL
+
 import Prelude hiding (null,filter,map,rem)
 
 newtype Poly ord = P (Map (Mon ord) Q)
 
 instance (Ord (Mon ord)) => Show (Poly ord) where
   show a | numTerms a == 0 = "0"
-         | otherwise = showTerm $ toAscList (getMap a)
+         | otherwise = showTerm $ toDescList (getMap a)
 
 pLp :: Poly Lex -> String
 pLp = prettyLexPrint
@@ -29,15 +31,15 @@ showTerm [] = ""
 showTerm ((a,b):[]) | show a == " " = show b
                     | b==0 = ""
                     | otherwise = if b/=1 then
-                                    show b ++ show a 
+                                    show b ++ "*" ++ show a 
                                   else
-                                    tail $ show a
+                                    show a
 showTerm ((a,b):as) | show a == " " = show b ++ showTerm as
                     | b==0 = showTerm as
                     | otherwise = if b/=1 then
-                                    show b ++ show a ++ " + " ++ showTerm as 
+                                    show b ++ "*" ++ show a ++ " + " ++ showTerm as 
                                   else
-                                    tail (show a) ++ " + " ++ showTerm as
+                                    (show a) ++ " + " ++ showTerm as
 
 -- | Constructors
 
@@ -51,21 +53,21 @@ monPoly (a,b) | b==0 = nullPoly
               | otherwise = P $ singleton a b
                           
 -- | Creates a polynomial from a list.
-fromList :: (Ord (Mon ord)) => [([Int], Q)] -> Poly ord
-fromList a = prune $ P $ DM.fromList $ DL.map (\(x,b) -> (M $ listArray (0,DL.length x-1) x,b)) a
+fromList :: (Ord (Mon ord)) => [(Mon ord, Q)] -> Poly ord
+fromList a = prune $ P $ DM.fromList a
 
 instance (Ord (Mon ord)) => Eq (Poly ord) where
   a == b = isNull $ a-b
   
 instance (Ord (Mon ord)) => Ord (Poly ord) where
-  compare (P a) (P b) | null a && null b = EQ
-                      | null a = LT
-                      | null b = GT
-                      | top == EQ = compare taila tailb
-                      | otherwise = top where
-    top = compare (findMax a) (findMax b)
-    taila = P (deleteMax a)
-    tailb = P (deleteMax b)
+    compare (P a) (P b) | null a && null b = EQ
+                        | null a = LT
+                        | null b = GT
+                        | top == EQ = compare taila tailb
+                        | otherwise = top where
+                        top = compare (findMax a) (findMax b)
+                        taila = P (deleteMax a)
+                        tailb = P (deleteMax b)
 
 insertTerm :: (Ord (Mon ord)) => Poly ord -> Mon ord -> Q -> Poly ord
 insertTerm (P a) b c = P (insertWith (+) b c a)
@@ -101,41 +103,46 @@ deleteFindLT a = let (x,y) = deleteFindMax $ getMap a
 numTerms :: Poly ord -> Int
 numTerms a = size $ getMap a
 
+maybeAdd a Nothing = Just a
+maybeAdd a (Just b) = let sum = a+b
+                      in if sum==0 then Nothing else Just sum
+
 instance (Ord (Mon ord)) => Num (Poly ord) where
-  P a + P b = prune $ P (unionWith (+) a b)
-  a * P b = prune $ P (foldWithKey (\k v -> unionWith (+) (getMap (monMult k v a))) empty b)
-  negate (P a) = P $ map negate a
+    P a + P b | null a = P b
+              | null b = P a
+              | otherwise = P $ fst (mapAccumWithKey addPrune a b) where
+                                           addPrune acc mon coef = (alter (maybeAdd coef) mon acc,0)
+    a * P b = fst (mapAccumWithKey polyFoil nullPoly b) where
+                                           polyFoil acc mon coef = (acc + (monMult mon coef a),0)
+    negate (P a) = P $ map negate a
 
 -- | Scales every term of a Polynomial by a Mon list and rational number.
-monMult :: (Ord (Mon ord)) => Mon ord -> Q -> Poly ord -> Poly ord
-monMult a b (P c) = P $ foldWithKey (f a b) empty c where
-  f a' b' k v = unionWith (+) (singleton (a' * k) (b' * v))
+monMult mon coef (P poly) = P $ mapKeysValuesMonotonic (\(k,v) -> (multiply mon k, v*coef)) poly
 
---Divides the first polynomial by the second once
-{-
-quoRem :: (Ord (Mon ord)) =>
+-- | Divides the first polynomial by the second once
+quoRem' :: (Ord (Mon ord)) =>
             Poly ord -> (Poly ord,Sugar ord) -> (Poly ord, Poly ord)
-quoRem rem (d,_) | isNull rem = (nullPoly, nullPoly)
-                 | otherwise = let (a1,a2) = leadTerm rem
-                                   (b1,b2) = leadTerm d
-                                   remOd = a1/b1
-                                   remOdco = a2/b2 
-                               in case isFactor b1 a1 of
-                                 False -> (nullPoly, rem)
-                                 True -> (P (singleton remOd remOdco), rem - (monMult remOd remOdco d))
--}
+quoRem' rem (d,_) | isNull rem = (nullPoly, nullPoly)
+                  | otherwise  = let (a1,a2) = leadTerm rem
+                                     (b1,b2) = leadTerm d
+                                     remOd = divide a1 b1
+                                     remOdco = a2/b2 
+                                 in case isFactor b1 a1 of
+                                      False -> (nullPoly, rem)
+                                      True -> (P (singleton remOd remOdco), rem - (monMult remOd remOdco d))
+
 
 -- | Divides the first polynomial by the second repeatedly until it fails.
 quoRem :: (Ord (Mon ord)) =>
            Poly ord -> (Poly ord,Sugar ord) -> (Poly ord, Poly ord)
 quoRem a (b,_) = quoRem' a b nullPoly where
   quoRem' rem d quo | numTerms rem == 0 = (quo, nullPoly)
-                    | otherwise = let !(a1,a2) = leadTerm rem
-                                      !(b1,b2) = leadTerm d
-                                      !remOd = a1/b1
-                                      !remOdco = a2/b2
-                                  in if isFactor b1 a1 then
-                                       quoRem' (rem - monMult remOd remOdco d) d (quo + P (singleton remOd remOdco))
-                                     else
-                                       (quo, rem)
+                    | otherwise         = let !(a1,a2) = leadTerm rem
+                                              !(b1,b2) = leadTerm d
+                                              !remOd = divide a1 b1
+                                              !remOdco = a2/b2
+                                          in if isFactor b1 a1 then
+                                                 quoRem' (rem - monMult remOd remOdco d) d (quo + P (singleton remOd remOdco))
+                                             else
+                                                 (quo, rem)
                                       
