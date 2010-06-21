@@ -4,6 +4,7 @@ module Yaiba.Polynomial where
 
 import Yaiba.Map hiding (fromList)
 import qualified Yaiba.Map as DM
+import qualified Data.Ord as DO
 import Yaiba.Monomial
 import Yaiba.Sugar
 import Yaiba.Base
@@ -36,7 +37,7 @@ showTerm ((a,b):as) | show a == " " = show b ++ showTerm as
                     | otherwise = if b/=1 then
                                     show b ++ "*" ++ show a ++ " + " ++ showTerm as 
                                   else
-                                    (show a) ++ " + " ++ showTerm as
+                                    show a ++ " + " ++ showTerm as
 
 -- | Constructors
 
@@ -62,9 +63,9 @@ instance (Ord (Mon ord)) => Ord (Poly ord) where
                         | null b = GT
                         | top == EQ = compare taila tailb
                         | otherwise = top where
-                        top = compare (findMax a) (findMax b)
-                        taila = P (deleteMax a)
-                        tailb = P (deleteMax b)
+                        top = DO.comparing findMax a b
+                        taila = P $ deleteMax a
+                        tailb = P $ deleteMax b
 
 insertTerm :: (Ord (Mon ord)) => Poly ord -> Mon ord -> Q -> Poly ord
 insertTerm (P a) b c = P (insertWith (+) b c a)
@@ -110,7 +111,7 @@ instance (Ord (Mon ord)) => Num (Poly ord) where
               | otherwise = P $ fst (mapAccumWithKey addPrune a b) where
                                            addPrune acc mon coef = (alter (maybeAdd coef) mon acc,True)
     a * P b = fst (mapAccumWithKey polyFoil nullPoly b) where
-                                           polyFoil acc mon coef = (acc + (monMult mon coef a),True)
+                                           polyFoil acc mon coef = (acc + monMult mon coef a,True)
     negate (P a) = P $ map negate a
 
 -- | Scales every term of a Polynomial by a Mon list and rational number.
