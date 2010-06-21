@@ -17,6 +17,30 @@ instance (Ord (Mon ord)) => Show (Poly ord) where
   show a | numTerms a == 0 = "0"
          | otherwise = showTerm $ toDescList (getMap a)
 
+instance (Ord (Mon ord)) => Eq (Poly ord) where
+  a == b = isNull $ a-b
+  
+instance (Ord (Mon ord)) => Ord (Poly ord) where
+    compare (P a) (P b) | null a && null b = EQ
+                        | null a = LT
+                        | null b = GT
+                        | top == EQ = compare taila tailb
+                        | otherwise = top where
+                        top = DO.comparing findMax a b
+                        taila = P $ deleteMax a
+                        tailb = P $ deleteMax b
+
+instance (Ord (Mon ord)) => Num (Poly ord) where
+    P a + P b | null a = P b
+              | null b = P a
+              | otherwise = P $ fst (mapAccumWithKey addPrune a b) where
+                                           addPrune acc mon coef = (alter (maybeAdd coef) mon acc,True)
+    a * P b = fst (mapAccumWithKey polyFoil nullPoly b) where
+                                           polyFoil acc mon coef = (acc + monMult mon coef a,True)
+    negate (P a) = P $ map negate a
+
+-- | Show functions
+
 pLp :: Poly Lex -> String
 pLp = prettyLexPrint
 
@@ -54,21 +78,8 @@ monPoly (a,b) | b==0 = nullPoly
 fromList :: (Ord (Mon ord)) => [(Mon ord, Q)] -> Poly ord
 fromList a = prune $ P $ DM.fromList a
 
-instance (Ord (Mon ord)) => Eq (Poly ord) where
-  a == b = isNull $ a-b
-  
-instance (Ord (Mon ord)) => Ord (Poly ord) where
-    compare (P a) (P b) | null a && null b = EQ
-                        | null a = LT
-                        | null b = GT
-                        | top == EQ = compare taila tailb
-                        | otherwise = top where
-                        top = DO.comparing findMax a b
-                        taila = P $ deleteMax a
-                        tailb = P $ deleteMax b
-
-insertTerm :: (Ord (Mon ord)) => Poly ord -> Mon ord -> Q -> Poly ord
-insertTerm (P a) b c = P (insertWith (+) b c a)
+--insertTerm :: (Ord (Mon ord)) => Poly ord -> Mon ord -> Q -> Poly ord
+--insertTerm (P a) b c = P (insertWith (+) b c a)
 
 isNull :: Poly ord -> Bool
 isNull (P a) = null a
@@ -105,15 +116,6 @@ maybeAdd a Nothing = Just a
 maybeAdd a (Just b) = let sum = a+b
                       in if sum==0 then Nothing else Just sum
 
-instance (Ord (Mon ord)) => Num (Poly ord) where
-    P a + P b | null a = P b
-              | null b = P a
-              | otherwise = P $ fst (mapAccumWithKey addPrune a b) where
-                                           addPrune acc mon coef = (alter (maybeAdd coef) mon acc,True)
-    a * P b = fst (mapAccumWithKey polyFoil nullPoly b) where
-                                           polyFoil acc mon coef = (acc + monMult mon coef a,True)
-    negate (P a) = P $ map negate a
-
 -- | Scales every term of a Polynomial by a Mon list and rational number.
 monMult mon coef (P poly) = P $ mapKeysValuesMonotonic (\(k,v) -> (multiply mon k, v*coef)) poly
 
@@ -122,7 +124,7 @@ monMult mon coef (P poly) = P $ mapKeysValuesMonotonic (\(k,v) -> (multiply mon 
 quoRem' :: (Ord (Mon ord)) =>
             Poly ord -> (Poly ord,Sugar ord) -> (Poly ord, Poly ord)
 quoRem' rem (d,_) | isNull rem = (nullPoly, nullPoly)
-                  | otherwise  = let (a1,a2) = leadTerm rem
+| otherwise  = let (a1,a2) = leadTerm rem
                                      (b1,b2) = leadTerm d
                                      remOd = divide a1 b1
                                      remOdco = a2/b2 

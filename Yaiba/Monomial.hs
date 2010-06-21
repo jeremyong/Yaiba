@@ -62,11 +62,7 @@ divide Constant (M as)   = M $ DVU.map negate as
 divide (M as) Constant   = M as
 divide (M as) (M bs)     = M $ DVU.zipWith (-) as bs
 -- definition to make Constant work right - much slower
---divide (M as) (M bs)     = let cs = DVU.zipWith (-) as bs
---                             in if DVU.any (/=0) cs then
---                                    M cs
---                                else
---                                    Constant
+--divide a@(M as) b@(M bs) = if a == b then Constant else M $ DVU.zipWith (-) as bs
 
 showVar :: Int -> Int -> String
 showVar n a | a==0      = ""
@@ -81,12 +77,18 @@ maybeLast :: (Eq a, DVU.Unbox a) => DVU.Vector a -> Maybe a
 maybeLast as = if as == DVU.empty then Nothing else Just $ DVU.unsafeLast as
 
 lexCompare :: Mon ord -> Mon ord -> Ordering
-lexCompare (M as) (M bs) = let !a = maybeHead $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
-                           in case a of
-                                Nothing -> EQ
-                                Just x -> if x > 0 then GT else LT
+lexCompare Constant Constant = EQ
+lexCompare Constant (M as)   = if DVU.any (/=0) as then LT else EQ
+lexCompare (M as) Constant   = if DVU.all (==0) as then EQ else GT
+lexCompare (M as) (M bs)     = let !a = maybeHead $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
+                               in case a of
+                                    Nothing -> EQ
+                                    Just x -> if x > 0 then GT else LT
                            
 grevlexCompare :: Mon ord -> Mon ord -> Ordering
+grevlexCompare Constant Constant = EQ
+grevlexCompare Constant (M as)   = if DVU.any (/=0) as then LT else EQ
+grevlexCompare (M as) Constant   = if DVU.all (==0) as then EQ else GT
 grevlexCompare (M as) (M bs) = let !a = maybeLast $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
                                in case a of
                                     Nothing -> EQ
