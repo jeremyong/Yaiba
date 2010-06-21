@@ -2,8 +2,7 @@
 -- | A Poly is synonymous to a map from Mon lists to a rational number
 module Yaiba.Polynomial where
 
-import Yaiba.Map hiding (fromList)
-import qualified Yaiba.Map as DM
+import qualified Yaiba.Map as YM
 import qualified Data.Ord as DO
 import Yaiba.Monomial
 import Yaiba.Sugar
@@ -11,18 +10,13 @@ import Yaiba.Base
 import Data.Maybe
 import Prelude hiding (null,filter,map,rem,sum)
 
-newtype Poly ord = P (Map (Mon ord) Q)
+-- | 
+data Poly ord = P (YM.Map (Mon ord) Q) | Term (Mon ord) Q
 
 instance (Ord (Mon ord)) => Show (Poly ord) where
+  show (Term a b) = showTerm [(a,b)]
   show a | numTerms a == 0 = "0"
-         | otherwise = showTerm $ toDescList (getMap a)
-
-pLp :: Poly Lex -> String
-pLp = prettyLexPrint
-
-prettyLexPrint :: Poly Lex -> String
-prettyLexPrint b@(P a) | numTerms b == 0 = "0" 
-                       | otherwise = showTerm $ reverse (toAscList a)
+         | otherwise = showTerm $ YM.toDescList (getMap a)
   
 showTerm :: [(Mon ord, Q)] -> String
 showTerm [] = ""
@@ -43,79 +37,85 @@ showTerm ((a,b):as) | show a == " " = show b ++ showTerm as
 
 -- | Creates an empty polynomial.
 nullPoly :: Poly ord
-nullPoly = P empty
+nullPoly = P YM.empty
 
 -- | Creates a single termed polynomial.
 monPoly :: (Mon ord, Q) -> Poly ord
 monPoly (a,b) | b==0 = nullPoly 
-              | otherwise = P $ singleton a b
+              | otherwise = Term a b
                           
 -- | Creates a polynomial from a list.
 fromList :: (Ord (Mon ord)) => [(Mon ord, Q)] -> Poly ord
-fromList a = prune $ P $ DM.fromList a
+fromList a = prune $ P $ YM.fromList a
 
 instance (Ord (Mon ord)) => Eq (Poly ord) where
-  a == b = isNull $ a-b
+  a == b = if numTerms a == numTerms b then False
+           else isNull $ a-b
   
 instance (Ord (Mon ord)) => Ord (Poly ord) where
-    compare (P a) (P b) | null a && null b = EQ
-                        | null a = LT
-                        | null b = GT
+    compare (P a) (P b) | YM.null a && YM.null b = EQ
+                        | YM.null a = LT
+                        | YM.null b = GT
                         | top == EQ = compare taila tailb
                         | otherwise = top where
-                        top = DO.comparing findMax a b
-                        taila = P $ deleteMax a
-                        tailb = P $ deleteMax b
-
-insertTerm :: (Ord (Mon ord)) => Poly ord -> Mon ord -> Q -> Poly ord
-insertTerm (P a) b c = P (insertWith (+) b c a)
+                        top = DO.comparing YM.findMax a b
+                        taila = P $ YM.deleteMax a
+                        tailb = P $ YM.deleteMax b
 
 isNull :: Poly ord -> Bool
-isNull (P a) = null a
+isNull (P a) = YM.null a
 
 -- | Removes elements that point to the zero element of the field.
 prune :: (Ord (Mon ord)) => Poly ord -> Poly ord
-prune (P a) = P $ filter (/=0) a
+prune (P a) = P $ YM.filter (/=0) a
 
-getMap :: Poly ord -> Map (Mon ord) Q
+getMap :: Poly ord -> YM.Map (Mon ord) Q
 getMap (P a) = a
 
 -- | Returns a tuple of the lead term Mon list and its coefficient.
 leadTerm :: Poly ord -> (Mon ord, Q)
-leadTerm (P a) | null a = (Constant,0)
-               | otherwise = findMax a
+leadTerm (Term a b) = (a,b)
+leadTerm (P a) | YM.null a = (Constant,0)
+               | otherwise = YM.findMax a
                              
 -- | Just returns the lead term Mon list.
-monLT (P a) | null a = Constant
-            | otherwise = fst $ findMax a
+monLT = fst . leadTerm
 
 -- | The degree of the poly.
-deg a = degree $ monLT a
+deg = degree . monLT
 
 -- | Returns a tuple of the lead term as Poly and the rest of the supplied Poly.
 deleteFindLT :: Poly ord -> (Poly ord, Poly ord)
-deleteFindLT a = let (x,y) = deleteFindMax $ getMap a
+deleteFindLT (Term a b) = (Term a b,nullPoly)
+deleteFindLT a = let (x,y) = YM.deleteFindMax $ getMap a
                  in (monPoly x,P y)
 
 -- | The length of the poly
 numTerms :: Poly ord -> Int
-numTerms a = size $ getMap a
+numTerms (Term _ _) = 1
+numTerms a = YM.size $ getMap a
 
 maybeAdd a Nothing = Just a
 maybeAdd a (Just b) = let sum = a+b
                       in if sum==0 then Nothing else Just sum
 
 instance (Ord (Mon ord)) => Num (Poly ord) where
-    P a + P b | null a = P b
-              | null b = P a
-              | otherwise = P $ fst (mapAccumWithKey addPrune a b) where
-                                           addPrune acc mon coef = (alter (maybeAdd coef) mon acc,True)
-    a * P b = fst (mapAccumWithKey polyFoil nullPoly b) where
+    Term a b + Term c d = if a==c then Term a (b+d)
+                          else Yaiba.Polynomial.fromList [(a,b),(c,d)]
+    Term a b + P c = P $ YM.alter (maybeAdd b) a c
+    P c + Term a b = P $ YM.alter (maybeAdd b) a c
+    P a + P b | YM.null a = P b
+              | YM.null b = P a
+              | otherwise = P $ fst (YM.mapAccumWithKey addPrune a b) where
+                                           addPrune acc mon coef = (YM.alter (maybeAdd coef) mon acc,True)
+    Term a b * Term c d = Term (multiply a c) (b*d)
+    Term a b * c = monMult a b c
+    a * P b = fst (YM.mapAccumWithKey polyFoil nullPoly b) where
                                            polyFoil acc mon coef = (acc + monMult mon coef a,True)
-    negate (P a) = P $ map negate a
+    negate (P a) = P $ YM.map negate a
 
 -- | Scales every term of a Polynomial by a Mon list and rational number.
-monMult mon coef (P poly) = P $ mapKeysValuesMonotonic (\(k,v) -> (multiply mon k, v*coef)) poly
+monMult mon coef (P poly) = P $ YM.mapKeysValuesMonotonic (\(k,v) -> (multiply mon k, v*coef)) poly
 
 -- | Divides the first polynomial by the second once
 {-
@@ -140,7 +140,7 @@ quoRem a (b,_) = quoRem' a b nullPoly where
                                               !remOd = divide a1 b1
                                               !remOdco = a2/b2
                                           in if isFactor b1 a1 then
-                                                 quoRem' (rem - monMult remOd remOdco d) d (quo + P (singleton remOd remOdco))
+                                                 quoRem' (rem - monMult remOd remOdco d) d (quo + Term remOd remOdco)
                                              else
                                                  (quo, rem)
                                       
