@@ -17,6 +17,10 @@ import Prelude hiding (rem,null,map,filter)
 
 reducePolys :: (Ord (Mon ord)) => Ideal ord -> [Poly ord] -> [Poly ord]
 reducePolys d = DL.map (/. d)
+--reducePolys _ []     = []
+--reducePolys d fs = DL.foldl' k [] fs where
+--                     k !gs !f = let !h = f /. d
+--                                in if isNull h then gs else h:gs
 
 -- | Partitions each value in an SPoly map and executes in parallel if the
 -- value list is sufficiently long.
@@ -30,6 +34,7 @@ gB a = gB' a (getSPolys (I []) a) where
                                              / (fromIntegral numCapabilities :: Float)
                                    allPolys = decluster (lift worker2 (cluster binSize polyList) `using` parList rwhnf) where
                                        worker1 = initSugars . DL.filter (not.isNull)
+                                       --worker1 = initSugars
                                        worker2 = worker1 . reducePolys (I ds)
                                    newDivisors = ds ++ allPolys
                                    SP newSMap = getSPolys d (I allPolys)

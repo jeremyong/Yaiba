@@ -50,7 +50,7 @@ multiply Constant (M as)   = M as
 multiply (M as) Constant   = M as
 multiply (M as) (M bs)     = M $ DVU.zipWith (+) as bs
 -- definition to make Constant work right - much slower
---multiply (M as) (M bs)     = let cs = DVU.zipWith (+) as bs
+--multiply (M as) (M bs)   = let cs = DVU.zipWith (+) as bs
 --                             in if DVU.any (/=0) cs then
 --                                    M cs
 --                                else
