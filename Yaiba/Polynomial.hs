@@ -2,8 +2,8 @@
 -- | A Poly is synonymous to a map from Mon lists to a rational number
 module Yaiba.Polynomial where
 
-import Data.Map hiding (fromList)
-import qualified Data.Map as DM
+import Yaiba.Map hiding (fromList)
+import qualified Yaiba.Map as DM
 import qualified Data.Vector.Unboxed as DVU
 import Yaiba.Monomial
 import Yaiba.Sugar
@@ -114,42 +114,23 @@ instance (Ord (Mon ord)) => Num (Poly ord) where
                                            polyFoil acc mon coef = (acc + (monMult mon coef a),0)
     negate (P a) = P $ map negate a
 
-{-
-instance (Ord (Mon ord)) => Num (Poly ord) where
-  P a + P b = prune $ P (unionWith (+) a b)
-  a * P b = prune $ P (foldWithKey (\k v -> unionWith (+) (getMap (monMult k v a))) empty b)
-  negate (P a) = P $ map negate a
--}
 -- | Scales every term of a Polynomial by a Mon list and rational number.
 
 monMult mon coef (P poly) = P $ map (*coef) $ mapKeysMonotonic (multiply mon) poly
--- monMult mon coef (P poly) = P $ mapKeysMonotonic (\k v -> (multiply mon k, v*coef)) poly
+--monMult mon coef (P poly) = P $ mapKeysValuesMonotonic (\(k,v) -> (multiply mon k, v*coef)) poly
 
-{-
-mapKeysValuesMonotonic :: ((k1,v1)->(k2,v2)) -> Map k1 a -> Map k2 a
-mapKeysValuesMonotonic _ Tip = Tip
-mapKeysValuesMonotonic f (Bin sz k x l r) = let (newKey,newValue) = f (k,x)
-                                           in Bin sz newKey newValue (mapKeysMonotonic f l) (mapKeysMonotonic f r)
--}
-{-
-monMult :: (Ord (Mon ord)) => Mon ord -> Q -> Poly ord -> Poly ord
-monMult a b (P c) = P (foldWithKey (f a b) empty c) where
-  f a' b' k v = unionWith (+) (singleton (multiply a' k) (b' * v))
--}
-
---Divides the first polynomial by the second once
-{-
-quoRem :: (Ord (Mon ord)) =>
+-- | Divides the first polynomial by the second once
+quoRem' :: (Ord (Mon ord)) =>
             Poly ord -> (Poly ord,Sugar ord) -> (Poly ord, Poly ord)
-quoRem rem (d,_) | isNull rem = (nullPoly, nullPoly)
-                 | otherwise = let (a1,a2) = leadTerm rem
-                                   (b1,b2) = leadTerm d
-                                   remOd = a1/b1
-                                   remOdco = a2/b2 
-                               in case isFactor b1 a1 of
-                                 False -> (nullPoly, rem)
-                                 True -> (P (singleton remOd remOdco), rem - (monMult remOd remOdco d))
--}
+quoRem' rem (d,_) | isNull rem = (nullPoly, nullPoly)
+                  | otherwise = let (a1,a2) = leadTerm rem
+                                    (b1,b2) = leadTerm d
+                                    remOd = divide a1 b1
+                                    remOdco = a2/b2 
+                                in case isFactor b1 a1 of
+                                     False -> (nullPoly, rem)
+                                     True -> (P (singleton remOd remOdco), rem - (monMult remOd remOdco d))
+
 
 -- | Divides the first polynomial by the second repeatedly until it fails.
 quoRem :: (Ord (Mon ord)) =>

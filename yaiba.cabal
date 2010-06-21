@@ -33,11 +33,19 @@ Library
 
   extensions:
         UndecidableInstances
+        DeriveDataTypeable
+        CPP
+        MagicHash
+        Rank2Types
 
   Exposed-modules:
+        Yaiba.Map
         Yaiba.Monomial
         Yaiba.Polynomial
         Yaiba.Ideal
         Yaiba.Sugar
         Yaiba.Buchberger
         Yaiba.SPoly
+
+  include-dirs:
+        include
