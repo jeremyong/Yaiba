@@ -10,6 +10,7 @@ import qualified Data.Set as DS
 import Yaiba.Sugar
 import Yaiba.Monomial
 import Yaiba.Polynomial
+import Control.Parallel
 import Yaiba.Ideal
 
 newtype SPoly ord = SP (Map (Sugar ord) (DS.Set (Poly ord)))
