@@ -42,13 +42,15 @@ syzygy (I as) b = DL.foldl' (\x y -> f (sPoly b y) x) [] as where
 -- assumed to be the LCM of the LTs of the Polys used to generate the S-Poly in the
 -- first component.
 minimize :: [(Poly ord, Sugar ord, Mon ord)] -> [(Poly ord, Sugar ord)]
-minimize as = DL.map (\(a,b,_) -> (a,b)) $ DL.filter (\(_,_,x) -> isMinimal x) as where
-  isMinimal a = DL.null $ DL.filter (\(_,_,x) -> a /= x && isFactor x a) as
+minimize as = DL.map (\(a,b,_) -> (a,b)) $! DL.filter (\(_,_,x) -> isMinimal x) as where
+  isMinimal a = DL.null $! DL.filter (\(_,_,x) -> a /= x && isFactor x a) as
 
 -- | Convolves two lists, returning an SPoly map using syzygy and minimize.
 getSPolys :: (Ord (Mon ord)) => Ideal ord -> Ideal ord -> SPoly ord
-getSPolys a b = SP $ DL.foldl' (\(!acc) (!v,!k) -> insertWith DS.union k (DS.singleton v) acc) 
+getSPolys a b = SP $! DL.foldl' (\(!acc) (!v,!k) -> insertWith DS.union k (DS.singleton v) acc) 
                 empty 
                 (getSPolys' a b) where
   getSPolys' _ (I []) = []
-  getSPolys' x@(I xs) (I (y:ys)) = minimize (syzygy x y) ++ getSPolys' (I (y:xs)) (I ys)
+  getSPolys' x@(I xs) (I (y:ys)) = let minS = minimize (syzygy x y) 
+                                       nextS = getSPolys' (I (y:xs)) (I ys)
+                                   in minS `par` minS ++ getSPolys' (I (y:xs)) (I ys)
