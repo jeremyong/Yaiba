@@ -23,8 +23,9 @@ initSugars = map (\a -> (a,S $ deg a))
 (/.) p i = let (/..) a b r = if isNull a then r else
                                 let !(new,divOcc) = divByIdeal a b
                                 in if divOcc then (/..) new b r else
-                                     let !(lt,rest) = deleteFindLT a
-                                         !newR = r + lt
+                                     let !((m,q),rest) = deleteFindLT a
+                                         !newR = r + (monPoly m q)
+--                                         !newR = monAdd m q r
                                      in (/..) rest b newR
            in (/..) p i nullPoly
              

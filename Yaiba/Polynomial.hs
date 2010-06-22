@@ -75,10 +75,10 @@ monLT = fst . leadTerm
 deg = degree . monLT
 
 -- | Returns a tuple of the lead term as Poly and the rest of the supplied Poly.
-deleteFindLT :: Poly ord -> (Poly ord, Poly ord)
-deleteFindLT a@(P a') = if YM.null a' then (nullPoly, nullPoly)
+deleteFindLT :: Poly ord -> ((Mon ord, Q), Poly ord)
+deleteFindLT a@(P a') = if YM.null a' then ((Constant,0), nullPoly)
                         else let !((m,q),y) = YM.deleteFindMax $ getMap a
-                             in (monPoly  m q,P y)
+                             in ((m,q),P y)
 
 -- | The length of the poly
 numTerms :: Poly ord -> Int
@@ -98,6 +98,9 @@ instance (Ord (Mon ord)) => Num (Poly ord) where
     a * P b               = fst (YM.mapAccumWithKey polyFoil nullPoly b) where
                                 polyFoil acc mon coef = (acc + monMult mon coef a,True)
     negate (P a) = P $ YM.map negate a
+
+-- just adds a monomial without turning it into a polynomial first
+monAdd mon coef (P poly) = P $ YM.alter (maybeAdd coef) mon poly
 
 -- | Scales every term of a Polynomial by a Mon list and rational number.
 monMult mon coef (P poly) = P $ YM.mapKeysValuesMonotonic (\(!k,!v) -> (multiply mon k, v*coef)) poly
@@ -126,7 +129,8 @@ quoRem a (b,_) = quoRem' a b nullPoly where
                                          let !remOd = divide a1 b1
                                              !remOdco = a2/b2
                                              !newRem = rem - monMult remOd remOdco d
-                                             !newQuo = quo + monPoly remOd remOdco
+                                             !newQuo = monAdd remOd (-remOdco) quo 
+--                                             !newQuo = quo + monPoly remOd remOdco
                                          in quoRem' newRem d newQuo
                                      else
                                          (quo, rem)
