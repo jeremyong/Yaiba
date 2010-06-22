@@ -31,4 +31,4 @@ main = do
   start <- getCurrentTime
   putStrLn (gb) 
   end <- getCurrentTime
-  putStrLn $ show (end `diffUTCTime` start) ++ " elapsed."-}
+  putStrLn $ show (end `diffUTCTime` start) ++ " elapsed."

@@ -91,10 +91,12 @@ maybeAdd a (Just b) = let !sum = a+b
 instance (Ord (Mon ord)) => Num (Poly ord) where
     P a + P b | YM.null a = P b
               | YM.null b = P a
-              | otherwise = P $ fst (YM.mapAccumWithKey addPrune a b) where
-                                           addPrune acc mon coef = (YM.alter (maybeAdd coef) mon acc,True)
-    a * P b = fst (YM.mapAccumWithKey polyFoil nullPoly b) where
-                                           polyFoil acc mon coef = (acc + monMult mon coef a,True)
+              | otherwise = P $ YM.foldWithKey addPrune a b where
+                                addPrune mon coef polyMap = YM.alter (maybeAdd coef) mon polyMap
+--              | otherwise = P $ fst (YM.mapAccumWithKey addPrune a b) where
+--                                           addPrune acc mon coef = (YM.alter (maybeAdd coef) mon acc,True)
+    a * P b               = fst (YM.mapAccumWithKey polyFoil nullPoly b) where
+                                polyFoil acc mon coef = (acc + monMult mon coef a,True)
     negate (P a) = P $ YM.map negate a
 
 -- | Scales every term of a Polynomial by a Mon list and rational number.
@@ -120,10 +122,12 @@ quoRem a (b,_) = quoRem' a b nullPoly where
   quoRem' rem d quo | isNull rem = (quo, nullPoly)
                     | otherwise = let !(a1,a2) = leadTerm rem
                                       !(b1,b2) = leadTerm d
-                                      !remOd = divide a1 b1
-                                      !remOdco = a2/b2
                                   in if isFactor b1 a1 then
-                                         quoRem' (rem - monMult remOd remOdco d) d (quo + monPoly remOd remOdco)
+                                         let !remOd = divide a1 b1
+                                             !remOdco = a2/b2
+                                             !newRem = rem - monMult remOd remOdco d
+                                             !newQuo = quo + monPoly remOd remOdco
+                                         in quoRem' newRem d newQuo
                                      else
                                          (quo, rem)
                                       

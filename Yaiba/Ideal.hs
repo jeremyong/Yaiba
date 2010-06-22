@@ -24,7 +24,8 @@ initSugars = map (\a -> (a,S $ deg a))
                                 let !(new,divOcc) = divByIdeal a b
                                 in if divOcc then (/..) new b r else
                                      let !(lt,rest) = deleteFindLT a
-                                     in (/..) rest b (r + lt)
+                                         !newR = r + lt
+                                     in (/..) rest b newR
            in (/..) p i nullPoly
              
 -- | Auxilliary function to /.
