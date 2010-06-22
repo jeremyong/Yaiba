@@ -88,7 +88,7 @@ grevlexCompare :: Mon ord -> Mon ord -> Ordering
 grevlexCompare Constant Constant = EQ
 grevlexCompare Constant (M as)   = if DVU.any (/=0) as then LT else EQ
 grevlexCompare (M as) Constant   = if DVU.all (==0) as then EQ else GT
-grevlexCompare (M as) (M bs) = let !a = maybeLast $! DVU.filter (/=0) (DVU.zipWith (-) as bs)
+grevlexCompare (M as) (M bs) = let !a = maybeLast $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
                                in case a of
                                     Nothing -> EQ
                                     (Just x) -> if x < 0 then GT else LT
