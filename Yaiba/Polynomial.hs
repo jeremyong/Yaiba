@@ -11,10 +11,9 @@ import Data.Maybe
 import Prelude hiding (null,filter,map,rem,sum)
 
 -- | 
-data Poly ord = P (YM.Map (Mon ord) Q) | Term (Mon ord) Q
+data Poly ord = P (YM.Map (Mon ord) Q)
 
 instance (Ord (Mon ord)) => Show (Poly ord) where
-  show (Term a b) = showTerm [(a,b)]
   show a | numTerms a == 0 = "0"
          | otherwise = showTerm $ YM.toDescList (getMap a)
 
@@ -49,6 +48,8 @@ showTerm ((a,b):as) | show a == " " = show b ++ showTerm as
 
 nullPoly = P YM.empty
 
+monPoly m q = P $ YM.singleton m q
+
 fromList :: (Ord (Mon ord)) => [(Mon ord, Q)] -> Poly ord
 fromList a = prune $ P $ YM.fromList a
 
@@ -64,7 +65,6 @@ getMap (P a) = a
 
 -- | Returns a tuple of the lead term Mon list and its coefficient.
 leadTerm :: Poly ord -> (Mon ord, Q)
-leadTerm (Term a b) = (a,b)
 leadTerm (P a) | YM.null a = (Constant,0)
                | otherwise = YM.findMax a
                              
@@ -76,36 +76,29 @@ deg = degree . monLT
 
 -- | Returns a tuple of the lead term as Poly and the rest of the supplied Poly.
 deleteFindLT :: Poly ord -> (Poly ord, Poly ord)
-deleteFindLT (Term a b) = (Term a b,nullPoly)
-deleteFindLT a = let ((m,q),y) = YM.deleteFindMax $ getMap a
-                 in (Term m q,P y)
+deleteFindLT a@(P a') = if YM.null a' then (nullPoly, nullPoly)
+                        else let !((m,q),y) = YM.deleteFindMax $ getMap a
+                             in (monPoly  m q,P y)
 
 -- | The length of the poly
 numTerms :: Poly ord -> Int
-numTerms (Term _ _) = 1
 numTerms a = YM.size $ getMap a
 
 maybeAdd a Nothing = Just a
-maybeAdd a (Just b) = let sum = a+b
+maybeAdd a (Just b) = let !sum = a+b
                       in if sum==0 then Nothing else Just sum
 
 instance (Ord (Mon ord)) => Num (Poly ord) where
-    Term a b + Term c d = if a==c then Term a (b+d)
-                          else Yaiba.Polynomial.fromList [(a,b),(c,d)]
-    Term a b + P c = P $ YM.alter (maybeAdd b) a c
-    P c + Term a b = P $ YM.alter (maybeAdd b) a c
     P a + P b | YM.null a = P b
               | YM.null b = P a
               | otherwise = P $ fst (YM.mapAccumWithKey addPrune a b) where
                                            addPrune acc mon coef = (YM.alter (maybeAdd coef) mon acc,True)
-    Term a b * Term c d = Term (multiply a c) (b*d)
-    Term a b * c = monMult a b c
     a * P b = fst (YM.mapAccumWithKey polyFoil nullPoly b) where
                                            polyFoil acc mon coef = (acc + monMult mon coef a,True)
     negate (P a) = P $ YM.map negate a
 
 -- | Scales every term of a Polynomial by a Mon list and rational number.
-monMult mon coef (P poly) = P $ YM.mapKeysValuesMonotonic (\(k,v) -> (multiply mon k, v*coef)) poly
+monMult mon coef (P poly) = P $ YM.mapKeysValuesMonotonic (\(!k,!v) -> (multiply mon k, v*coef)) poly
 
 -- | Divides the first polynomial by the second once
 {-
@@ -124,13 +117,13 @@ quoRem' rem (d,_) | isNull rem = (nullPoly, nullPoly)
 quoRem :: (Ord (Mon ord)) =>
            Poly ord -> (Poly ord,Sugar ord) -> (Poly ord, Poly ord)
 quoRem a (b,_) = quoRem' a b nullPoly where
-  quoRem' rem d quo | numTerms rem == 0 = (quo, nullPoly)
-                    | otherwise         = let !(a1,a2) = leadTerm rem
-                                              !(b1,b2) = leadTerm d
-                                              !remOd = divide a1 b1
-                                              !remOdco = a2/b2
-                                          in if isFactor b1 a1 then
-                                                 quoRem' (rem - monMult remOd remOdco d) d (quo + Term remOd remOdco)
-                                             else
-                                                 (quo, rem)
+  quoRem' rem d quo | isNull rem = (quo, nullPoly)
+                    | otherwise = let !(a1,a2) = leadTerm rem
+                                      !(b1,b2) = leadTerm d
+                                      !remOd = divide a1 b1
+                                      !remOdco = a2/b2
+                                  in if isFactor b1 a1 then
+                                         quoRem' (rem - monMult remOd remOdco d) d (quo + monPoly remOd remOdco)
+                                     else
+                                         (quo, rem)
                                       
