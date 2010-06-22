@@ -52,6 +52,6 @@ getSPolys a b = SP $! DL.foldl' (\(!acc) (!v,!k) -> insertWith DS.union k (DS.si
                 empty 
                 (getSPolys' a b) where
   getSPolys' _ (I []) = []
-  getSPolys' x@(I xs) (I (y:ys)) = let minS = minimize (syzygy x y) 
-                                       nextS = getSPolys' (I (y:xs)) (I ys)
-                                   in minS `par` minS ++ getSPolys' (I (y:xs)) (I ys)
+  getSPolys' x@(I xs) (I (y:ys)) = let !minS = minimize (syzygy x y) 
+                                       !nextS = getSPolys' (I (y:xs)) (I ys)
+                                   in minS `par` minS ++ nextS
