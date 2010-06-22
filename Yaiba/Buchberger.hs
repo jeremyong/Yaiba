@@ -28,12 +28,14 @@ gB :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
 gB a = gB' a (getSPolys (I []) a) where
     gB' d@(I ds) (SP sPolys) = let ((_,polys),rest) = deleteFindMin sPolys
                                    polyList = DS.toList polys
-                                   binSize = ceiling $
-                                             (fromIntegral (DS.size polys) :: Float)
-                                             / (fromIntegral numCapabilities :: Float)
-                                   allPolys = decluster (lift worker2 (cluster binSize polyList) `using` parList rwhnf) where
-                                       worker1 = initSugars . DL.filter (not.isNull)
-                                       --worker1 = initSugars
+                                   --numBins = ceiling $
+                                   --          (fromIntegral (DS.size polys) :: Float)
+                                   --          / (fromIntegral numCapabilities :: Float)
+                                   --numBins = 4*numCapabilities
+                                   numBins = DS.size polys
+                                   allPolys = decluster (lift worker2 (cluster numBins polyList) `using` parList rwhnf) where
+                                       --worker1 = initSugars . DL.filter (not.isNull)
+                                       worker1 = initSugars
                                        worker2 = worker1 . reducePolys (I ds)
                                    newDivisors = ds ++ allPolys
                                    SP newSMap = getSPolys d (I allPolys)
@@ -47,11 +49,14 @@ gB'' :: (Ord (Mon ord)) => Ideal ord -> Int -> Ideal ord
 gB'' a = gB' a (getSPolys (I []) a) where
   gB' d@(I ds) (SP sPolys) n = let ((_,polys),rest) = deleteFindMin sPolys
                                    polyList = DS.toList polys
-                                   binSize = ceiling $
-                                             (fromIntegral (DS.size polys) :: Float)
-                                             / (fromIntegral numCapabilities :: Float)
-                                   allPolys = DL.concat (lift worker2 (cluster binSize polyList) `using` parList rwhnf) where
+                                   --numBins = ceiling $
+                                   --          (fromIntegral (DS.size polys) :: Float)
+                                   --          / (fromIntegral numCapabilities :: Float)
+                                   --numBins = 4*numCapabilities
+                                   numBins = DS.size polys
+                                   allPolys = DL.concat (lift worker2 (cluster numBins polyList) `using` parList rwhnf) where
                                                   worker1 = initSugars . DL.filter (not.isNull)
+                                                  --worker1 = initSugars
                                                   worker2 = worker1 . reducePolys (I ds)
                                    newDivisors = ds ++ allPolys
                                    SP newSMap = getSPolys d (I allPolys)
