@@ -95,8 +95,10 @@ instance (Ord (Mon ord)) => Num (Poly ord) where
                                 addPrune mon coef polyMap = YM.alter (maybeAdd coef) mon polyMap
 --              | otherwise = P $ fst (YM.mapAccumWithKey addPrune a b) where
 --                                           addPrune acc mon coef = (YM.alter (maybeAdd coef) mon acc,True)
-    a * P b               = fst (YM.mapAccumWithKey polyFoil nullPoly b) where
-                                polyFoil acc mon coef = (acc + monMult mon coef a,True)
+    a * P b             = YM.foldWithKey (polyFoil a) nullPoly b where
+                              polyFoil p mon coef acc = acc + monMult mon coef p
+--    a * P b               = fst (YM.mapAccumWithKey polyFoil nullPoly b) where
+--                                polyFoil acc mon coef = (acc + monMult mon coef a,True)
     negate (P a) = P $ YM.map negate a
 
 -- just adds a monomial without turning it into a polynomial first
