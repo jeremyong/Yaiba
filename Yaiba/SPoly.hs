@@ -20,7 +20,7 @@ sPoly :: (Ord (Mon ord)) => (Poly ord,Sugar ord) ->
          (Poly ord, Sugar ord) -> Maybe (Poly ord, Sugar ord, Mon ord)
 sPoly (a,S a') (b,S b') = let (a1,a2) = leadTerm a
                               (b1,b2) = leadTerm b
-                              g = gcdMon a1 b1
+                              !g = gcdMon a1 b1
                               l = lcmMon a1 b1
                               sp = monMult (divide l a1) b2 a - monMult (divide l b1) a2 b
                               (spLT,_) = leadTerm sp
@@ -43,8 +43,8 @@ syzygy (I as) b = DL.foldl' (\x y -> f (sPoly b y) x) [] as where
 -- assumed to be the LCM of the LTs of the Polys used to generate the S-Poly in the
 -- first component.
 minimize :: [(Poly ord, Sugar ord, Mon ord)] -> [(Poly ord, Sugar ord)]
-minimize as = DL.map (\(a,b,_) -> (a,b)) $! DL.filter (\(_,_,x) -> isMinimal x) as where
-  isMinimal a = DL.null $! DL.filter (\(_,_,x) -> a /= x && isFactor x a) as
+minimize as = DL.map (\(!a,!b,_) -> (a,b)) $! DL.filter (\(_,_,!x) -> isMinimal x) as where
+  isMinimal a = DL.null $! DL.filter (\(_,_,!x) -> a /= x && isFactor x a) as
 
 -- | Convolves two lists, returning an SPoly map using syzygy and minimize.
 getSPolys :: (Ord (Mon ord)) => Ideal ord -> Ideal ord -> SPoly ord

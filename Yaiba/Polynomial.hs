@@ -19,7 +19,7 @@ instance (Ord (Mon ord)) => Show (Poly ord) where
 
 instance (Ord (Mon ord)) => Eq (Poly ord) where
   a == b = if numTerms a == numTerms b then False
-           else isNull $ a-b
+           else isNull $! a-b
   
 instance (Ord (Mon ord)) => Ord (Poly ord) where
     compare (P a) (P b) | YM.null a && YM.null b = EQ
@@ -28,8 +28,8 @@ instance (Ord (Mon ord)) => Ord (Poly ord) where
                         | top == EQ = compare taila tailb
                         | otherwise = top where
                         top = DO.comparing YM.findMax a b
-                        taila = P $ YM.deleteMax a
-                        tailb = P $ YM.deleteMax b
+                        taila = P $! YM.deleteMax a
+                        tailb = P $! YM.deleteMax b
 
 showTerm :: [(Mon ord, Q)] -> String
 showTerm [] = ""
@@ -65,8 +65,8 @@ getMap (P a) = a
 
 -- | Returns a tuple of the lead term Mon list and its coefficient.
 leadTerm :: Poly ord -> (Mon ord, Q)
-leadTerm (P a) | YM.null a = (Constant,0)
-               | otherwise = YM.findMax a
+leadTerm (P a) = if YM.null a then (Constant,0)
+                 else YM.findMax a
                              
 -- | Just returns the lead term Mon list.
 monLT = fst . leadTerm
@@ -77,7 +77,7 @@ deg = degree . monLT
 -- | Returns a tuple of the lead term as Poly and the rest of the supplied Poly.
 deleteFindLT :: Poly ord -> ((Mon ord, Q), Poly ord)
 deleteFindLT a@(P a') = if YM.null a' then ((Constant,0), nullPoly)
-                        else let !((m,q),y) = YM.deleteFindMax $ getMap a
+                        else let ((m,q),y) = YM.deleteFindMax $! getMap a
                              in ((m,q),P y)
 
 -- | The length of the poly
@@ -91,21 +91,22 @@ maybeAdd a (Just b) = let !sum = a+b
 instance (Ord (Mon ord)) => Num (Poly ord) where
     P a + P b | YM.null a = P b
               | YM.null b = P a
-              | otherwise = P $ YM.foldWithKey addPrune a b where
-                                addPrune mon coef polyMap = YM.alter (maybeAdd coef) mon polyMap
+              | otherwise = P $! YM.foldWithKey addPrune a b where
+                                           addPrune mon coef polyMap = YM.alter (maybeAdd coef) mon polyMap
 --              | otherwise = P $ fst (YM.mapAccumWithKey addPrune a b) where
 --                                           addPrune acc mon coef = (YM.alter (maybeAdd coef) mon acc,True)
     a * P b             = YM.foldWithKey (polyFoil a) nullPoly b where
                               polyFoil p mon coef acc = acc + monMult mon coef p
 --    a * P b               = fst (YM.mapAccumWithKey polyFoil nullPoly b) where
 --                                polyFoil acc mon coef = (acc + monMult mon coef a,True)
-    negate (P a) = P $ YM.map negate a
+    negate (P a) = P $! YM.map negate a
 
--- just adds a monomial without turning it into a polynomial first
+-- | Just adds a monomial without turning it into a polynomial first
 monAdd mon coef (P poly) = P $ YM.alter (maybeAdd coef) mon poly
+monAdd' mon coef (P poly) = YM.alter (maybeAdd coef) mon poly
 
 -- | Scales every term of a Polynomial by a Mon list and rational number.
-monMult mon coef (P poly) = P $ YM.mapKeysValuesMonotonic (\(!k,!v) -> (multiply mon k, v*coef)) poly
+monMult mon coef (P poly) = P $! YM.mapKeysValuesMonotonic (\(!k,!v) -> (multiply mon k, v*coef)) poly
 
 -- | Divides the first polynomial by the second once
 {-
