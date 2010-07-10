@@ -1,5 +1,5 @@
 cd ..
-cabal install --reinstall -w /home/jeremyong/Software/ghc613/bin/ghc -O --ghc-options=-fllvm
+cabal install -O --ghc-options=-fllvm
 cd -
-/home/jeremyong/Software/ghc613/bin/ghc -threaded -O2 -eventlog -fllvm -fforce-recomp -rtsopts --make Test
+ghc -threaded -O2 -eventlog -rtsopts -fllvm -fforce-recomp --make Test
 ./Test +RTS -N -ls -s

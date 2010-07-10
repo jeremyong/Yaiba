@@ -29,7 +29,7 @@ time a = do
 
 main = do 
   --let gb = gB j
-  let gb = gB'' p 2
+  let gb = gB'' p 30
   putStrLn "8"
   putStrLn ("Lex")
   --putStrLn (show (getPolys j))

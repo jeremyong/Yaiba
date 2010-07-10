@@ -1,5 +1,5 @@
 cd ..
-cabal install
+cabal install --reinstall
 cd -
-ghc -threaded -O2 -eventlog --make Test
+ghc -rtsopts -threaded -O2 -eventlog -fforce-recomp --make Test
 ./Test +RTS -N -ls -s

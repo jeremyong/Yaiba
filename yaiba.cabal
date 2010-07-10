@@ -42,6 +42,8 @@ Library
         Yaiba.Map
         Yaiba.Monomial
         Yaiba.Polynomial
+        Yaiba.PolynomialMap
+        Yaiba.PolynomialList
         Yaiba.Ideal
         Yaiba.Sugar
         Yaiba.Cluster

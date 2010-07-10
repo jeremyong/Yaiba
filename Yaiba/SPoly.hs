@@ -63,11 +63,11 @@ fTest nMap = let (coprimes,notCoprimes) = DM.partition snd nMap
              in DM.union coprimes' (DM.fold fTest' notCoprimes' coprimes') where
                  fTest' cpair acc = DM.mapMaybe (\cpair' -> if cpair' == cpair then Nothing else Just cpair') acc
 
-delFindLowest spMap ideal = let sugSet = DM.fold (\(CP (S x,_)) acc -> DI.insert x acc) DI.empty spMap
-                                minSug = S $ DI.findMin sugSet
-                                (bottom,top) = DM.partition (\(CP (x,_)) -> x ==minSug) spMap
-                                botelems = toSPolys (SP bottom ideal)
-                            in (botelems,top)
+delFindLowest (SP spMap ideal) = let sugSet = DM.fold (\(CP (S x,_)) acc -> DI.insert x acc) DI.empty spMap
+                                     minSug = S $ DI.findMin sugSet
+                                     (bottom,top) = DM.partition (\(CP (x,_)) -> x ==minSug) spMap
+                                     botelems = toSPolys (SP bottom ideal)
+                                 in (botelems,top)
 
 toSPolys (SP spMap ideal) = DM.foldlWithKey toSPolys' [] spMap where
     toSPolys' acc (i,j) (CP (sug,_)) = let (polyi,_) = ideal ! i
