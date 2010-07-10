@@ -106,6 +106,10 @@ isFactor a b               = let !mon = divide b a
                                   Constant -> True
                                   (M cs) -> DVU.all (>=0) cs
 
+isMon :: Mon ord -> Bool
+isMon Constant = True
+isMon (M a) = DVU.all (>=0) a
+
 lcmMon :: Mon ord -> Mon ord -> Mon ord
 lcmMon Constant Constant = Constant
 lcmMon Constant a        = a

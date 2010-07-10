@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -fglasgow-exts -XUndecidableInstances -XBangPatterns #-}
 -- | A Poly is synonymous to a map from Mon lists to a rational number
-module Yaiba.Polynomial where
+module Yaiba.PolynomialMap where
 
 import qualified Yaiba.Map as YM
 import qualified Data.Ord as DO
@@ -93,8 +93,12 @@ instance (Ord (Mon ord)) => Num (Poly ord) where
               | YM.null b = P a
               | otherwise = P $! YM.foldWithKey addPrune a b where
                                            addPrune mon coef polyMap = YM.alter (maybeAdd coef) mon polyMap
-    a * P b               = YM.foldWithKey (polyFoil a) nullPoly b where
-                                           polyFoil p mon coef acc = acc + monMult mon coef p
+--              | otherwise = P $ fst (YM.mapAccumWithKey addPrune a b) where
+--                                           addPrune acc mon coef = (YM.alter (maybeAdd coef) mon acc,True)
+    a * P b             = YM.foldWithKey (polyFoil a) nullPoly b where
+                              polyFoil p mon coef acc = acc + monMult mon coef p
+--    a * P b               = fst (YM.mapAccumWithKey polyFoil nullPoly b) where
+--                                polyFoil acc mon coef = (acc + monMult mon coef a,True)
     negate (P a) = P $! YM.map negate a
     fromInteger 0 = nullPoly
     fromInteger 1 = monPoly Constant 1
@@ -106,24 +110,6 @@ monAdd' mon coef (P poly) = YM.alter (maybeAdd coef) mon poly
 -- | Scales every term of a Polynomial by a Mon list and rational number.
 monMult mon coef (P poly) = P $! YM.mapKeysValuesMonotonic (\(!k,!v) -> (multiply mon k, v*coef)) poly
 
--- | Divides the first polynomial by the second repeatedly until it fails.
--- Keeps track of the sugar throughout the reduction
-quoRem :: (Ord (Mon ord)) => (Poly ord,Sugar ord) -> 
-          (Poly ord,Sugar ord) -> (Poly ord, Poly ord, Sugar ord)
-quoRem (r,rs) (d,S dsug) = quoRem' (r,rs) nullPoly where
-  quoRem' (rem,S remsug) quo | isNull rem = (quo, nullPoly, S 0)
-                             | otherwise = let (a1,a2) = leadTerm rem
-                                               (b1,b2) = leadTerm d
-                                           in if isFactor b1 a1 then
-                                                  let !remOd = divide a1 b1
-                                                      !remOdco = a2/b2
-                                                      !newRem = rem - monMult remOd remOdco d
-                                                      !newQuo = monAdd remOd (-remOdco) quo 
-                                                      !newSug = S $! max remsug (degree remOd + dsug)
-                                                  in quoRem' (newRem,newSug) newQuo
-                                              else
-                                                  (quo, rem, S remsug)
-                                      
 -- | Divides the first polynomial by the second once
 {-
 quoRem' :: (Ord (Mon ord)) =>
@@ -137,3 +123,20 @@ quoRem' rem (d,_) | isNull rem = (nullPoly, nullPoly)
                                       False -> (nullPoly, rem)
                                       True -> (P (singleton remOd remOdco), rem - (monMult remOd remOdco d))
 -}
+-- | Divides the first polynomial by the second repeatedly until it fails.
+quoRem :: (Ord (Mon ord)) =>
+           Poly ord -> (Poly ord,Sugar ord) -> (Poly ord, Poly ord)
+quoRem a (b,_) = quoRem' a b nullPoly where
+  quoRem' rem d quo | isNull rem = (quo, nullPoly)
+                    | otherwise = let !(a1,a2) = leadTerm rem
+                                      !(b1,b2) = leadTerm d
+                                  in if isFactor b1 a1 then
+                                         let !remOd = divide a1 b1
+                                             !remOdco = a2/b2
+                                             !newRem = rem - monMult remOd remOdco d
+                                             !newQuo = monAdd remOd (-remOdco) quo 
+--                                             !newQuo = quo + monPoly remOd remOdco
+                                         in quoRem' newRem d newQuo
+                                     else
+                                         (quo, rem)
+                                      

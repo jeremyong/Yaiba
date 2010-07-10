@@ -7,46 +7,20 @@ import Yaiba.Polynomial
 import Yaiba.Ideal
 import Yaiba.Sugar
 import Yaiba.SPoly
+import Yaiba.Map hiding (filter,map)
 import Yaiba.Cluster
 import qualified Data.List as DL
 import Control.Parallel.Strategies
 import qualified Data.Set as DS
-import qualified Data.Vector as DV
-import qualified Data.Map as DM
 import Prelude hiding (rem,null,map,filter)
 
+reducePolys :: (Ord (Mon ord)) => Ideal ord -> [Poly ord] -> [Poly ord]
+reducePolys d = DL.map (/. d)
+--reducePolys _ []     = []
+--reducePolys d fs = DL.foldl' k [] fs where
+--                     k !gs !f = let !h = f /. d
+--                                in if isNull h then gs else h:gs
 
-gB :: Ord (Mon ord) => DS.Set (Poly ord, Sugar ord) -> Ideal ord
-gB seed = let (initial,restSeed) = DS.deleteFindMin seed
-          in gB' (I $ DV.singleton initial) restSeed DM.empty where
-              gB' res oneByOne spMap | DS.null oneByOne && DM.null spMap = res
-                                     | otherwise = let (gen,newGens) = DS.deleteFindMin oneByOne
-                                                       SP newspMap newres = updateSPolys (SP spMap res) gen
-                                                       (lowSugPolys, higherSugPolys) = delFindLowest newspMap res
-                                                       numBins = DL.length lowSugPolys
-                                                       redPolys = decluster (lift worker (cluster numBins lowSugPolys)
-                                                                             `using` parList rwhnf)
-                                                       worker = DL.filter (\(poly,_) -> not $ isNull poly) . reducePolys res
-                                                       newOneByOne = DL.foldl' (\acc x -> DS.insert x acc) newGens redPolys
-                                                   in gB' newres newOneByOne higherSugPolys
-
-
-gB'' :: Ord (Mon ord) => DS.Set (Poly ord, Sugar ord) -> Int -> Ideal ord
-gB'' seed n = let (initial,restSeed) = DS.deleteFindMin seed
-              in gB' (I $ DV.singleton initial) restSeed DM.empty n where
-                  gB' res _ _ 0 = res
-                  gB' res oneByOne spMap n | DS.null oneByOne && DM.null spMap = res
-                                           | otherwise = let (gen,newGens) = DS.deleteFindMin oneByOne
-                                                             SP newspMap newres = updateSPolys (SP spMap res) gen
-                                                             (lowSugPolys, higherSugPolys) = delFindLowest newspMap res
-                                                             numBins = DL.length lowSugPolys
-                                                             redPolys = decluster (lift worker (cluster numBins lowSugPolys)
-                                                                                   `using` parList rwhnf)
-                                                             worker = DL.filter (\(poly,_) -> not $ isNull poly) . reducePolys res
-                                                             newOneByOne = DL.foldl' (\acc x -> DS.insert x acc) newGens redPolys
-                                                         in gB' newres newOneByOne higherSugPolys (n-1)
-
-{-
 -- | Partitions each value in an SPoly map and executes in parallel if the
 -- value list is sufficiently long.
 
@@ -86,7 +60,7 @@ gB'' a = gB' a (getSPolys (I []) a) where
 minDivs :: Ord (Mon ord) => [(Poly ord, Sugar ord)] -> [(Poly ord, Sugar ord)]
 minDivs as = DL.filter isMinimal as where
   isMinimal (a,_) = DL.null $ DL.filter (\(!x,_) -> a /= x && isFactor (monLT x) (monLT a)) as
--}
+
 
 {-
 -- | Non-parallelized implementation.
