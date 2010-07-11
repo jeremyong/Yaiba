@@ -11,6 +11,7 @@ import Yaiba.Sugar
 import Yaiba.Monomial
 import Yaiba.Polynomial
 import Yaiba.Ideal
+import Debug.Trace
 
 -- | SPoly is a map of CritPairs keyed to the ideal provided in the second argument.
 data SPoly ord = SP (DM.Map (Int, Int) (CritPair ord)) (Ideal ord)
@@ -30,7 +31,8 @@ updateSPolys (SP cpMap oldGens) (newGen,sug) = let mPass = mTest (SP cpMap oldGe
                                                    pairs = pairing oldGens newGen
                                                    fPass = fTest pairs
                                                    newcpMap = DM.union mPass fPass
-                                               in SP newcpMap (snoc oldGens (newGen,sug))
+                                               in --("spmap size:" ++ show (DM.size newcpMap)) `trace` 
+                                                  SP newcpMap (snoc oldGens (newGen,sug))
 
 -- | Criterion M described in Gebauer Moller 1988. Sloppy variant from "One sugar cube, please"
 mTest (SP cpMap oldGens) newGen = DM.mapMaybeWithKey mTest' cpMap where

@@ -29,13 +29,13 @@ time a = do
 
 main = do 
   --let gb = gB j
-  let gb = gB'' p 30
+  let gb = gB'' p 100
   putStrLn "8"
   putStrLn ("Lex")
   --putStrLn (show (getPolys j))
   putStrLn (show (getPolys pideal))
   time $ gb `seq` return ()
-  putStrLn (show (getPolys gb))
+  --putStrLn (show (getPolys gb))
   putStrLn "Done."
 
 j_1 = P.fromList [(M.fromList [3,14,2,4,0,0,0,0],-1),(M.fromList [0,0,0,0,1,0,0,0],1)]

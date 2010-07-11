@@ -13,6 +13,7 @@ import Control.Parallel.Strategies
 import qualified Data.Set as DS
 import qualified Data.Vector as DV
 import qualified Data.Map as DM
+import Debug.Trace
 import Prelude hiding (rem,null,map,filter)
 
 
@@ -35,13 +36,16 @@ gB seed = let (initial,restSeed) = DS.deleteFindMin seed
                                                                              `using` parList rwhnf)
                                                        worker = DL.filter (\(poly,_) -> not $ isNull poly) . reducePolys newres
                                                        newOneByOne = DL.foldl' (\acc x -> DS.insert x acc) newGens redPolys
-                                                   in gB' newres newOneByOne higherSugPolys
+                                                   in if isNull $ fst (gen /. res) then
+                                                          gB' res newGens spMap
+                                                      else ("Queue size: "++(show $ DS.size newOneByOne)) `trace`
+                                                           gB' newres newOneByOne higherSugPolys
 
 
 
 gB'' :: Ord (Mon ord) => DS.Set (Poly ord, Sugar ord) -> Int -> Ideal ord
-gB'' seed n = let (initial,restSeed) = DS.deleteFindMin seed
-            in gB' (I $ DV.singleton initial) restSeed DM.empty n where
+gB'' seed c = let (initial,restSeed) = DS.deleteFindMin seed
+              in gB' (I $ DV.singleton initial) restSeed DM.empty c where
                 gB' res _ _ 0 = res
                 gB' res oneByOne spMap n | DS.null oneByOne && DM.null spMap = res
                                          | DS.null oneByOne = let (lowSugPolys, higherSugPolys) = delFindLowest (SP spMap res)
@@ -59,7 +63,10 @@ gB'' seed n = let (initial,restSeed) = DS.deleteFindMin seed
                                                                                  `using` parList rwhnf)
                                                            worker = DL.filter (\(poly,_) -> not $ isNull poly) . reducePolys newres
                                                            newOneByOne = DL.foldl' (\acc x -> DS.insert x acc) newGens redPolys
-                                                       in gB' newres newOneByOne higherSugPolys (n-1)
+                                                       in if isNull $ fst (gen /. res) then
+                                                              gB' res newGens spMap n
+                                                          else ("Queue size: "++(show $ DS.size newOneByOne)) `trace`
+                                                               gB' newres newOneByOne higherSugPolys (n-1)
 
 {-
 -- | Partitions each value in an SPoly map and executes in parallel if the

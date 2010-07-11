@@ -33,6 +33,8 @@ foldl' f acc (I as) = DV.foldl' f acc as
 
 snoc (I as) a = I $! DV.snoc as a
 
+--union (I as) (I bs) = I $! DV.++ as bs
+
 numGens (I as) = DV.length as
 
 null (I as) = DV.null as
