@@ -17,7 +17,7 @@ makeExample(Ideal) := (I) -> (
    scan(#gensList-1, i -> << "p_" << i+1 << ",");
    << "p_" << #gensList << "]" << endl;
    << "p = DS.fromList (initPolySugars p')" << endl;
-   << "pideal = I $ DV.fromList (initSugars p') :: Ideal M.Grevlex" << endl;
+   << "pideal = I $ DV.fromList (initSugars p') :: Ideal M.Lex" << endl;
 )
 
 makeRandomExample = (n,m,k) -> (
@@ -44,7 +44,8 @@ makeExample(I)
 makePolynomial(first I_*)
 
 restart
-load "M2MakeTest.m2"
-I = makeRandomExample(4,4,4)
+load "../M2MakeTest/M2MakeTest.m2"
+I = makeRandomExample(4,3,6)
 time Igb = gb I
+gens gb I
 makeExample I
