@@ -12,6 +12,7 @@ import Yaiba.Monomial
 import Yaiba.Polynomial
 import Yaiba.Ideal
 import Debug.Trace
+import Control.Parallel
 
 -- | SPoly is a map of CritPairs keyed to the ideal provided in the second argument.
 data SPoly ord = SP (DM.Map (Int, Int) (CritPair ord)) (Ideal ord)
@@ -27,10 +28,11 @@ isEmpty (SP spmap _) = DM.null spmap
 sizespMap (SP spmap _) = DM.size spmap
 
 updateSPolys :: Ord (Mon ord) => SPoly ord -> (Poly ord, Sugar ord) -> SPoly ord
-updateSPolys (SP cpMap oldGens) (newGen,sug) = let !mPass = mTest (SP cpMap oldGens) newGen
-                                                   pairs = pairing oldGens newGen
+updateSPolys (SP cpMap oldGens) (newGen,sug) = let mPass = mTest (SP cpMap oldGens) newGen
+                                                   pairs = pairing oldGens (newGen,sug)
                                                    fPass = fTest pairs
-                                                   newcpMap = DM.union mPass fPass
+                                                   !tupmap = mPass `par` (fPass `pseq` (mPass,fPass))
+                                                   newcpMap = DM.union (fst tupmap) (snd tupmap)
                                                    --newcpMap = DM.union cpMap fPass
                                                    --newcpMap = DM.union mPass (DM.map (\(x,_) -> x) pairs)
                                                    --newcpMap = DM.union cpMap (DM.map (\(x,_) -> x) pairs)
@@ -49,18 +51,15 @@ mTest (SP cpMap oldGens) newGen = DM.mapMaybeWithKey mTest' cpMap where
                                      Just $ CP cpair
 
 
-pairing oldGens newGen = ifoldl' pairing' DM.empty oldGens where
-    k = numGens oldGens
-    pairing' acc index (poly,S sug) = let (taui,ci) = leadTerm poly
-                                          (tauk,ck) = leadTerm newGen
-                                          tauik = lcmMon tauk taui
-                                          g = gcdMon taui tauk
-                                          coprime = g == Constant
-                                          spoly = monMult (divide tauik taui) ck poly -
-                                                  monMult (divide tauik tauk) ci newGen
-                                          spolyDeg = deg spoly
-                                          newsug = S $ spolyDeg + max (sug - spolyDeg) (degree taui - spolyDeg)
-                                      in DM.insert (index,k) (CP (newsug,tauik),coprime) acc
+pairing oldGens (newGen,S sugk) = ifoldl' pairing' DM.empty oldGens where
+  k = numGens oldGens
+  pairing' acc index (poly,S sugi) = let (taui,_) = leadTerm poly
+                                         (tauk,_) = leadTerm newGen
+                                         tauik = lcmMon tauk taui
+                                         g = gcdMon taui tauk
+                                         coprime = g == Constant
+                                         newsug = S $ (degree tauik) + max (sugi - (degree taui)) (sugk - (degree tauk))
+                                     in DM.insert (index,k) (CP (newsug,tauik),coprime) acc
 
 -- | Criterion F described in Gebauer-Moller 1988.
 fTest nMap = let (coprimes,notCoprimes) = DM.partition snd nMap

@@ -91,6 +91,9 @@ monLT = fst . leadTerm
 -- | The degree of the poly.
 deg = degree . monLT
 
+totalDeg (P a) = YM.foldrWithKey totalDeg' 0 a where
+  totalDeg' mon _ sug = max (degree mon) sug
+
 -- | Returns a tuple of the lead term as Poly and the rest of the supplied Poly.
 deleteFindLT :: Poly ord -> ((Mon ord, Q), Poly ord)
 deleteFindLT a@(P a') = if YM.null a' then ((Constant,0), nullPoly)

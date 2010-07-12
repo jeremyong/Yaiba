@@ -25,7 +25,7 @@ initSugarsIdeal :: Ord (Mon ord) => [Poly ord] -> DV.Vector (Poly ord, Sugar ord
 initSugarsIdeal as = DV.fromList $! DL.map initSugar (DL.sort as)
 
 initSugar :: Ord (Mon ord) => Poly ord -> (Poly ord, Sugar ord)
-initSugar a = (a, S $! deg a)
+initSugar a = (a, S $! totalDeg a)
 
 tau :: Ideal ord -> Int -> Mon ord -> Mon ord
 tau (I as) index mon = lcmMon (monLT $ fst $ as DV.! index) mon

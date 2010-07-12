@@ -64,7 +64,8 @@ gB'' seed c = let (initial,restSeed) = deleteFindMin seed
                                                            newOneByOne = DL.foldl' (\acc x -> DS.insert (PS x) acc) newGens redPolys
                                                        in if isNull $ fst (gen /. res) then
                                                               gB' res newGens spMap n
-                                                          else ("Queue size: "++(show $ DS.size newOneByOne)) `trace`
+                                                          else --("Queue size: "++(show $ DS.size newOneByOne)) `trace`
+                                                               ("Sug deg: "++(show $ snd gen)++" Poly: " ++ (show $ fst (gen /. res))) `trace` 
                                                                gB' newres newOneByOne higherSugPolys (n-1)
 
 {-
