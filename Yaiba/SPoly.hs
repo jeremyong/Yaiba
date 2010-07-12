@@ -34,7 +34,7 @@ updateSPolys (SP cpMap oldGens) (newGen,sug) = let mPass = mTest (SP cpMap oldGe
                                                in --("spmap size:" ++ show (DM.size newcpMap)) `trace` 
                                                   SP newcpMap (snoc oldGens (newGen,sug))
 
--- | Criterion M described in Gebauer Moller 1988. Sloppy variant from "One sugar cube, please"
+-- | Criterion M described in Gebauer-Moller 1988. Sloppy variant from "One sugar cube, please"
 mTest (SP cpMap oldGens) newGen = DM.mapMaybeWithKey mTest' cpMap where
     ltk = monLT newGen
     mTest' (i,j) (CP cpair) = let tauij = snd cpair
@@ -58,7 +58,7 @@ pairing oldGens newGen = ifoldl' pairing' DM.empty oldGens where
                                           newsug = S $ spolyDeg + max (sug - spolyDeg) (degree taui - spolyDeg)
                                       in DM.insert (index,k) (CP (newsug,tauik),coprime) acc
 
--- | Criterion F described in Gebauer Moller 1988.
+-- | Criterion F described in Gebauer-Moller 1988.
 fTest nMap = let (coprimes,notCoprimes) = DM.partition snd nMap
                  coprimes' = DM.map (\(x,_) -> x) coprimes
                  notCoprimes' = DM.map (\(x,_) -> x) notCoprimes
@@ -67,7 +67,7 @@ fTest nMap = let (coprimes,notCoprimes) = DM.partition snd nMap
 
 delFindLowest (SP spMap ideal) = let sugSet = DM.fold (\(CP (S x,_)) acc -> DI.insert x acc) DI.empty spMap
                                      minSug = S $ DI.findMin sugSet
-                                     (bottom,top) = DM.partition (\(CP (x,_)) -> x ==minSug) spMap
+                                     (bottom,top) = DM.partition (\(CP (x,_)) -> x == minSug) spMap
                                      botelems = toSPolys (SP bottom ideal)
                                  in (botelems,top)
 

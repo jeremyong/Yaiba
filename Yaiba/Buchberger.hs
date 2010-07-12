@@ -29,7 +29,7 @@ gB seed = let (initial,restSeed) = DS.deleteFindMin seed
                                                               newOneByOne = DL.foldl' (\acc x -> DS.insert x acc) oneByOne redPolys
                                                           in gB' res newOneByOne higherSugPolys
                                      | otherwise = let (gen,newGens) = DS.deleteFindMin oneByOne
-                                                       SP newspMap newres = updateSPolys (SP spMap res) gen
+                                                       SP newspMap newres = show gen `trace` updateSPolys (SP spMap res) gen
                                                        (lowSugPolys, higherSugPolys) = delFindLowest (SP newspMap newres)
                                                        numBins = DL.length lowSugPolys
                                                        redPolys = decluster (lift worker (cluster numBins lowSugPolys)
@@ -38,7 +38,7 @@ gB seed = let (initial,restSeed) = DS.deleteFindMin seed
                                                        newOneByOne = DL.foldl' (\acc x -> DS.insert x acc) newGens redPolys
                                                    in if isNull $ fst (gen /. res) then
                                                           gB' res newGens spMap
-                                                      else ("Queue size: "++(show $ DS.size newOneByOne)) `trace`
+                                                      else --("Queue size: "++(show $ DS.size newOneByOne)) `trace`
                                                            gB' newres newOneByOne higherSugPolys
 
 
