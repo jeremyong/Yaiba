@@ -27,10 +27,11 @@ isEmpty (SP spmap _) = DM.null spmap
 sizespMap (SP spmap _) = DM.size spmap
 
 updateSPolys :: Ord (Mon ord) => SPoly ord -> (Poly ord, Sugar ord) -> SPoly ord
-updateSPolys (SP cpMap oldGens) (newGen,sug) = let mPass = mTest (SP cpMap oldGens) newGen
+updateSPolys (SP cpMap oldGens) (newGen,sug) = let !mPass = mTest (SP cpMap oldGens) newGen
                                                    pairs = pairing oldGens newGen
                                                    fPass = fTest pairs
                                                    newcpMap = DM.union mPass fPass
+                                                   --newcpMap = DM.union mPass (DM.map (\(x,_) -> x) pairs)
                                                in --("spmap size:" ++ show (DM.size newcpMap)) `trace` 
                                                   SP newcpMap (snoc oldGens (newGen,sug))
 
@@ -44,6 +45,7 @@ mTest (SP cpMap oldGens) newGen = DM.mapMaybeWithKey mTest' cpMap where
                                      Nothing
                                  else
                                      Just $ CP cpair
+
 
 pairing oldGens newGen = ifoldl' pairing' DM.empty oldGens where
     k = numGens oldGens

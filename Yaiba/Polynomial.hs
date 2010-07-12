@@ -7,11 +7,25 @@ import qualified Data.Ord as DO
 import Yaiba.Monomial
 import Yaiba.Sugar
 import Yaiba.Base
+import Data.Set as DS
 import Data.Maybe
 import Prelude hiding (null,filter,map,rem,sum)
 
 -- | 
 data Poly ord = P (YM.Map (Mon ord) Q)
+data PolySug ord = PS (Poly ord, Sugar ord)
+
+instance Ord (Mon ord) => Ord (PolySug ord) where
+  compare (PS (_,sa)) (PS (_,sb)) = compare sa sb
+  
+instance Ord (Mon ord) => Eq (PolySug ord) where 
+  PS (a,b) == PS (c,d) = a == c && b == d
+  
+getPolySug (PS a) = a
+
+deleteFindMin :: Ord (Mon ord) => DS.Set (PolySug ord) -> ((Poly ord, Sugar ord), DS.Set (PolySug ord))
+deleteFindMin a = let (minPoly,restPolys) = DS.deleteFindMin a
+                  in (getPolySug minPoly, restPolys)
 
 instance (Ord (Mon ord)) => Show (Poly ord) where
   show a | numTerms a == 0 = "0"
