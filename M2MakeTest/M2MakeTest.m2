@@ -49,3 +49,22 @@ I = makeRandomExample(4,3,6)
 time Igb = gb I
 gens gb I
 makeExample I
+
+restart
+load "../M2MakeTest/M2MakeTest.m2"
+R = QQ[T,x,y,z,a,b,c,d,e,MonomialOrder=>Lex]
+I = ideal {-y^82*a+x^32*z^23,x^45-y^13*z^21*b,y^33*z^12-x^41*c,-y^33*z^12*d+x^22,x^5*y^17*z^22*e-1,x*y*z*T-1}
+gbTrace = 3
+time Igb = gb I
+makeExample I
+
+restart
+load "../M2MakeTest/M2MakeTest.m2"
+R = QQ[x,y,z,u,t]
+I = ideal {2*x^2+2y^2+2z^2+2t^2+u^2-u,
+           x*y+2*y*z+2*z*t+2*t*u-t,
+	   2*x*z+2*y*t+t^2+2*z*u-z,
+	   2*x*t+2*z*t+2*y*u-y,
+	   2*x+2*y+2*z+2*t+u-1}
+gbTrace = 3
+time Igb = gb I
