@@ -28,11 +28,12 @@ isEmpty (SP spmap _) = DM.null spmap
 sizespMap (SP spmap _) = DM.size spmap
 
 updateSPolys :: Ord (Mon ord) => SPoly ord -> (Poly ord, Sugar ord) -> SPoly ord
-updateSPolys (SP cpMap oldGens) (newGen,sug) = let mPass = mTest (SP cpMap oldGens) newGen
+updateSPolys (SP cpMap oldGens) (newGen,sug) = let k = numGens oldGens
+                                                   mPass = mTest (SP cpMap oldGens) newGen
                                                    pairs = pairing oldGens (newGen,sug)
                                                    fPass = fTest pairs
-                                                   !tupmap = mPass `par` (fPass `pseq` (mPass,fPass))
-                                                   newcpMap = DM.union (fst tupmap) (snd tupmap)
+                                                   bPass = bTest mPass fPass newGen k
+                                                   newcpMap = DM.union bPass fPass
                                                    --newcpMap = DM.union cpMap fPass
                                                    --newcpMap = DM.union mPass (DM.map (\(x,_) -> x) pairs)
                                                    --newcpMap = DM.union cpMap (DM.map (\(x,_) -> x) pairs)
@@ -45,7 +46,7 @@ mTest (SP cpMap oldGens) newGen = DM.mapMaybeWithKey mTest' cpMap where
     mTest' (i,j) (CP cpair) = let tauij = snd cpair
                                   tauik = tau oldGens i ltk
                                   taujk = tau oldGens j ltk
-                              in if tauij `isFactor` tauik && tauij `isFactor` taujk then
+                              in if tauij `isFactor` tauik && tauij `isFactor` taujk && tauij /= tauik && tauij /= taujk then
                                      Nothing
                                  else
                                      Just $ CP cpair
@@ -53,8 +54,8 @@ mTest (SP cpMap oldGens) newGen = DM.mapMaybeWithKey mTest' cpMap where
 
 pairing oldGens (newGen,S sugk) = ifoldl' pairing' DM.empty oldGens where
   k = numGens oldGens
-  pairing' acc index (poly,S sugi) = let (taui,_) = leadTerm poly
-                                         (tauk,_) = leadTerm newGen
+  pairing' acc index (poly,S sugi) = let taui = monLT poly
+                                         tauk = monLT newGen
                                          tauik = lcmMon tauk taui
                                          g = gcdMon taui tauk
                                          coprime = g == Constant
@@ -67,6 +68,16 @@ fTest nMap = let (coprimes,notCoprimes) = DM.partition snd nMap
                  notCoprimes' = DM.map (\(x,_) -> x) notCoprimes
              in DM.union coprimes' (DM.fold fTest' notCoprimes' coprimes') where
                  fTest' cpair acc = DM.mapMaybe (\cpair' -> if cpair' == cpair then Nothing else Just cpair') acc
+
+bTest oldMap nMap newGen k = DM.mapMaybeWithKey bTest' oldMap where
+  bTest' (i,j) (CP (sug,tauij)) = let Just (CP (_,tauik)) = DM.lookup (i,k) nMap
+                                      Just (CP (_,taujk)) = DM.lookup (j,k) nMap
+                                      tauk = monLT newGen
+                                  in if tauk `isFactor` tauij && tauij /= tauik
+                                        && tauij /= taujk && tauik /= taujk then
+                                       Nothing
+                                     else
+                                       Just (CP (sug,tauij))
 
 delFindLowest (SP spMap ideal) = let sugSet = DM.fold (\(CP (S x,_)) acc -> DI.insert x acc) DI.empty spMap
                                      minSug = S $ DI.findMin sugSet
