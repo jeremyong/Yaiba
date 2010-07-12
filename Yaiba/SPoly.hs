@@ -31,7 +31,9 @@ updateSPolys (SP cpMap oldGens) (newGen,sug) = let !mPass = mTest (SP cpMap oldG
                                                    pairs = pairing oldGens newGen
                                                    fPass = fTest pairs
                                                    newcpMap = DM.union mPass fPass
+                                                   --newcpMap = DM.union cpMap fPass
                                                    --newcpMap = DM.union mPass (DM.map (\(x,_) -> x) pairs)
+                                                   --newcpMap = DM.union cpMap (DM.map (\(x,_) -> x) pairs)
                                                in --("spmap size:" ++ show (DM.size newcpMap)) `trace` 
                                                   SP newcpMap (snoc oldGens (newGen,sug))
 

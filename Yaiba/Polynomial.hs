@@ -16,7 +16,10 @@ data Poly ord = P (YM.Map (Mon ord) Q)
 data PolySug ord = PS (Poly ord, Sugar ord)
 
 instance Ord (Mon ord) => Ord (PolySug ord) where
-  compare (PS (_,sa)) (PS (_,sb)) = compare sa sb
+  compare (PS (a,sa)) (PS (b,sb)) = case compare sa sb of
+    GT -> GT
+    LT -> LT
+    EQ -> compare a b
   
 instance Ord (Mon ord) => Eq (PolySug ord) where 
   PS (a,b) == PS (c,d) = a == c && b == d
