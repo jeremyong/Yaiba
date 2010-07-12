@@ -23,7 +23,7 @@ j_2 = P.fromList [(M.fromList [4,3,2,3,0,0,0,0],-1),(M.fromList [0,0,0,0,0,1,0,0
 j_3 = P.fromList [(M.fromList [3,5,3,5,0,0,0,0],-1),(M.fromList [0,0,0,0,0,0,1,0],1)]
 j_4 = P.fromList [(M.fromList [2,3,4,3,0,0,0,0],-1),(M.fromList [0,0,0,0,0,0,0,1],1)]
 j' = j_1:j_2:j_3:j_4:[]
-j = DS.fromList (DL.map (\x-> P.PS x) (initSugars j'))
+j = DS.fromList (initPolySugars j')
 jideal = I $ DV.fromList (initSugars j') :: Ideal M.Lex
 
 {-p_1 = P.fromList [(M.fromList [4,0,0,0],1),(M.fromList [0,1,0,0],-1)]
@@ -37,7 +37,7 @@ p_1 = P.fromList [(M.fromList [0,0,1,0,0],1),(M.fromList [1,0,0,0,0],-1),(M.from
 p_2 = P.fromList [(M.fromList [0,0,0,1,0],1),(M.fromList [2,0,0,0,0],-1),(M.fromList [1,1,0,0,0],-2)]
 p_3 = P.fromList [(M.fromList [0,0,0,0,1],1),(M.fromList [3,0,0,0,0],-1),(M.fromList [2,1,0,0,0],-3)]
 p' = p_1:p_2:p_3:[]
-p = DS.fromList (DL.map (\x-> P.PS x) (initSugars p'))
+p = DS.fromList (initPolySugars p')
 pideal = I $ DV.fromList (initSugars p') :: Ideal M.Lex
 
 main = do 

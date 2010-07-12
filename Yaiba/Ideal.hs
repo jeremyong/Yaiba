@@ -18,6 +18,8 @@ getPolys (I a) = DL.map fst (DV.toList a)
 
 initSugars :: Ord (Mon ord) => [Poly ord] -> [(Poly ord, Sugar ord)]
 initSugars as = DL.map initSugar (DL.sort as)
+initPolySugars :: Ord (Mon ord) => [Poly ord] -> [PolySug ord]
+initPolySugars as = DL.map (\a -> PS (initSugar a)) (DL.sort as)
 
 initSugarsIdeal :: Ord (Mon ord) => [Poly ord] -> DV.Vector (Poly ord, Sugar ord)
 initSugarsIdeal as = DV.fromList $! DL.map initSugar (DL.sort as)
