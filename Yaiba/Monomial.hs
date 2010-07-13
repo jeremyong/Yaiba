@@ -58,9 +58,9 @@ multiply (M as) (M bs)     = M $! DVU.zipWith (+) as bs
 
 divide :: Mon ord -> Mon ord -> Mon ord
 divide Constant Constant = Constant
-divide Constant (M as)   = M $ DVU.map negate as
+divide Constant (M as)   = M $! DVU.map negate as
 divide (M as) Constant   = M as
-divide (M as) (M bs)     = M $ DVU.zipWith (-) as bs
+divide (M as) (M bs)     = M $! DVU.zipWith (-) as bs
 
 showVar :: Int -> Int -> String
 showVar n a | a==0      = ""
@@ -78,21 +78,21 @@ lexCompare :: Mon ord -> Mon ord -> Ordering
 lexCompare Constant Constant = EQ
 lexCompare Constant (M as)   = if DVU.any (/=0) as then LT else EQ
 lexCompare (M as) Constant   = if DVU.all (==0) as then EQ else GT
---lexCompare (M as) (M bs)     = compare as bs
-
-lexCompare (M as) (M bs)     = let !a = maybeHead $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
+-- much slower!
+-- lexCompare (M as) (M bs)     = compare as bs
+lexCompare (M as) (M bs)     = let !a = DVU.find (/=(False,False)) (DVU.zipWith (\x y -> (x > y, x < y)) as bs)
                                in case a of
                                     Nothing -> EQ
-                                    Just x -> if x > 0 then GT else LT
+                                    Just (b1,_) -> if b1 then GT else LT
 
 grevlexCompare :: Mon ord -> Mon ord -> Ordering
 grevlexCompare Constant Constant = EQ
 grevlexCompare Constant (M as)   = if DVU.any (/=0) as then LT else EQ
 grevlexCompare (M as) Constant   = if DVU.all (==0) as then EQ else GT
-grevlexCompare (M as) (M bs) = let !a = maybeLast $ DVU.filter (/=0) (DVU.zipWith (-) as bs)
+grevlexCompare (M as) (M bs) = let !a = maybeLast $ DVU.filter (/=(False,False)) (DVU.zipWith (\x y -> (x > y, x < y)) as bs)
                                in case a of
                                     Nothing -> EQ
-                                    (Just x) -> if x < 0 then GT else LT
+                                    Just (_,b1) -> if b1 then GT else LT
                            
 degree :: Mon ord -> Int
 degree Constant = 0
@@ -102,10 +102,11 @@ isFactor :: Mon ord -> Mon ord -> Bool
 isFactor Constant Constant = True
 isFactor Constant (M _)    = True
 isFactor (M _) Constant    = False
-isFactor a b               = let !mon = divide b a
-                             in case mon of
-                                  Constant -> True
-                                  (M cs) -> DVU.all (>=0) cs
+--isFactor a b               = let !mon = divide a b in
+--                             case mon of
+--                               Constant -> True
+--                               (M cs) -> DVU.all (<=0) cs
+isFactor (M as) (M bs)     = let !a = DVU.and (DVU.zipWith (<=) as bs) in a
 
 isMon :: Mon ord -> Bool
 isMon Constant = True
