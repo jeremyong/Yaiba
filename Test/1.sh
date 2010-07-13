@@ -1,5 +1,5 @@
 cd ..
 cabal install --reinstall
 cd -
-ghc -rtsopts -threaded -O2 -eventlog -fforce-recomp --make Test
-./Test +RTS -N -ls -s
+ghc -threaded -Odph -eventlog -fforce-recomp --make Verify
+./Verify +RTS -N7 -ls -s
