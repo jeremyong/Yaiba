@@ -70,14 +70,18 @@ fTest nMap = let (coprimes,notCoprimes) = DM.partition snd nMap
                  fTest' cpair acc = DM.mapMaybe (\cpair' -> if cpair' == cpair then Nothing else Just cpair') acc
 
 bTest oldMap nMap newGen k = DM.mapMaybeWithKey bTest' oldMap where
-  bTest' (i,j) (CP (sug,tauij)) = let Just (CP (_,tauik)) = DM.lookup (i,k) nMap
-                                      Just (CP (_,taujk)) = DM.lookup (j,k) nMap
+  bTest' (i,j) (CP (sug,tauij)) = let lookupi = DM.lookup (i,k) nMap
+                                      lookupj = DM.lookup (j,k) nMap
                                       tauk = monLT newGen
-                                  in if tauk `isFactor` tauij && tauij /= tauik
-                                        && tauij /= taujk && tauik /= taujk then
+                                  in if lookupi == Nothing || lookupj == Nothing then
                                        Nothing
-                                     else
-                                       Just (CP (sug,tauij))
+                                     else let Just (CP (_,tauik)) = lookupi                                  
+                                              Just (CP (_,taujk)) = lookupj
+                                          in if tauk `isFactor` tauij && tauij /= tauik
+                                                && tauij /= taujk && tauik /= taujk then
+                                               Nothing
+                                             else
+                                               Just (CP (sug,tauij))
 
 delFindLowest (SP spMap ideal) = let sugSet = DM.fold (\(CP (S x,_)) acc -> DI.insert x acc) DI.empty spMap
                                      minSug = S $ DI.findMin sugSet

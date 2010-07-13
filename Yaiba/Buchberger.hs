@@ -24,7 +24,8 @@ gB seed = let (initial,restSeed) = deleteFindMin seed
                                                               numBins = DL.length lowSugPolys
                                                               redPolys = decluster (lift worker (cluster numBins lowSugPolys)
                                                                                     `using` parList rwhnf)
-                                                              worker = DL.filter (\(poly,_) -> not $ isNull poly) . reducePolys res
+                                                              worker = DL.map (\(poly,sug) -> (scalePoly (recip $ coefLT poly) poly,sug)) .                                                              
+                                                                       DL.filter (\(poly,_) -> not $ isNull poly) . reducePolys res
                                                               newOneByOne = DL.foldl' (\acc x -> DS.insert (PS x) acc) oneByOne redPolys
                                                           in gB' res newOneByOne higherSugPolys
                                      | otherwise = let (gen,newGens) = deleteFindMin oneByOne
@@ -33,7 +34,8 @@ gB seed = let (initial,restSeed) = deleteFindMin seed
                                                        numBins = DL.length lowSugPolys
                                                        redPolys = decluster (lift worker (cluster numBins lowSugPolys)
                                                                              `using` parList rwhnf)
-                                                       worker = DL.filter (\(poly,_) -> not $ isNull poly) . reducePolys newres
+                                                       worker = DL.map (\(poly,sug) -> (scalePoly (recip $ coefLT poly) poly,sug)) .                                                        
+                                                                DL.filter (\(poly,_) -> not $ isNull poly) . reducePolys newres
                                                        newOneByOne = DL.foldl' (\acc x -> DS.insert (PS x) acc) newGens redPolys
                                                    in if isNull $ fst (gen /. res) then
                                                         gB' res newGens spMap
@@ -51,7 +53,8 @@ gB'' seed c = let (initial,restSeed) = deleteFindMin seed
                                                                   numBins = DL.length lowSugPolys
                                                                   redPolys = decluster (lift worker (cluster numBins lowSugPolys)
                                                                                         `using` parList rwhnf)
-                                                                  worker = DL.filter (\(poly,_) -> not $ isNull poly) . reducePolys res
+                                                                  worker = DL.map (\(poly,sug) -> (scalePoly (recip $ coefLT poly) poly,sug)) . 
+                                                                           DL.filter (\(poly,_) -> not $ isNull poly) . reducePolys res
                                                                   newOneByOne = DL.foldl' (\acc x -> DS.insert (PS x) acc) oneByOne redPolys
                                                               in gB' res newOneByOne higherSugPolys (n-1)
                                          | otherwise = let (gen,newGens) = deleteFindMin oneByOne
@@ -60,7 +63,8 @@ gB'' seed c = let (initial,restSeed) = deleteFindMin seed
                                                            numBins = DL.length lowSugPolys
                                                            redPolys = decluster (lift worker (cluster numBins lowSugPolys)
                                                                                  `using` parList rwhnf)
-                                                           worker = DL.filter (\(poly,_) -> not $ isNull poly) . reducePolys newres
+                                                           worker = DL.map (\(poly,sug) -> (scalePoly (recip $ coefLT poly) poly,sug)) .
+                                                                    DL.filter (\(poly,_) -> not $ isNull poly) . reducePolys newres
                                                            newOneByOne = DL.foldl' (\acc x -> DS.insert (PS x) acc) newGens redPolys
                                                        in if isNull $ fst (gen /. res) then
                                                               gB' res newGens spMap n

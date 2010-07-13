@@ -88,6 +88,8 @@ leadTerm (P a) = if YM.null a then (Constant,0)
 -- | Just returns the lead term Mon list.
 monLT = fst . leadTerm
 
+coefLT = snd . leadTerm
+
 -- | The degree of the poly.
 deg = degree . monLT
 
@@ -125,6 +127,8 @@ monAdd' mon coef (P poly) = YM.alter (maybeAdd coef) mon poly
 
 -- | Scales every term of a Polynomial by a Mon list and rational number.
 monMult mon coef (P poly) = P $! YM.mapKeysValuesMonotonic (\(!k,!v) -> (multiply mon k, v*coef)) poly
+
+scalePoly value (P poly) = P $! YM.map (*value) poly
 
 -- | Divides the first polynomial by the second repeatedly until it fails.
 -- Keeps track of the sugar throughout the reduction
