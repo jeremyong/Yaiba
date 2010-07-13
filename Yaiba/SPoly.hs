@@ -11,8 +11,6 @@ import Yaiba.Sugar
 import Yaiba.Monomial
 import Yaiba.Polynomial
 import Yaiba.Ideal
-import Debug.Trace
-import Control.Parallel
 
 -- | SPoly is a map of CritPairs keyed to the ideal provided in the second argument.
 data SPoly ord = SP (DM.Map (Int, Int) (CritPair ord)) (Ideal ord)
@@ -28,7 +26,7 @@ isEmpty (SP spmap _) = DM.null spmap
 sizespMap (SP spmap _) = DM.size spmap
 
 updateSPolys :: Ord (Mon ord) => SPoly ord -> (Poly ord, Sugar ord) -> SPoly ord
-updateSPolys (SP cpMap oldGens) (newGen,sug) = let k = numGens oldGens
+updateSPolys (SP cpMap oldGens) (newGen,sug) = let !k = numGens oldGens
                                                    mPass = mTest (SP cpMap oldGens) newGen
                                                    pairs = pairing oldGens (newGen,sug)
                                                    fPass = fTest pairs
@@ -73,15 +71,23 @@ bTest oldMap nMap newGen k = DM.mapMaybeWithKey bTest' oldMap where
   bTest' (i,j) (CP (sug,tauij)) = let lookupi = DM.lookup (i,k) nMap
                                       lookupj = DM.lookup (j,k) nMap
                                       tauk = monLT newGen
-                                  in if lookupi == Nothing || lookupj == Nothing then
-                                       Nothing
-                                     else let Just (CP (_,tauik)) = lookupi                                  
-                                              Just (CP (_,taujk)) = lookupj
-                                          in if tauk `isFactor` tauij && tauij /= tauik
-                                                && tauij /= taujk && tauik /= taujk then
-                                               Nothing
-                                             else
-                                               Just (CP (sug,tauij))
+                                      taukDivides = tauk `isFactor` tauij
+                                  in if taukDivides then case lookupi of
+                                    Nothing -> case lookupj of
+                                      Nothing -> Nothing
+                                      Just (CP (_,taujk)) -> if taujk /= tauij then
+                                                               Nothing
+                                                             else Just (CP (sug,tauij))
+                                    Just (CP (_,tauik)) -> case lookupj of
+                                      Nothing -> if tauik /= tauij then
+                                                   Nothing
+                                                 else Just (CP (sug,tauij))
+                                      Just (CP (_,taujk)) -> if tauij /= tauik && tauij /= taujk && tauik /= taujk then
+                                                               Nothing
+                                                             else
+                                                               Just (CP (sug,tauij))
+                                     else
+                                       Just (CP (sug,tauij))
 
 delFindLowest (SP spMap ideal) = let sugSet = DM.fold (\(CP (S x,_)) acc -> DI.insert x acc) DI.empty spMap
                                      minSug = S $ DI.findMin sugSet

@@ -12,8 +12,8 @@ import Data.Maybe
 import Prelude hiding (null,filter,map,rem,sum)
 
 -- | 
-data Poly ord = P (YM.Map (Mon ord) Q)
-data PolySug ord = PS (Poly ord, Sugar ord)
+newtype Poly ord = P (YM.Map (Mon ord) Q)
+newtype PolySug ord = PS (Poly ord, Sugar ord)
 
 instance Ord (Mon ord) => Ord (PolySug ord) where
   compare (PS (a,sa)) (PS (b,sb)) = case compare sa sb of
@@ -30,11 +30,11 @@ deleteFindMin :: Ord (Mon ord) => DS.Set (PolySug ord) -> ((Poly ord, Sugar ord)
 deleteFindMin a = let (minPoly,restPolys) = DS.deleteFindMin a
                   in (getPolySug minPoly, restPolys)
 
-instance (Ord (Mon ord)) => Show (Poly ord) where
+instance Ord (Mon ord) => Show (Poly ord) where
   show a | numTerms a == 0 = "0"
          | otherwise = showTerm $ YM.toDescList (getMap a)
 
-instance (Ord (Mon ord)) => Eq (Poly ord) where
+instance Ord (Mon ord) => Eq (Poly ord) where
   a == b = if numTerms a == numTerms b then False
            else isNull $! a-b
   
@@ -110,16 +110,19 @@ maybeAdd a Nothing = Just a
 maybeAdd a (Just b) = let !sum = a+b
                       in if sum==0 then Nothing else Just sum
 
-instance (Ord (Mon ord)) => Num (Poly ord) where
-    P a + P b | YM.null a = P b
+instance Ord (Mon ord) => Num (Poly ord) where
+    P a + P b | (YM.null a) = P b
               | YM.null b = P a
               | otherwise = P $! YM.foldWithKey addPrune a b where
-                                           addPrune mon coef polyMap = YM.alter (maybeAdd coef) mon polyMap
-    a * P b               = YM.foldWithKey (polyFoil a) nullPoly b where
-                                           polyFoil p mon coef acc = acc + monMult mon coef p
+                        addPrune mon coef polyMap = YM.alter (maybeAdd coef) mon polyMap
+    a * P b = YM.foldWithKey (polyFoil a) nullPoly b where
+                        polyFoil p mon coef acc = acc + monMult mon coef p
     negate (P a) = P $! YM.map negate a
     fromInteger 0 = nullPoly
     fromInteger 1 = monPoly Constant 1
+    fromInteger _ = error ""
+    abs = error "Polys are not signed"
+    signum = error "Polys are not signed"
 
 -- | Just adds a monomial without turning it into a polynomial first
 monAdd mon coef (P poly) = P $ YM.alter (maybeAdd coef) mon poly

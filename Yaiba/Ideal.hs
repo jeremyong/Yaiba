@@ -8,7 +8,6 @@ import Yaiba.Polynomial
 import Yaiba.Sugar
 import qualified Data.List as DL
 import qualified Data.Vector as DV
-import qualified Data.Set as DS
 import Prelude hiding (rem)
 
 newtype Ideal ord = I (DV.Vector (Poly ord,Sugar ord))
