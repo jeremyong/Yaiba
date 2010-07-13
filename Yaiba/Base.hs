@@ -19,12 +19,63 @@ instance Show Q where
                where a = numerator x
                      b = denominator x
 
-
 numeratorQ (Q x) = Data.Ratio.numerator x
 denominatorQ (Q x) = Data.Ratio.denominator x
 
-{-
--- PRIME FIELDS
+-- Finite Fields
+
+{-newtype M s a = M a deriving (Eq, Show)
+
+unM :: M s a -> a
+unM (M a) = a
+
+class Modular s a | s -> a where modulus :: s -> a
+
+normalize :: forall s a. (Modular s a, Integral a) => a -> M s a
+normalize a = (M $ a `mod` (modulus (undefined :: s)))
+
+instance (Modular s a, Integral a) => Num (M s a) where
+  M a + M b     = normalize (a+b)
+  M a - M b     = normalize (a-b)
+  M a * M b     = normalize (a*b)
+  negate (M a)  = normalize (negate a)
+  fromInteger i = normalize (fromInteger i)  
+  signum        = error "Modular numbers are not signed"
+  abs           = error "Modular numbers are not signed"
+
+data Zero; data Twice s; data Succ s
+
+class ReflectNum s where reflectNum :: Num a => s -> a
+instance ReflectNum Zero where reflectNum _ = 0
+instance ReflectNum s => ReflectNum (Twice s) where reflectNum _ = reflectNum (undefined :: s) * 2
+instance ReflectNum s => ReflectNum (Succ s)  where reflectNum _ = reflectNum (undefined :: s) + 1
+
+reifyIntegral :: Integral a => a -> (forall s. ReflectNum s => s -> w) -> w
+reifyIntegral i k = case quotRem i 2 of
+  (0, 0) -> k (undefined :: Zero)
+  (j, 0) -> reifyIntegral j (\(_::s) -> k (undefined :: Twice s))
+  (j, 1) -> reifyIntegral j (\(_::s) -> k (undefined :: Succ (Twice s)))
+
+data ModulusNum t a
+instance (ReflectNum t, Num a) => Modular (ModulusNum t a) a where modulus _ = reflectNum (undefined :: t)
+
+withIntegralModulus :: Integral a => a -> (forall s. Modular s a => s -> M s w) -> w
+withIntegralModulus i k = reifyIntegral i (\(_::t) -> unM $ k (undefined :: ModulusNum t a))
+
+inject :: forall s a. (Integral a) => a -> M s a
+inject a = M a :: M s a
+
+test3' :: (Modular s a, Integral a) => M s a -> M s a -> s -> M s a
+test3' x y _ = x*x + y*y
+
+myX = inject 3
+myY = inject 10
+myPrime = 101
+--data FF101
+--instance Modular FF101 Int where modulus _ = myPrime
+
+test3 = withIntegralModulus myPrime (test3' myX myY)
+--test3 = withIntegralModulus 101 (test3' 3 10)
 
 -- extendedEuclid a b returns (u,v,d) such that u*a + v*b = d
 extendedEuclid a b | a >= 0 && b >= 0 = extendedEuclid' a b [] where
@@ -32,7 +83,6 @@ extendedEuclid a b | a >= 0 && b >= 0 = extendedEuclid' a b [] where
     extendedEuclid' a b qs = let (q,r) = quotRem a b in extendedEuclid' b r (q:qs)
     unwind u v [] = (u,v)
     unwind u v (q:qs) = unwind v (u-v*q) qs
-
 
 newtype Fp n = Fp Integer deriving (Eq,Ord)
 
