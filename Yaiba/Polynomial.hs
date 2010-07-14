@@ -12,7 +12,7 @@ import Data.Maybe
 import Prelude hiding (null,filter,map,rem,sum)
 
 -- | 
-newtype Poly ord = P (YM.Map (Mon ord) Q)
+newtype Poly ord = P (YM.Map (Mon ord) Field)
 newtype PolySug ord = PS (Poly ord, Sugar ord)
 
 instance Ord (Mon ord) => Ord (PolySug ord) where
@@ -48,7 +48,7 @@ instance (Ord (Mon ord)) => Ord (Poly ord) where
                         taila = P $! YM.deleteMax a
                         tailb = P $! YM.deleteMax b
 
-showTerm :: [(Mon ord, Q)] -> String
+showTerm :: [(Mon ord, Field)] -> String
 showTerm [] = ""
 showTerm ((a,b):[]) | show a == " " = show b
                     | b==0 = ""
@@ -67,7 +67,7 @@ nullPoly = P YM.empty
 
 monPoly m q = P $ YM.singleton m q
 
-fromList :: (Ord (Mon ord)) => [(Mon ord, Q)] -> Poly ord
+fromList :: (Ord (Mon ord)) => [(Mon ord, Field)] -> Poly ord
 fromList a = prune $ P $ YM.fromList a
 
 isNull :: Poly ord -> Bool
@@ -77,11 +77,11 @@ isNull (P a) = YM.null a
 prune :: (Ord (Mon ord)) => Poly ord -> Poly ord
 prune (P a) = P $ YM.filter (/=0) a
 
-getMap :: Poly ord -> YM.Map (Mon ord) Q
+getMap :: Poly ord -> YM.Map (Mon ord) Field
 getMap (P a) = a
 
 -- | Returns a tuple of the lead term Mon list and its coefficient.
-leadTerm :: Poly ord -> (Mon ord, Q)
+leadTerm :: Poly ord -> (Mon ord, Field)
 leadTerm (P a) = if YM.null a then (Constant,0)
                  else YM.findMax a
                              
@@ -97,7 +97,7 @@ totalDeg (P a) = YM.foldrWithKey totalDeg' 0 a where
   totalDeg' mon _ sug = max (degree mon) sug
 
 -- | Returns a tuple of the lead term as Poly and the rest of the supplied Poly.
-deleteFindLT :: Poly ord -> ((Mon ord, Q), Poly ord)
+deleteFindLT :: Poly ord -> ((Mon ord, Field), Poly ord)
 deleteFindLT a@(P a') = if YM.null a' then ((Constant,0), nullPoly)
                         else let ((m,q),y) = YM.deleteFindMax $! getMap a
                              in ((m,q),P y)
@@ -106,7 +106,6 @@ deleteFindLT a@(P a') = if YM.null a' then ((Constant,0), nullPoly)
 numTerms :: Poly ord -> Int
 numTerms a = YM.size $ getMap a
 
-maybeAdd :: Num a => a -> Maybe a -> Maybe a
 maybeAdd a Nothing = Just a
 maybeAdd a (Just b) = let !sum = a+b
                       in if sum==0 then Nothing else Just sum
@@ -126,13 +125,10 @@ instance Ord (Mon ord) => Num (Poly ord) where
     signum = error "Polys are not signed"
 
 -- | Just adds a monomial without turning it into a polynomial first
-
-monAdd :: (Ord (Mon ord)) => Mon ord -> Q -> Poly ord -> Poly ord
 monAdd mon coef (P poly) = P $ YM.alter (maybeAdd coef) mon poly
 monAdd' mon coef (P poly) = YM.alter (maybeAdd coef) mon poly
 
 -- | Scales every term of a Polynomial by a Mon list and rational number.
-monMult :: Mon ord -> Q -> Poly ord -> Poly ord
 monMult mon coef (P poly) = P $! YM.mapKeysValuesMonotonic (\(!k,!v) -> (multiply mon k, v*coef)) poly
 
 scalePoly value (P poly) = P $! YM.map (*value) poly
