@@ -1,0 +1,10 @@
+*#
+*~
+*.pdf
+*.hi
+*.hp
+*.o
+*.aux
+dist/*
+*.eventlog
+*.prof
