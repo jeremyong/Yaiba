@@ -19,12 +19,100 @@ instance Show Q where
                where a = numerator x
                      b = denominator x
 
-
 numeratorQ (Q x) = Data.Ratio.numerator x
 denominatorQ (Q x) = Data.Ratio.denominator x
 
+-- Finite Fields
+
 {-
--- PRIME FIELDS
+
+newtype F101 = F Int deriving (Eq,Show)
+
+instance Num F101 where
+  F a + F b = F $ let c = a + b in
+                  case compare c 101 of
+                    LT -> c
+                    GT -> c - 101
+                    EQ -> 0
+  F a * F b = F $ a * b `mod` 101
+  negate F a = F $ 101 - a
+
+instance 
+
+inject :: (Num a) => a -> F101
+inject n = F $ n `mod` 101
+
+-- returns (u,v,d) where u*p+v*q = d
+extendedEuclid :: (Integral a) => a -> a -> (a,a,a)
+extendedEuclid a b | a >= 0 && b >= 0 = extendedEuclid' a b [] where
+    extendedEuclid' d 0 qs = let (u,v) = unwind 1 0 qs in (u,v,d)
+    extendedEuclid' a b qs = let (q,r) = quotRem a b in extendedEuclid' b r (q:qs)
+    unwind u v [] = (u,v)
+    unwind u v (q:qs) = unwind v (u-v*q) qs
+
+
+
+
+newtype M s a = M a deriving (Eq, Show)
+
+unM :: M s a -> a
+unM (M a) = a
+
+class Modular s a | s -> a where modulus :: s -> a
+
+normalize :: forall s a. (Modular s a, Integral a) => a -> M s a
+normalize a = (M $ a `mod` (modulus (undefined :: s)))
+
+instance (Modular s a, Integral a) => Num (M s a) where
+  M a + M b     = normalize (a+b)
+  M a - M b     = normalize (a-b)
+  M a * M b     = normalize (a*b)
+  negate (M a)  = normalize (negate a)
+  fromInteger i = normalize (fromInteger i)  
+  signum        = error "Modular numbers are not signed"
+  abs           = error "Modular numbers are not signed"
+
+data Zero; data Twice s; data Succ s
+
+class ReflectNum s where reflectNum :: Num a => s -> a
+instance ReflectNum Zero where reflectNum _ = 0
+instance ReflectNum s => ReflectNum (Twice s) where reflectNum _ = reflectNum (undefined :: s) * 2
+instance ReflectNum s => ReflectNum (Succ s)  where reflectNum _ = reflectNum (undefined :: s) + 1
+
+reifyIntegral :: Integral a => a -> (forall s. ReflectNum s => s -> w) -> w
+reifyIntegral i k = case quotRem i 2 of
+  (0, 0) -> k (undefined :: Zero)
+  (j, 0) -> reifyIntegral j (\(_::s) -> k (undefined :: Twice s))
+  (j, 1) -> reifyIntegral j (\(_::s) -> k (undefined :: Succ (Twice s)))
+
+data ModulusNum t a
+instance (ReflectNum t, Num a) => Modular (ModulusNum t a) a where modulus _ = reflectNum (undefined :: t)
+
+withIntegralModulus :: Integral a => a -> (forall s. Modular s a => s -> w) -> w
+withIntegralModulus i k = reifyIntegral i (\(_::t) -> k (undefined :: ModulusNum t a))
+
+inject :: forall s a. (Integral a) => a -> M s a
+inject a = M a :: M s a
+
+test3' :: (Modular s a, Integral a) => M s a -> M s a -> s -> M s a
+test3' x y _ = x*x + y*y
+
+tester :: (Modular s a, Integral a) => s -> M s a
+tester _ = 5
+
+junk = withIntegralModulus 101 (unM . tester)
+--junk = withIntegralModulus 101 tester
+
+myX = inject 3
+myY = inject 10
+myPrime1 = 101
+myPrime2 = 17
+--data FF101
+--instance Modular FF101 Int where modulus _ = myPrime
+
+test3a = withIntegralModulus myPrime1 (unM . (test3' myX myY))
+test3b = withIntegralModulus myPrime2 (unM . (test3' myX myY))
+--test3 = withIntegralModulus 101 (test3' 3 10)
 
 -- extendedEuclid a b returns (u,v,d) such that u*a + v*b = d
 extendedEuclid a b | a >= 0 && b >= 0 = extendedEuclid' a b [] where
@@ -32,7 +120,6 @@ extendedEuclid a b | a >= 0 && b >= 0 = extendedEuclid' a b [] where
     extendedEuclid' a b qs = let (q,r) = quotRem a b in extendedEuclid' b r (q:qs)
     unwind u v [] = (u,v)
     unwind u v (q:qs) = unwind v (u-v*q) qs
-
 
 newtype Fp n = Fp Integer deriving (Eq,Ord)
 
@@ -161,4 +248,5 @@ f89 = map fromInteger [0..88] :: [F89]
 
 type F97 = Fp T97
 f97 = map fromInteger [0..96] :: [F97]
+
 -}
