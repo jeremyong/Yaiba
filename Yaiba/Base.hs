@@ -7,6 +7,13 @@ module Yaiba.Base where
 import Data.Ratio
 --import Math.Common.IntegerAsType
 
+-- so that we can change fields easily
+myPrime = 32003 :: Int
+--newtype Field = Field F2 deriving (Eq,Ord,Num,Fractional)
+newtype Field = Field FiniteField deriving (Eq,Ord,Num,Fractional)
+--newtype Field = Field Q deriving (Eq,Ord,Num,Fractional)
+
+instance Show Field where show (Field a) = show a
 
 -- RATIONALS
 
@@ -23,8 +30,6 @@ numeratorQ (Q x) = Data.Ratio.numerator x
 denominatorQ (Q x) = Data.Ratio.denominator x
 
 -- Finite Fields
-
-myPrime = 32003 :: Int
 
 newtype FiniteField = FF Int deriving (Eq,Ord)
 
@@ -69,13 +74,6 @@ extendedEuclid a b | a >= 0 && b >= 0 = extendedEuclid' a b [] where
     extendedEuclid' a b qs = let (q,r) = quotRem a b in extendedEuclid' b r (q:qs)
     unwind u v [] = (u,v)
     unwind u v (q:qs) = unwind v (u-v*q) qs
-
--- so that we can change fields easily
---newtype Field = Field F2 deriving (Eq,Ord,Num,Fractional)
-newtype Field = Field FiniteField deriving (Eq,Ord,Num,Fractional)
---newtype Field = Field Q deriving (Eq,Ord,Num,Fractional)
-
-instance Show Field where show (Field a) = show a
 
 {-
 newtype Fp n = Fp Integer deriving (Eq,Ord)

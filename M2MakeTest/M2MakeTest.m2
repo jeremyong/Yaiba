@@ -52,6 +52,18 @@ makeExample I
 
 restart
 load "../M2MakeTest/M2MakeTest.m2"
+R = QQ[t,u,x,y,z,MonomialOrder=>Lex]
+I = ideal {x+y+z+t+u, x*y+y*z+z*t+t*u+u*x, x*y*z+y*z*t+z*t*u+t*u*x+u*x*y, x*y*z*t+y*z*t*u+z*t*u*x+t*u*x*y+u*x*y*z, x*y*z*t*u-1}
+makeExample I
+
+restart
+load "../M2MakeTest/M2MakeTest.m2"
+R = QQ[t,u,x,y,z,MonomialOrder=>Lex]
+I = ideal {y*(1+x^2)^4 - 2*(5+19*x^2-45*x^4+x^6-4*x^8), z*(1+x^2)^4-2*(x+51*x^3+3*x^5+17*x^7)}
+makeExample I
+
+restart
+load "../M2MakeTest/M2MakeTest.m2"
 R = QQ[T,x,y,z,a,b,c,d,e,MonomialOrder=>Lex]
 I = ideal {-y^82*a+x^32*z^23,x^45-y^13*z^21*b,y^33*z^12-x^41*c,-y^33*z^12*d+x^22,x^5*y^17*z^22*e-1,x*y*z*T-1}
 gbTrace = 3

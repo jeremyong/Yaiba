@@ -26,6 +26,21 @@ j' = j_1:j_2:j_3:j_4:[]
 j = DS.fromList (initPolySugars j')
 jideal = I $ DV.fromList (initSugars j') :: Ideal M.Lex
 
+y_1 = P.fromList [(M.fromList [0,0,8,1,0],1),(M.fromList [0,0,8,0,0],8),(M.fromList [0,0,6,1,0],4),(M.fromList [0,0,6,0,0],-2),(M.fromList [0,0,4,1,0],6),(M.fromList [0,0,4,0,0],90),(M.fromList [0,0,2,1,0],4),(M.fromList [0,0,2,0,0],-38),(M.fromList [0,0,0,1,0],1),(M.fromList [0,0,0,0,0],-10)]
+y_2 = P.fromList [(M.fromList [0,0,8,0,1],1),(M.fromList [0,0,7,0,0],-34),(M.fromList [0,0,6,0,1],4),(M.fromList [0,0,5,0,0],-6),(M.fromList [0,0,4,0,1],6),(M.fromList [0,0,3,0,0],-102),(M.fromList [0,0,2,0,1],4),(M.fromList [0,0,1,0,0],-2),(M.fromList [0,0,0,0,1],1)]
+y' = [y_1,y_2]
+y = DS.fromList (initPolySugars y')
+yideal = I $ DV.fromList (initSugars y') :: Ideal M.Lex
+
+x_1 = P.fromList [(M.fromList [1,0,0,0,0],1),(M.fromList [0,1,0,0,0],1),(M.fromList [0,0,1,0,0],1),(M.fromList [0,0,0,1,0],1),(M.fromList [0,0,0,0,1],1)]
+x_2 = P.fromList [(M.fromList [1,1,0,0,0],1),(M.fromList [1,0,0,0,1],1),(M.fromList [0,1,1,0,0],1),(M.fromList [0,0,1,1,0],1),(M.fromList [0,0,0,1,1],1)]
+x_3 = P.fromList [(M.fromList [1,1,1,0,0],1),(M.fromList [1,1,0,0,1],1),(M.fromList [1,0,0,1,1],1),(M.fromList [0,1,1,1,0],1),(M.fromList [0,0,1,1,1],1)]
+x_4 = P.fromList [(M.fromList [1,1,1,1,0],1),(M.fromList [1,1,1,0,1],1),(M.fromList [1,1,0,1,1],1),(M.fromList [1,0,1,1,1],1),(M.fromList [0,1,1,1,1],1)]
+x_5 = P.fromList [(M.fromList [1,1,1,1,1],1),(M.fromList [0,0,0,0,0],-1)]
+x' = [x_1,x_2,x_3,x_4,x_5]
+x = DS.fromList (initPolySugars x')
+xideal = I $ DV.fromList (initSugars x') :: Ideal M.Lex
+
 {-p_1 = P.fromList [(M.fromList [4,0,0,0],1),(M.fromList [0,1,0,0],-1)]
 p_2 = P.fromList [(M.fromList [3,0,0,0],1),(M.fromList [0,0,1,0],-1)]
 p_3 = P.fromList [(M.fromList [2,0,0,0],1),(M.fromList [0,0,0,1],-1)]
@@ -69,10 +84,10 @@ p = DS.fromList (initPolySugars p')
 pideal = I $ DV.fromList (initSugars p') :: Ideal M.Lex -}
 
 main = do 
-  let gb = show $ (getPolys $ modgB p)
+  let gb = show $ (getPolys $ modgB x)
   putStrLn "8"
   putStrLn ("Lex")
-  putStrLn (show (getPolys pideal))
+  putStrLn (show (getPolys xideal))
   start <- getCurrentTime
   putStrLn (gb) 
   end <- getCurrentTime
