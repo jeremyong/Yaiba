@@ -11,8 +11,6 @@ import Yaiba.Sugar
 import Yaiba.Monomial
 import Yaiba.Polynomial
 import Yaiba.Ideal
-import Debug.Trace
-import Control.Parallel
 
 -- | SPoly is a map of CritPairs keyed to the ideal provided in the second argument.
 data SPoly ord = SP (DM.Map (Int, Int) (CritPair ord)) (Ideal ord)
@@ -28,7 +26,7 @@ isEmpty (SP spmap _) = DM.null spmap
 sizespMap (SP spmap _) = DM.size spmap
 
 updateSPolys :: Ord (Mon ord) => SPoly ord -> (Poly ord, Sugar ord) -> SPoly ord
-updateSPolys (SP cpMap oldGens) (newGen,sug) = let k = numGens oldGens
+updateSPolys (SP cpMap oldGens) (newGen,sug) = let !k = numGens oldGens
                                                    mPass = mTest (SP cpMap oldGens) newGen
                                                    pairs = pairing oldGens (newGen,sug)
                                                    fPass = fTest pairs
@@ -70,12 +68,24 @@ fTest nMap = let (coprimes,notCoprimes) = DM.partition snd nMap
                  fTest' cpair acc = DM.mapMaybe (\cpair' -> if cpair' == cpair then Nothing else Just cpair') acc
 
 bTest oldMap nMap newGen k = DM.mapMaybeWithKey bTest' oldMap where
-  bTest' (i,j) (CP (sug,tauij)) = let Just (CP (_,tauik)) = DM.lookup (i,k) nMap
-                                      Just (CP (_,taujk)) = DM.lookup (j,k) nMap
+  bTest' (i,j) (CP (sug,tauij)) = let lookupi = DM.lookup (i,k) nMap
+                                      lookupj = DM.lookup (j,k) nMap
                                       tauk = monLT newGen
-                                  in if tauk `isFactor` tauij && tauij /= tauik
-                                        && tauij /= taujk && tauik /= taujk then
-                                       Nothing
+                                      taukDivides = tauk `isFactor` tauij
+                                  in if taukDivides then case lookupi of
+                                    Nothing -> case lookupj of
+                                      Nothing -> Nothing
+                                      Just (CP (_,taujk)) -> if taujk /= tauij then
+                                                               Nothing
+                                                             else Just (CP (sug,tauij))
+                                    Just (CP (_,tauik)) -> case lookupj of
+                                      Nothing -> if tauik /= tauij then
+                                                   Nothing
+                                                 else Just (CP (sug,tauij))
+                                      Just (CP (_,taujk)) -> if tauij /= tauik && tauij /= taujk && tauik /= taujk then
+                                                               Nothing
+                                                             else
+                                                               Just (CP (sug,tauij))
                                      else
                                        Just (CP (sug,tauij))
 
