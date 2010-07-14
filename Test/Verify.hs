@@ -69,7 +69,7 @@ p = DS.fromList (initPolySugars p')
 pideal = I $ DV.fromList (initSugars p') :: Ideal M.Lex -}
 
 main = do 
-  let gb = show $ (getPolys $ gB p)
+  let gb = show $ (getPolys $ modgB p)
   putStrLn "8"
   putStrLn ("Lex")
   putStrLn (show (getPolys pideal))
