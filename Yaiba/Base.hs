@@ -11,8 +11,8 @@ import Data.Ratio
 -- so that we can change fields easily
 myPrime = 32003 :: Int
 --newtype Field = Field F2 deriving (Eq,Ord,Num,Fractional)
-newtype Field = Field FiniteField deriving (Eq,Ord,Num,Fractional)
---newtype Field = Field Q deriving (Eq,Ord,Num,Fractional)
+--newtype Field = Field FiniteField deriving (Eq,Ord,Num,Fractional)
+newtype Field = Field Q deriving (Eq,Ord,Num,Fractional)
 
 instance Show Field where show (Field a) = show a
 

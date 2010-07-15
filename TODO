@@ -1,4 +1,12 @@
+X Sweeten the algorithm with some sugar. Get the basic operations optimized properly.
 Write a nice parser.
-Test on multiple cores.
-Sweeten the algorithm with some sugar. Get the basic operations optimized properly.
-Finish the project.
+Implement strategy accurate version
+F/J Rewrite fTest to be like Mike.
+Eliminate fractions.
+Reify finite field types.
+Look at e/f4/moninfo.hpp in the M2 code.
+Memoize finite field tables.
+Adaptive parallel selection strategy.
+Saccharine selection strategy.
+Improving the polynomial reduction algorithm.
+F/J Finish the project.

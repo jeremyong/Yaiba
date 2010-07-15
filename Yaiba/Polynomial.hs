@@ -38,7 +38,7 @@ instance Ord (Mon ord) => Eq (Poly ord) where
   a == b = if numTerms a == numTerms b then False
            else isNull $! a-b
   
-instance (Ord (Mon ord)) => Ord (Poly ord) where
+instance Ord (Mon ord) => Ord (Poly ord) where
     compare (P a) (P b) | YM.null a && YM.null b = EQ
                         | YM.null a = LT
                         | YM.null b = GT
@@ -95,6 +95,8 @@ deg = degree . monLT
 
 totalDeg (P a) = YM.foldrWithKey totalDeg' 0 a where
   totalDeg' mon _ sug = max (degree mon) sug
+
+makeMonic (poly,sug) = (scalePoly (recip $ coefLT poly) poly, sug)
 
 -- | Returns a tuple of the lead term as Poly and the rest of the supplied Poly.
 deleteFindLT :: Poly ord -> ((Mon ord, Field), Poly ord)
