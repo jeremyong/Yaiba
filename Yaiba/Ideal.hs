@@ -9,6 +9,7 @@ import Yaiba.Sugar
 import qualified Data.List as DL
 import qualified Data.Vector as DV
 import Prelude hiding (rem)
+import Data.Eq
 
 newtype Ideal ord = I (DV.Vector (Poly ord,Sugar ord))
 
@@ -42,6 +43,16 @@ null (I as) = DV.null as
 
 (!) (I as) index = (DV.!) as index
 
+reduceIdeal ideal@(I as) = I $ DV.imap (\i a -> a /. (allExcept i ideal)) as 
+
+allExcept index (I as) | index == 0 = I back
+                       | index == len = I front
+                       | otherwise = I (front DV.++ back) 
+    where
+      len = DV.length as -1
+      front = DV.take (index-1) as
+      back = DV.drop index as
+
 -- | Reduces a polynomial by an ideal into something irreducible. Records
 -- its "history" in the Sugar
 (/.) :: Ord (Mon ord) => (Poly ord, Sugar ord) -> 
@@ -53,15 +64,24 @@ null (I as) = DV.null as
                                    else let !((m,q),rest) = deleteFindLT poly
                                             !newrem = rem + monPoly m q
                                         in (/..) (rest,newsug) newrem
-             
+{-
+(/.) :: Ord (Mon ord) => (Poly ord, Sugar ord) -> 
+         Ideal ord -> (Poly ord, Sugar ord)
+(/.) p ideal = (/..) p nullPoly where
+    (/..) (poly,psug) rem = if isNull poly then (rem,psug) else
+                                let !(new,newsug,divOcc) = divByIdeal (poly,psug) ideal
+                                in if divOcc then (/..) (new,newsug) rem
+                                   else (/..) (nullPoly,psug) poly
+-}
 -- | Auxilliary function to /.
 divByIdeal :: Ord (Mon ord) => (Poly ord, Sugar ord) -> 
               Ideal ord -> (Poly ord, Sugar ord, Bool)
 divByIdeal (poly,sug) ideal = foldl' divByIdeal' (poly, sug, False) ideal where
-  divByIdeal' (p,s,divOcc) d = if divOcc then (p,s,divOcc) else
-                                   let (quo,rem,remsug) = quoRem (p,s) d
-                                   in if isNull quo then (p,s,divOcc) 
-                                      else (rem,remsug,True)
+  divByIdeal' (p,s,divOcc) d | isNull $ fst d = (p,s,divOcc) 
+                             | otherwise = if divOcc then (p,s,divOcc) else
+                                               let (quo,rem,remsug) = quoRem (p,s) d
+                                               in if isNull quo then (p,s,divOcc) 
+                                                  else (rem,remsug,True)
 
 reducePolys :: Ord (Mon ord) => Ideal ord ->
                [(Poly ord,Sugar ord)] -> [(Poly ord,Sugar ord)]

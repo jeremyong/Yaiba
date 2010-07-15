@@ -84,10 +84,10 @@ p = DS.fromList (initPolySugars p')
 pideal = I $ DV.fromList (initSugars p') :: Ideal M.Lex -}
 
 main = do 
-  let gb = show $ (getPolys $ modgB x)
+  let gb = show $ (getPolys $ modgB y)
   putStrLn "8"
   putStrLn ("Lex")
-  putStrLn (show (getPolys xideal))
+  putStrLn (show $ getPolys yideal)
   start <- getCurrentTime
   putStrLn (gb) 
   end <- getCurrentTime
