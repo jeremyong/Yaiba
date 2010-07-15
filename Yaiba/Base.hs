@@ -1,3 +1,4 @@
+
 -- Copyright (c) David Amos, 2008. All rights reserved.
 
 {-# OPTIONS_GHC -fglasgow-exts #-}
@@ -48,12 +49,12 @@ instance Num FiniteField where
   fromInteger a   = FF $ ((fromInteger a) `mod` myPrime)
 
 instance Fractional FiniteField where
-  recip (FF a)    = let (u,v,1) = extendedEuclid a myPrime in FF $ u `mod` myPrime
+  recip (FF a)    = let (u,_,1) = extendedEuclid a myPrime in FF $ u `mod` myPrime
   fromRational q = (fromInteger $ Data.Ratio.numerator q) * (recip $ fromInteger $ Data.Ratio.denominator q)
 
 newtype F2 = F2 Bool deriving (Eq,Ord)
 
-instance Show F2 where show (F2 a) = if a then show 1 else show 0
+instance Show F2 where show (F2 a) = if a then show (1 :: Int) else show (0 :: Int)
 
 instance Num F2 where
   F2 a + F2 b  = F2 $ (a || b) && (not (a && b))
@@ -69,9 +70,9 @@ instance Fractional F2 where
 
 -- returns (u,v,d) where u*p+v*q = d
 extendedEuclid :: (Integral a) => a -> a -> (a,a,a)
-extendedEuclid a b | a >= 0 && b >= 0 = extendedEuclid' a b [] where
+extendedEuclid a b = extendedEuclid' a b [] where
     extendedEuclid' d 0 qs = let (u,v) = unwind 1 0 qs in (u,v,d)
-    extendedEuclid' a b qs = let (q,r) = quotRem a b in extendedEuclid' b r (q:qs)
+    extendedEuclid' c d qs = let (q,r) = quotRem c d in extendedEuclid' d r (q:qs)
     unwind u v [] = (u,v)
     unwind u v (q:qs) = unwind v (u-v*q) qs
 
