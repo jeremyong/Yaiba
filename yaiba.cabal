@@ -30,7 +30,7 @@ Library
         array                == 0.3.0.*
 
   ghc-options:
-        -Odph -Wall -fno-warn-missing-signatures -fglasgow-exts -fdph-par
+        -Odph -Wall -fno-warn-missing-signatures -fglasgow-exts -fdph-par -fno-warn-orphans
 
   extensions:
         UndecidableInstances
