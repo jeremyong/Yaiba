@@ -31,6 +31,9 @@ instance NFData (CritPair ord) where
 instance Ord (CritPair ord) where
     compare (CP (a,_)) (CP (b,_)) = compare a b
 
+instance Show (CritPair ord) where
+    show (CP cp) = show cp 
+
 empty :: SPoly ord
 empty = SP (DM.empty) (I $ DV.empty)
 
@@ -47,9 +50,9 @@ updateSPolys (SP cpMap oldGens) (newGen,sug) = let !k = numGens oldGens
                                                    newcpMap = DM.union bPass fPass
                                                in SP newcpMap (snoc oldGens (newGen,sug))
 
-pairing :: Ideal t1
-        -> (Poly t1, Sugar t)
-        -> DM.Map (Int, Int) (CritPair t1, Bool)
+pairing :: Ideal ord
+        -> (Poly ord, Sugar ord)
+        -> DM.Map (Int, Int) (CritPair ord, Bool)
 pairing oldGens (newGen,S sugk) = ifoldl' pairing' DM.empty oldGens where
   k = numGens oldGens
   pairing' acc index (poly,S sugi) = let taui = monLT poly
@@ -60,8 +63,8 @@ pairing oldGens (newGen,S sugk) = ifoldl' pairing' DM.empty oldGens where
                                          newsug = S $ (degree tauik) + max (sugi - (degree taui)) (sugk - (degree tauk))
                                      in DM.insert (index,k) (CP (newsug,tauik),coprime) acc
 
-fTest :: (Ord t, Ord t1, Ord (Mon t2)) =>
-         DM.Map (t, t1) (CritPair t2, Bool) -> DM.Map (t, t1) (CritPair t2)
+fTest :: Ord (Mon ord) =>
+         DM.Map (Int, Int) (CritPair ord, Bool) -> DM.Map (Int, Int) (CritPair ord)
 fTest nMap = reformat $ DM.foldrWithKey fTest' DM.empty nMap where
     fTest' (i,k) (cp@(CP (_,tauik)),coprime) acc = let filteredAcc = DM.filterWithKey (\taujk _ -> not $ tauik `isFactor` taujk) acc
                                                    in DM.insertWith (\(nv,copr) (l,coprAcc) -> (l++nv,copr || coprAcc))
@@ -73,12 +76,12 @@ fTest nMap = reformat $ DM.foldrWithKey fTest' DM.empty nMap where
                           --                          in DM.insert k v acc
                       in DM.foldrWithKey reformat' DM.empty notCoprime
 
-bTest :: (Ord t, Ord t1) =>
-         DM.Map (t, t) (CritPair ord)
-             -> DM.Map (t, t1) (CritPair ord)
+bTest :: Ord (Mon ord) =>
+         DM.Map (Int, Int) (CritPair ord)
+             -> DM.Map (Int, Int) (CritPair ord)
              -> Poly ord
-             -> t1
-             -> DM.Map (t, t) (CritPair ord)
+             -> Int
+             -> DM.Map (Int, Int) (CritPair ord)
 bTest oldMap nMap newGen k = DM.mapMaybeWithKey bTest' oldMap where
   bTest' (i,j) (CP (sug,tauij)) = let lookupi = DM.lookup (i,k) nMap
                                       lookupj = DM.lookup (j,k) nMap
@@ -118,8 +121,8 @@ delFindSingleLowest (SP spMap ideal) = let sugSet = DM.fold (\(CP (S x,_)) acc -
                                               ((nullPoly,S 0),DM.empty)
                                           else (botelem,newTop)
 
-toSPoly :: (Ord (Mon t1)) =>
-           ((Int, Int), CritPair t) -> Ideal t1 -> (Poly t1, Sugar t)
+toSPoly :: Ord (Mon ord) =>
+           ((Int, Int), CritPair ord) -> Ideal ord -> (Poly ord, Sugar ord)
 toSPoly ((i,j),(CP (sug,_))) ideal = let (polyi,_) = ideal ! i
                                          (polyj,_) = ideal ! j
                                          (taui,ci) = leadTerm polyi
@@ -129,7 +132,7 @@ toSPoly ((i,j),(CP (sug,_))) ideal = let (polyi,_) = ideal ! i
                                                  monMult (divide tauij tauj) ci polyj
                                      in (spoly,sug)
 
-toSPolys :: (Ord (Mon t)) => SPoly t -> [(Poly t, Sugar t)]
+toSPolys :: Ord (Mon ord) => SPoly ord -> [(Poly ord, Sugar ord)]
 toSPolys (SP spMap ideal) = DM.foldlWithKey toSPolys' [] spMap where
     toSPolys' acc (i,j) (CP (sug,_)) = let (polyi,_) = ideal ! i
                                            (polyj,_) = ideal ! j

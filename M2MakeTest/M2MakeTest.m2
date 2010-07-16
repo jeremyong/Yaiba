@@ -58,6 +58,12 @@ makeExample I
 
 restart
 load "../M2MakeTest/M2MakeTest.m2"
+R = QQ[t,u,x,y,MonomialOrder=>Lex]
+I = ideal {x+y+t+u, x*y+y*t+t*u+u*x, x*y*t+y*t*u+t*u*x+u*x*y, x*y*t*u-1}
+makeExample I
+
+restart
+load "../M2MakeTest/M2MakeTest.m2"
 R = QQ[t,u,x,y,z,MonomialOrder=>Lex]
 I = ideal {y*(1+x^2)^4 - 2*(5+19*x^2-45*x^4+x^6-4*x^8), z*(1+x^2)^4-2*(x+51*x^3+3*x^5+17*x^7)}
 makeExample I

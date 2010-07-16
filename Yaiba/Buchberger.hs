@@ -13,6 +13,7 @@ import qualified Data.Set as DS
 import qualified Data.Vector as DV
 import qualified Data.Map as DM
 import Prelude hiding (rem,null,map,filter)
+import Debug.Trace
 
 -- | This implementation of gB does not insert the supplied generators first. Instead, generators are
 -- inserted by sugar degree.
@@ -44,7 +45,8 @@ accgB seed = let (initial,restSeed) = deleteFindMin seed
              in gB' (I $ DV.singleton initial) restSeed DM.empty where
                  gB' res oneByOne spMap | DS.null oneByOne && DM.null spMap = res
                                         | DS.null oneByOne = let (lowSugPoly, higherSugPolys) = delFindSingleLowest (SP spMap res)
-                                                                 !redPoly = makeMonic $ lowSugPoly /. res
+                                                                 !redPoly = (show res ++ "\n" ++ DM.showTree spMap) `trace`
+                                                                            makeMonic $ lowSugPoly /. res
                                                                  newOneByOne = if not $ isNull $ fst redPoly then
                                                                                    DS.insert (PS redPoly) oneByOne
                                                                                else
@@ -54,7 +56,8 @@ accgB seed = let (initial,restSeed) = deleteFindMin seed
                                                           reducedGen = makeMonic $ gen /. res
                                                           SP newspMap newres = updateSPolys (SP spMap res) reducedGen
                                                           (lowSugPoly, higherSugPolys) = delFindSingleLowest (SP newspMap newres)
-                                                          !redPoly = makeMonic $ lowSugPoly /. res
+                                                          !redPoly = (show res ++ "\n" ++"Adding: " ++ show reducedGen++"\n"++ DM.showTree newspMap) `trace`
+                                                                     makeMonic $ lowSugPoly /. res
                                                           newOneByOne = if not $ isNull $ fst redPoly then
                                                                             DS.insert (PS redPoly) newGens
                                                                         else
