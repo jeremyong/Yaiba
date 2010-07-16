@@ -33,8 +33,8 @@ time a = do
   start <- getCPUTime
   v <- a
   end <- getCPUTime
-  let diff = (fromIntegral (end - start)) / (10^12)
-  printf "Time to compute gb in Yaiba: %0.5f sec\n" (diff :: Double)
+  let diff = (fromIntegral (end - start)) / (10^12) / (fromIntegral numCapabilities)
+  printf "Time to compute gb in Yaiba (%i cores): %0.5f sec\n" numCapabilities (diff :: Double)
   return v
 
 j_1 = P.fromList [(M.fromList [2,3,4,3,0,0,0,0],-1),(M.fromList [0,0,0,0,1,0,0,0],1)]
