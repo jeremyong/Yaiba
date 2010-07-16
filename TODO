@@ -2,8 +2,9 @@ Yaiba TODO/Spec Sheet
 Updated: 7/16/2010
 
 STRATEGIC IMPROVEMENTS (major changes or improvements increment 2nd digit in version number)
-Implement strategy accurate version                                                          -J
+Implement strategy accurate version.                                                         -J
 Saccharine selection strategy.                                                               -
+Keep track of minimal cloud generators.                                                      -J
 
 TECHNICAL IMPROVEMENTS (major changes or improvements increment 2nd digit in version number)
 Eliminate fractions (aka keeping the coefficients down).                                     -
@@ -11,6 +12,7 @@ Reify finite field types.                                                       
 Look at e/f4/moninfo.hpp in the M2 code.                                                     -
 Memoize finite field tables.                                                                 -
 Make the polynomial reduction algorithm smarter.                                             -
+Fix 1-2 Bug                                                                                  -F
 
 PARALLEL EXECUTION IMPROVEMENTS (major changes or improvements increment 3rd digit in version number)
 Adaptive parallel selection strategy.                                                        -
