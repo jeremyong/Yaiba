@@ -6,7 +6,7 @@ monOrder = infileString#1
 
 R = QQ[x_1..x_numVars,MonomialOrder=>{Lex}] --Weights=>toList(numVars:1),
 origIdeal = ideal value ("{" | substring((1,#infileString#2 - 2), infileString#2) | "}")
-gbList = value ("{" | substring((1,#infileString#3 - 2), infileString#3) | "}")
+gbList = value ("{" | substring((1,#infileString#4 - 2), infileString#4) | "}")
 -- are they the same ideal?
 assert(origIdeal == ideal gbList)
 -- is it a GB?
