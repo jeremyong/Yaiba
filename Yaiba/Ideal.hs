@@ -36,21 +36,30 @@ initSugar a = (a, S $! totalDeg a)
 tau :: Ideal ord -> Int -> Mon ord -> Mon ord
 tau (I as) index mon = lcmMon (monLT $ fst $ as DV.! index) mon
 
+ifoldl' :: (a -> Int -> (Poly t, Sugar t) -> a) -> a -> Ideal t -> a
 ifoldl' f acc (I as) = DV.ifoldl' f acc as
+
+foldl' :: (a -> (Poly t, Sugar t) -> a) -> a -> Ideal t -> a
 foldl' f acc (I as) = DV.foldl' f acc as
 
+snoc :: Ideal ord -> (Poly ord, Sugar ord) -> Ideal ord
 snoc (I as) a = I $! DV.snoc as a
 
 --union (I as) (I bs) = I $! DV.++ as bs
 
+numGens :: Ideal t -> Int
 numGens (I as) = DV.length as
 
+null :: Ideal ord -> Bool
 null (I as) = DV.null as
 
+(!) :: Ideal t -> Int -> (Poly t, Sugar t)
 (!) (I as) index = (DV.!) as index
 
+reduceIdeal :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
 reduceIdeal ideal@(I as) = I $ DV.imap (\i a -> a /. (allExcept i ideal)) as 
 
+allExcept :: Int -> Ideal t -> Ideal t
 allExcept index (I as) | index == 0 = I back
                        | index == len = I front
                        | otherwise = I (front DV.++ back) 
