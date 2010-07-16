@@ -19,6 +19,9 @@ import Control.DeepSeq
 -- | SPoly is a map of CritPairs keyed to the ideal provided in the second argument.
 data SPoly ord = SP (DM.Map (Int, Int) (CritPair ord)) (Ideal ord)
 
+instance NFData (SPoly ord) where
+    rnf (SP m _) = rnf m
+
 -- | CritPair stores a critical pair as a tuple with the sugar and lcm as described
 -- in the Sugar paper.
 newtype CritPair ord = CP (Sugar ord, Mon ord) deriving Eq
@@ -39,7 +42,6 @@ updateSPolys :: Ord (Mon ord) => SPoly ord -> (Poly ord, Sugar ord) -> SPoly ord
 updateSPolys (SP cpMap oldGens) (newGen,sug) = let !k = numGens oldGens
                                                    --mPass = mTest (SP cpMap oldGens) newGen
                                                    pairs = pairing oldGens (newGen,sug)
-                                                   --(fPass,bPass) = (fTest pairs, bTest cpMap fPass newGen k) `using` parPair rdeepseq rdeepseq
                                                    (fPass,bPass) = (fTest pairs, bTest cpMap fPass newGen k)
                                                    newcpMap = DM.union bPass fPass
                                                in SP newcpMap (snoc oldGens (newGen,sug))

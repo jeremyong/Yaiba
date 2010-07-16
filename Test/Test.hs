@@ -28,22 +28,23 @@ time a = do
   return v
 
 main = do 
-  --let gb = gB j
-  let gb = gB'' p 100
-  putStrLn "8"
-  putStrLn ("Lex")
+  let gb = gB j
+  --let gb = gB'' p 100
+  --putStrLn "8"
+  --putStrLn ("Lex")
   --putStrLn (show (getPolys j))
-  putStrLn (show (getPolys pideal))
+  --putStrLn (show (getPolys pideal))
   time $ gb `seq` return ()
   --putStrLn (show (getPolys gb))
   putStrLn "Done."
 
 j_1 = P.fromList [(M.fromList [3,14,2,4,0,0,0,0],-1),(M.fromList [0,0,0,0,1,0,0,0],1)]
 j_2 = P.fromList [(M.fromList [5,5,3,7,0,0,0,0],-1),(M.fromList [0,0,0,0,0,1,0,0],1)]
-j_3 = P.fromList [(M.fromList [4,5,8,6,0,0,0,0],-1),(M.fromList [0,0,0,0,0,0,1,0],1)]
-j_4 = P.fromList [(M.fromList [7,8,10,5,0,0,0,0],-1),(M.fromList [0,0,0,0,0,0,0,1],1)]
+j_3 = P.fromList [(M.fromList [4,5,8,16,0,0,0,0],-1),(M.fromList [0,0,0,0,0,0,1,0],1)]
+j_4 = P.fromList [(M.fromList [27,8,10,5,0,0,0,0],-1),(M.fromList [0,0,0,0,0,0,0,1],1)]
 j' = j_1:j_2:j_3:j_4:[]
-j = DS.fromList (initSugars j') :: DS.Set (P.Poly M.Lex, Sugar M.Lex)
+j = DS.fromList (initPolySugars j')
+jideal =I $ DV.fromList $ initSugars $ j' :: Ideal M.Grlex
 
 p_1 = P.fromList [(M.fromList [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],1),(M.fromList [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],1),(M.fromList [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],1),(M.fromList [0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],-1),(M.fromList [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],-1),(M.fromList [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],-1)]
 p_2 = P.fromList [(M.fromList [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],1),(M.fromList [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],-1),(M.fromList [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0],1),(M.fromList [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0],1),(M.fromList [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0],1),(M.fromList [0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],-1),(M.fromList [0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],-1),(M.fromList [0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],-1)]

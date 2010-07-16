@@ -19,24 +19,29 @@ import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import System.IO
 import System.CPUTime
 import Text.Printf
+import Criterion.Main
 
 main = do 
   let gb = modgB x
   putStrLn "8"
   putStrLn "Lex"
   putStrLn (show $ getPolys xideal)
-  time $ gb `seq` return ()
+  start <- getCurrentTime
+  gb `seq` return ()
+  end <- getCurrentTime
+  let diff = show $ end `diffUTCTime` start
+  printf "Time to compute gb in Yaiba with %i cores: %s sec\n" numCapabilities diff
   putStrLn (show $ gb) 
-
+{-
 time :: IO t -> IO t
 time a = do
   start <- getCPUTime
   v <- a
   end <- getCPUTime
-  let diff = (fromIntegral (end - start)) / (10^12) / (fromIntegral numCapabilities)
+  let diff = (fromIntegral (end - start)) / (10^12)
   printf "Time to compute gb in Yaiba (%i cores): %0.5f sec\n" numCapabilities (diff :: Double)
   return v
-
+-}
 j_1 = P.fromList [(M.fromList [2,3,4,3,0,0,0,0],-1),(M.fromList [0,0,0,0,1,0,0,0],1)]
 j_2 = P.fromList [(M.fromList [4,3,2,3,0,0,0,0],-1),(M.fromList [0,0,0,0,0,1,0,0],1)]
 j_3 = P.fromList [(M.fromList [3,5,3,5,0,0,0,0],-1),(M.fromList [0,0,0,0,0,0,1,0],1)]
