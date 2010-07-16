@@ -16,6 +16,9 @@ newtype Ideal ord = I (DV.Vector (Poly ord,Sugar ord))
 instance NFData (Ideal ord) where
     rnf (I a) = DV.foldl' (\_ x -> rnf x) () a
 
+instance Ord (Mon ord) => Show (Ideal ord) where
+    show = show . getPolys
+
 getPolys :: Ideal ord -> [Poly ord]
 getPolys (I a) = DL.map fst (DV.toList a)
 

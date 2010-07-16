@@ -17,6 +17,25 @@ import qualified Data.Vector as DV
 import qualified Data.List as DL
 import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import System.IO
+import System.CPUTime
+import Text.Printf
+
+main = do 
+  let gb = modgB x
+  putStrLn "8"
+  putStrLn "Lex"
+  putStrLn (show $ getPolys xideal)
+  time $ gb `seq` return ()
+  putStrLn (show $ gb) 
+
+time :: IO t -> IO t
+time a = do
+  start <- getCPUTime
+  v <- a
+  end <- getCPUTime
+  let diff = (fromIntegral (end - start)) / (10^12)
+  printf "Computation time: %0.5f sec\n" (diff :: Double)
+  return v
 
 j_1 = P.fromList [(M.fromList [2,3,4,3,0,0,0,0],-1),(M.fromList [0,0,0,0,1,0,0,0],1)]
 j_2 = P.fromList [(M.fromList [4,3,2,3,0,0,0,0],-1),(M.fromList [0,0,0,0,0,1,0,0],1)]
@@ -83,12 +102,3 @@ p' = [p_1,p_2,p_3,p_4,p_5,p_6]
 p = DS.fromList (initPolySugars p')
 pideal = I $ DV.fromList (initSugars p') :: Ideal M.Lex -}
 
-main = do 
-  let gb = show $ map P.monLT $ getPolys $ modgB x
-  putStrLn "8"
-  putStrLn ("Lex")
-  putStrLn (show $ getPolys xideal)
-  start <- getCurrentTime
-  putStrLn (gb) 
-  end <- getCurrentTime
-  putStrLn $ show (end `diffUTCTime` start) ++ " elapsed."
