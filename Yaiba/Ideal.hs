@@ -8,10 +8,13 @@ import Yaiba.Polynomial
 import Yaiba.Sugar
 import qualified Data.List as DL
 import qualified Data.Vector as DV
+import Control.DeepSeq
 import Prelude hiding (rem)
-import Data.Eq
 
 newtype Ideal ord = I (DV.Vector (Poly ord,Sugar ord))
+
+instance NFData (Ideal ord) where
+    rnf (I a) = DV.foldl' (\_ x -> rnf x) () a
 
 getPolys :: Ideal ord -> [Poly ord]
 getPolys (I a) = DL.map fst (DV.toList a)
@@ -64,6 +67,7 @@ allExcept index (I as) | index == 0 = I back
                                    else let !((m,q),rest) = deleteFindLT poly
                                             !newrem = rem + monPoly m q
                                         in (/..) (rest,newsug) newrem
+
 {-
 (/.) :: Ord (Mon ord) => (Poly ord, Sugar ord) -> 
          Ideal ord -> (Poly ord, Sugar ord)

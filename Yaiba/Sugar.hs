@@ -4,6 +4,8 @@
 -- the "sugar" of a polynomial.
 module Yaiba.Sugar where
 
+import Control.DeepSeq
+
 newtype Sugar ord = S Int
 
 instance Eq (Sugar ord) where
@@ -14,3 +16,6 @@ instance Ord (Sugar ord) where
   
 instance Show (Sugar ord) where
   show (S a) = show a
+
+instance NFData (Sugar ord) where
+    rnf (S a) = rnf a

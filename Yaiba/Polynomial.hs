@@ -9,6 +9,7 @@ import Yaiba.Sugar
 import Yaiba.Base
 import Data.Set as DS
 import Data.Maybe
+import Control.DeepSeq
 import Prelude hiding (null,filter,map,rem,sum)
 
 -- | 
@@ -47,6 +48,12 @@ instance Ord (Mon ord) => Ord (Poly ord) where
                         top = DO.comparing YM.findMax a b
                         taila = P $! YM.deleteMax a
                         tailb = P $! YM.deleteMax b
+
+instance NFData (Poly ord) where
+    rnf (P a) = rnf a
+
+instance NFData (YM.Map (Mon ord) Field) where
+    rnf a = rnf $ YM.toList a
 
 showTerm :: [(Mon ord, Field)] -> String
 showTerm [] = ""

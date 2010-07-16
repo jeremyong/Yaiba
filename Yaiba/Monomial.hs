@@ -6,6 +6,7 @@ module Yaiba.Monomial where
 
 import qualified Data.Vector.Unboxed as DVU
 import qualified Data.Ord as DO
+import Control.DeepSeq
 
 data Mon ord = M (DVU.Vector Int) | Constant
 
@@ -40,6 +41,13 @@ instance Ord (Mon Grevlex) where
     GT -> GT
     LT -> LT
     EQ -> grevlexCompare x y
+
+instance NFData (Mon ord) where
+    rnf Constant = Constant `seq` ()
+    rnf (M a) = rnf a
+
+instance NFData (DVU.Vector Int) where
+    rnf = DVU.foldl' (\_ x -> rnf x) ()
 
 fromList :: [Int] -> Mon ord
 fromList ds = M (DVU.fromList ds :: DVU.Vector Int)

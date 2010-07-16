@@ -6,6 +6,7 @@
 module Yaiba.Base where
 
 import Data.Ratio
+import Control.DeepSeq
 --import Math.Common.IntegerAsType
 
 -- so that we can change fields easily
@@ -15,6 +16,9 @@ myPrime = 32003 :: Int
 newtype Field = Field Q deriving (Eq,Ord,Num,Fractional)
 
 instance Show Field where show (Field a) = show a
+
+instance NFData Field where
+    rnf (Field a) = rnf a
 
 -- RATIONALS
 
@@ -26,6 +30,9 @@ instance Show Q where
                | otherwise = show a ++ "/" ++ show b
                where a = numerator x
                      b = denominator x
+
+instance NFData Q where
+    rnf (Q a) = rnf a
 
 numeratorQ (Q x) = Data.Ratio.numerator x
 denominatorQ (Q x) = Data.Ratio.denominator x

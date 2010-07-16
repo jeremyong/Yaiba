@@ -26,6 +26,7 @@ Library
         containers           == 0.3.0.*,
         dph-par              == 0.4.*,
         parallel             == 2.2.0.*,
+        deepseq              == 1.1.0.*,
         array                == 0.3.0.*
 
   ghc-options:

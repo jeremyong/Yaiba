@@ -14,6 +14,40 @@ import qualified Data.Vector as DV
 import qualified Data.Map as DM
 import Prelude hiding (rem,null,map,filter)
 
+
+modgB :: Ord (Mon ord) => DS.Set (PolySug ord) -> Ideal ord
+modgB seed = let (initial,restSeed) = deleteFindMin seed
+             in gB' (I $ DV.singleton initial) restSeed DM.empty where
+                 gB' res oneByOne spMap | DS.null oneByOne && DM.null spMap = res
+                                        | DS.null oneByOne = let (lowSugPolys, higherSugPolys) = delFindLowest (SP spMap res)
+                                                                 numBins = DL.length lowSugPolys
+                                                                 --redPolys = decluster (lift worker (cluster numBins lowSugPolys)
+                                                                 --                      `using` parList rwhnf)
+                                                                 redPolys' = parMap rdeepseq (/. res) lowSugPolys
+                                                                 --worker = DL.map makeMonic .
+                                                                 --         DL.filter (\(poly,_) -> not $ isNull poly) . reducePolys res
+                                                                 worker = DL.map makeMonic .
+                                                                          DL.filter (\(poly,_) -> not $ isNull poly)
+                                                                 redPolys = worker redPolys'
+                                                                 newOneByOne = DL.foldl' (\acc x -> DS.insert (PS x) acc) oneByOne redPolys
+                                                             in gB' res newOneByOne higherSugPolys
+                                        | otherwise = let (gen,newGens) = deleteFindMin oneByOne
+                                                          reducedGen = makeMonic $ gen /. res
+                                                          SP newspMap newres = updateSPolys (SP spMap res) reducedGen
+                                                          (lowSugPolys, higherSugPolys) = delFindLowest (SP newspMap newres)
+                                                          numBins = DL.length lowSugPolys
+                                                          --redPolys = decluster (lift worker (cluster numBins lowSugPolys)
+                                                          --                      `using` parList rwhnf)
+                                                          redPolys' = parMap rdeepseq (/. res) lowSugPolys
+                                                          worker = DL.map makeMonic .
+                                                                   DL.filter (\(poly,_) -> not $ isNull poly)
+                                                          redPolys = worker redPolys'
+                                                          newOneByOne = DL.foldl' (\acc x -> DS.insert (PS x) acc) newGens redPolys
+                                                      in if isNull $ fst reducedGen then
+                                                             gB' res newGens spMap
+                                                         else --("Queue size: "++(show $ DS.size newOneByOne)) `trace`
+                                                             gB' newres newOneByOne higherSugPolys
+
 gB :: Ord (Mon ord) => DS.Set (PolySug ord) -> Ideal ord
 gB seed = let (initial,restSeed) = deleteFindMin seed
           in gB1 (I $ DV.singleton initial) restSeed DM.empty DS.empty where
@@ -78,36 +112,6 @@ oldgB seed = let (initial,restSeed) = deleteFindMin seed
                                                              gB' res newGens spMap
                                                          else --("Queue size: "++(show $ DS.size newOneByOne)) `trace`
                                                              gB' newres newOneByOne higherSugPolys
-
-modgB :: Ord (Mon ord) => DS.Set (PolySug ord) -> Ideal ord
-modgB seed = let (initial,restSeed) = deleteFindMin seed
-             in gB' (I $ DV.singleton initial) restSeed DM.empty where
-                 gB' res oneByOne spMap | DS.null oneByOne && DM.null spMap = res
-                                        | DS.null oneByOne = let (lowSugPolys, higherSugPolys) = delFindLowest (SP spMap res)
-                                                                 numBins = DL.length lowSugPolys
-                                                                 redPolys = decluster (lift worker (cluster numBins lowSugPolys)
-                                                                                       `using` parList rwhnf)
-                                                                 worker = DL.map (\(poly,sug) -> (scalePoly (recip $ coefLT poly) poly,sug)) .
-                                                                          DL.filter (\(poly,_) -> not $ isNull poly) . reducePolys res
-                                                                 newOneByOne = DL.foldl' (\acc x -> DS.insert (PS x) acc) oneByOne redPolys
-                                                             in gB' res newOneByOne higherSugPolys
-                                        | otherwise = let (gen,newGens) = deleteFindMin oneByOne
-                                                          reducedGenNotMonic = gen /. res
-                                                          reducedGen = (scalePoly (recip $ coefLT (fst reducedGenNotMonic)) (fst reducedGenNotMonic),
-                                                                        snd reducedGenNotMonic)
-                                                          SP newspMap newres = updateSPolys (SP spMap res) reducedGen
-                                                          (lowSugPolys, higherSugPolys) = delFindLowest (SP newspMap newres)
-                                                          numBins = DL.length lowSugPolys
-                                                          redPolys = decluster (lift worker (cluster numBins lowSugPolys)
-                                                                                `using` parList rwhnf)
-                                                          worker = DL.map (\(poly,sug) -> (scalePoly (recip $ coefLT poly) poly,sug)) .                                                        
-                                                                   DL.filter (\(poly,_) -> not $ isNull poly) . reducePolys newres
-                                                          newOneByOne = DL.foldl' (\acc x -> DS.insert (PS x) acc) newGens redPolys
-                                                      in if isNull $ fst reducedGen then
-                                                             gB' res newGens spMap
-                                                         else --("Queue size: "++(show $ DS.size newOneByOne)) `trace`
-                                                             gB' newres newOneByOne higherSugPolys
-
 
 modgB' :: Ord (Mon ord) => DS.Set (PolySug ord) -> Ideal ord
 modgB' seed = let (initial,restSeed) = deleteFindMin seed
