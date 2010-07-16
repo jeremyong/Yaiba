@@ -1,5 +1,6 @@
 X Sweeten the algorithm with some sugar. Get the basic operations optimized properly.
 X Rewrite fTest to be like Mike.
+X Eliminate need for cluster.
 Write a nice parser.
 Implement strategy accurate version
 Eliminate fractions.
