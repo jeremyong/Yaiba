@@ -105,6 +105,30 @@ delFindLowest (SP spMap ideal) = let sugSet = DM.fold (\(CP (S x,_)) acc -> DI.i
                                         ([],DM.empty)
                                     else (botelems,top)
 
+delFindSingleLowest :: (Ord (Mon ord)) =>
+                       SPoly ord
+                           -> ((Poly ord, Sugar ord), DM.Map (Int, Int) (CritPair ord))
+delFindSingleLowest (SP spMap ideal) = let sugSet = DM.fold (\(CP (S x,_)) acc -> DI.insert x acc) DI.empty spMap
+                                           minSug = S $ DI.findMin sugSet
+                                           (bottom,top) = DM.partition (\(CP (x,_)) -> x == minSug) spMap
+                                           (botelem',smallbot) = DM.deleteFindMin bottom
+                                           botelem = toSPoly botelem' ideal
+                                           newTop = DM.union smallbot top
+                                       in if DM.null spMap then
+                                              ((nullPoly,S 0),DM.empty)
+                                          else (botelem,newTop)
+
+toSPoly :: (Ord (Mon t1)) =>
+           ((Int, Int), CritPair t) -> Ideal t1 -> (Poly t1, Sugar t)
+toSPoly ((i,j),(CP (sug,_))) ideal = let (polyi,_) = ideal ! i
+                                         (polyj,_) = ideal ! j
+                                         (taui,ci) = leadTerm polyi
+                                         (tauj,cj) = leadTerm polyj
+                                         tauij = lcmMon taui tauj
+                                         spoly = monMult (divide tauij taui) cj polyi -
+                                                 monMult (divide tauij tauj) ci polyj
+                                     in (spoly,sug)
+
 toSPolys :: (Ord (Mon t)) => SPoly t -> [(Poly t, Sugar t)]
 toSPolys (SP spMap ideal) = DM.foldlWithKey toSPolys' [] spMap where
     toSPolys' acc (i,j) (CP (sug,_)) = let (polyi,_) = ideal ! i

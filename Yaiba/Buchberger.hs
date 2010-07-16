@@ -14,7 +14,8 @@ import qualified Data.Vector as DV
 import qualified Data.Map as DM
 import Prelude hiding (rem,null,map,filter)
 
-
+-- | This implementation of gB does not insert the supplied generators first. Instead, generators are
+-- inserted by sugar degree.
 modgB :: Ord (Mon ord) => DS.Set (PolySug ord) -> Ideal ord
 modgB seed = let (initial,restSeed) = deleteFindMin seed
              in gB' (I $ DV.singleton initial) restSeed DM.empty where
@@ -36,6 +37,32 @@ modgB seed = let (initial,restSeed) = deleteFindMin seed
                                                       in if isNull $ fst reducedGen then
                                                              gB' res newGens spMap
                                                          else gB' newres newOneByOne higherSugPolys
+
+-- | Strategy accurate implementation of gB
+accgB :: Ord (Mon ord) => DS.Set (PolySug ord) -> Ideal ord
+accgB seed = let (initial,restSeed) = deleteFindMin seed
+             in gB' (I $ DV.singleton initial) restSeed DM.empty where
+                 gB' res oneByOne spMap | DS.null oneByOne && DM.null spMap = res
+                                        | DS.null oneByOne = let (lowSugPoly, higherSugPolys) = delFindSingleLowest (SP spMap res)
+                                                                 !redPoly = makeMonic $ lowSugPoly /. res
+                                                                 newOneByOne = if not $ isNull $ fst redPoly then
+                                                                                   DS.insert (PS redPoly) oneByOne
+                                                                               else
+                                                                                   oneByOne
+                                                             in gB' res newOneByOne higherSugPolys
+                                        | otherwise = let (gen,newGens) = deleteFindMin oneByOne
+                                                          reducedGen = makeMonic $ gen /. res
+                                                          SP newspMap newres = updateSPolys (SP spMap res) reducedGen
+                                                          (lowSugPoly, higherSugPolys) = delFindSingleLowest (SP newspMap newres)
+                                                          !redPoly = makeMonic $ lowSugPoly /. res
+                                                          newOneByOne = if not $ isNull $ fst redPoly then
+                                                                            DS.insert (PS redPoly) newGens
+                                                                        else
+                                                                            newGens
+                                                      in if isNull $ fst reducedGen then
+                                                             gB' res newGens spMap
+                                                         else gB' newres newOneByOne higherSugPolys
+
 
 gB :: Ord (Mon ord) => DS.Set (PolySug ord) -> Ideal ord
 gB seed = let (initial,restSeed) = deleteFindMin seed
@@ -75,7 +102,7 @@ gB seed = let (initial,restSeed) = deleteFindMin seed
                                                       else --("Queue size: "++(show $ DS.size newOneByOne)) `trace`
                                                           gB2 newRes newTierTwo highSugPolys
 
-
+{-
 oldgB :: Ord (Mon ord) => DS.Set (PolySug ord) -> Ideal ord
 oldgB seed = let (initial,restSeed) = deleteFindMin seed
              in gB' (I $ DV.singleton initial) restSeed DM.empty where
@@ -130,6 +157,7 @@ modgB' seed = let (initial,restSeed) = deleteFindMin seed
                                                              gB' res newGens spMap
                                                          else --("Queue size: "++(show $ DS.size newOneByOne)) `trace`
                                                              gB' newres newOneByOne higherSugPolys
+-}
 
 gB'' :: Ord (Mon ord) => DS.Set (PolySug ord) -> Int -> Ideal ord
 gB'' seed c = let (initial,restSeed) = deleteFindMin seed
