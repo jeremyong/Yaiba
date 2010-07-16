@@ -54,6 +54,7 @@ accgB seed = let (initial,restSeed) = deleteFindMin seed
                                                              in gB' res newOneByOne higherSugPolys
                                         | otherwise = let (gen,newGens) = deleteFindMin oneByOne
                                                           reducedGen = makeMonic $ gen /. res
+                                                          --reducedGen = gen
                                                           SP newspMap newres = updateSPolys (SP spMap res) reducedGen
                                                           (lowSugPoly, higherSugPolys) = delFindSingleLowest (SP newspMap newres)
                                                           !redPoly = (show res ++ "\n" ++"Adding: " ++ show reducedGen++"\n"++ DM.showTree newspMap) `trace`

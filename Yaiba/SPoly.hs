@@ -14,6 +14,7 @@ import Yaiba.Ideal
 import Data.Ord
 import Control.Parallel.Strategies
 import Control.DeepSeq
+import Debug.Trace
 
 -- | SPoly is a map of CritPairs keyed to the ideal provided in the second argument.
 data SPoly ord = SP (DM.Map (Int, Int) (CritPair ord)) (Ideal ord)
@@ -46,9 +47,10 @@ sizespMap (SP spmap _) = DM.size spmap
 updateSPolys :: Ord (Mon ord) => SPoly ord -> (Poly ord, Sugar ord) -> SPoly ord
 updateSPolys (SP cpMap oldGens) (newGen,sug) = let !k = numGens oldGens
                                                    pairs = pairing oldGens (newGen,sug)
-                                                   (fPass,bPass) = (fTest pairs, bTest cpMap fPass newGen k)
+                                                   (fPass,bPass) = (fTest pairs, bTest cpMap fPass newGen k)                                                 
                                                    newcpMap = DM.union bPass fPass
-                                               in SP newcpMap (snoc oldGens (newGen,sug))
+                                               in ("Deleted Pairs: " ++ DM.showTree (DM.difference cpMap bPass)) `trace`
+                                                  SP newcpMap (snoc oldGens (newGen,sug))
 
 pairing :: Ideal ord
         -> (Poly ord, Sugar ord)
@@ -63,10 +65,16 @@ pairing oldGens (newGen,S sugk) = ifoldl' pairing' DM.empty oldGens where
                                          newsug = S $ (degree tauik) + max (sugi - (degree taui)) (sugk - (degree tauk))
                                      in DM.insert (index,k) (CP (newsug,tauik),coprime) acc
 
+-- | fTest does nothing if all pairs added are not coprime
 fTest :: Ord (Mon ord) =>
          DM.Map (Int, Int) (CritPair ord, Bool) -> DM.Map (Int, Int) (CritPair ord)
 fTest nMap = reformat $ DM.foldrWithKey fTest' DM.empty nMap where
-    fTest' (i,k) (cp@(CP (_,tauik)),coprime) acc = let filteredAcc = DM.filterWithKey (\taujk _ -> not $ tauik `isFactor` taujk) acc
+    fTest' (i,k) (cp@(CP (_,tauik)),coprime) acc = let filteredAcc = DM.filterWithKey (\taujk _ -> let check = not $ tauik `isFactor` taujk
+                                                                                                   in if check then
+                                                                                                          True
+                                                                                                      else
+                                                                                                          ("fTest removed: "++show (i,k)) `trace`
+                                                                                                          False) acc
                                                    in DM.insertWith (\(nv,copr) (l,coprAcc) -> (l++nv,copr || coprAcc))
                                                              tauik ([((i,k),cp)],coprime) filteredAcc
     reformat minMap = let notCoprime = DM.filter (\(_,copr) -> not copr) minMap
@@ -89,11 +97,13 @@ bTest oldMap nMap newGen k = DM.mapMaybeWithKey bTest' oldMap where
                                       taukDivides = tauk `isFactor` tauij
                                   in if taukDivides then
                                          if lookupi == Nothing || lookupj == Nothing
-                                         then Nothing
+                                         then --("bTest1: "++show (i,j)) `trace`
+                                              Nothing
                                          else let Just (CP (_,tauik)) = lookupi
                                                   Just (CP (_,taujk)) = lookupj
                                               in if tauik /= taujk && tauik /= tauij && taujk /= tauij
-                                                 then Nothing
+                                                 then --("bTest2: "++show (i,j)) `trace`
+                                                      Nothing
                                                  else Just (CP (sug,tauij))
                                      else
                                        Just (CP (sug,tauij))
