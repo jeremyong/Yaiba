@@ -127,11 +127,13 @@ bTest oldMap nMap newGen k = DM.mapMaybeWithKey bTest' oldMap where
                                      else
                                        Just (CP (sug,tauij))
 
-delFindLowest (SP spMap ideal) = let !sugSet = DM.fold (\(CP (S x,_)) acc -> DI.insert x acc) DI.empty spMap
-                                     !minSug = S $ DI.findMin sugSet
-                                     !(bottom,top) = DM.partition (\(CP (x,_)) -> x == minSug) spMap
-                                     !botelems = toSPolys (SP bottom ideal)
-                                 in (botelems,top)
+delFindLowest (SP spMap ideal) = let sugSet = DM.fold (\(CP (S x,_)) acc -> DI.insert x acc) DI.empty spMap
+                                     minSug = S $ DI.findMin sugSet
+                                     (bottom,top) = DM.partition (\(CP (x,_)) -> x == minSug) spMap
+                                     botelems = toSPolys (SP bottom ideal)
+                                 in if DM.null spMap then
+                                        ([],DM.empty)
+                                    else (botelems,top)
 
 toSPolys (SP spMap ideal) = DM.foldlWithKey toSPolys' [] spMap where
     toSPolys' acc (i,j) (CP (sug,_)) = let (polyi,_) = ideal ! i
