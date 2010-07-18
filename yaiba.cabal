@@ -45,7 +45,6 @@ Library
         Yaiba.Polynomial
         Yaiba.Ideal
         Yaiba.Sugar
-        Yaiba.Cluster
         Yaiba.Buchberger
         Yaiba.SPoly
         Yaiba.Base

@@ -22,7 +22,7 @@ import Text.Printf
 import Criterion.Main
 
 main = do 
-  let gb = accgB x
+  let gb = modgB x
   putStrLn "8"
   putStrLn "Lex"
   putStrLn (show $ getPolys xideal)

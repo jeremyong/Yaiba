@@ -45,7 +45,7 @@ foldl' f acc (I as) = DV.foldl' f acc as
 snoc :: Ideal ord -> (Poly ord, Sugar ord) -> Ideal ord
 snoc (I as) a = I $! DV.snoc as a
 
---union (I as) (I bs) = I $! DV.++ as bs
+--union (I as) (I bs) = I $! as ++ bs
 
 numGens :: Ideal t -> Int
 numGens (I as) = DV.length as

@@ -116,6 +116,8 @@ isFactor (M _) Constant    = False
 --                               (M cs) -> DVU.all (<=0) cs
 isFactor (M as) (M bs)     = let !a = DVU.and (DVU.zipWith (<=) as bs) in a
 
+strictDiv a b = a `isFactor` b && a /= b
+
 isMon :: Mon ord -> Bool
 isMon Constant = True
 isMon (M a) = DVU.all (>=0) a
