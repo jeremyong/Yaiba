@@ -68,7 +68,7 @@ constructN fs (fk,S sugk) k = let tauk = monLT fk
                                  , let sug = S $ degree tauik + max (sugi - degree taui) (sugk - degree tauk)
                                  , let copr = gcdMon taui tauk == Constant ]
 
--- | Consider the set of new pairs nps. Discard all pairs (j,k) s.t. [;\tau_i;] and [;\tau_k;] are
+-- | Consider the set of new pairs nps. Discard all pairs (j,k) s.t. [;\tau_j;] and [;\tau_k;] are
 -- comprime, along with any other pair (i,k) s.t. [;\tau_{jk}\left|\tau_{ik}\right.;].
 tTest :: [(((Int,Int),CritPair ord),Bool)] -> SPoly ord
 tTest nps = SP $ [ ps | (ps,_) <- notcoprs, tTest' ps ] where

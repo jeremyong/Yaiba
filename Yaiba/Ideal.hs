@@ -78,16 +78,24 @@ lppRed p (I fs) = lppRed' p nullPoly where
                                          Nothing -> lppRed' (newpoly,S psug) (monAdd tauk ck rem)
 
 
-lppRedDivOcc p (I fs) = lppRed' p nullPoly False where
-    lppRed' (poly,S psug) rem divOcc = if isNull poly then (rem,S psug) else
-                                           let ((tauk,ck),newpoly) = deleteFindLT poly
-                                               fi = DV.find (\(f,_) -> monLT f `isFactor` tauk) fs
-                                           in case fi of
-                                                Just (polyf,S sugf) -> (rem + poly - monMult (divide tauk (monLT polyf)) ck polyf,
-                                                                            S $ max psug (degree tauk * sugf))
-                                                Nothing -> lppRed' (newpoly,S psug) (monAdd tauk ck rem)
+lppRedDivOcc (poly,S psug) rem (I fs) divOcc = if isNull poly then (rem,poly, S psug, divOcc) else
+                                                   let ((tauk,ck),newpoly) = deleteFindLT poly
+                                                       fi = DV.find (\(f,_) -> monLT f `isFactor` tauk) fs
+                                                   in case fi of
+                                                        Just (polyf,S sugf) -> let (taui,ci) = leadTerm polyf
+                                                                               in (rem, scalePoly ci poly - monMult (divide tauk taui) ck polyf,
+                                                                                   S $ max psug (degree tauk * sugf), True)
+                                                        Nothing -> lppRedDivOcc (newpoly,S psug) (monAdd tauk ck rem) (I fs) divOcc
 
-totalRed p (I fs) = 
+totalRed p fs = totalRed' p nullPoly where
+    totalRed' polysug rem = let (rem', poly', sug, divOcc) = lppRedDivOcc polysug rem fs False
+                            in if isNull rem' then
+                                   (poly',sug)
+                               else
+                                   if divOcc then
+                                       totalRed' (poly',sug) rem'
+                                   else
+                                       (rem'+poly',sug)
 
 -- | Reduces a polynomial by an ideal into something irreducible. Records
 -- its "history" in the Sugar
