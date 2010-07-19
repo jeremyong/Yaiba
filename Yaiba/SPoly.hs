@@ -97,7 +97,7 @@ updateSPolys oldsp (fk,sugk) ideal = let SP bPass = bTest oldsp ideal (monLT fk)
 
 delFindSingleLowest :: Ord (Mon ord) => SPoly ord -> Ideal ord -> ((Poly ord, Sugar ord),SPoly ord)
 delFindSingleLowest (SP []) _ = ((nullPoly,S 0),empty)
-delFindSingleLowest (SP pairs) ideal = let minsug = findMinSug pairs Nothing
+delFindSingleLowest (SP pairs) ideal = let minsug = findMinSug pairs
                                            (bottom':top',top) = DL.partition (\(_,CP (sug,_)) -> sug == minsug) pairs
                                            bottom = toSPoly ideal bottom'
                                        in (bottom, SP (top'++top))
@@ -105,18 +105,14 @@ delFindSingleLowest (SP pairs) ideal = let minsug = findMinSug pairs Nothing
 
 delFindLowest :: Ord (Mon ord) => SPoly ord -> Ideal ord -> ([(Poly ord, Sugar ord)],SPoly ord)
 delFindLowest (SP []) _ = ([],empty)
-delFindLowest (SP pairs) ideal = let minsug = findMinSug pairs Nothing
+delFindLowest (SP pairs) ideal = let minsug = findMinSug pairs
                                      (bottom',top) = DL.partition (\(_,CP (sug,_)) -> sug == minsug) pairs
                                      bottom = DL.map (toSPoly ideal) bottom'
                                  in (bottom, SP top)
 
-findMinSug :: Ord (Mon ord) => [((Int,Int),CritPair ord)] -> Maybe (Sugar ord) -> Sugar ord
-findMinSug [] Nothing = S 0
-findMinSug [] (Just sug) = sug
-findMinSug (p:ps) sug' = let (_,CP (newsug,_)) = p
-                        in case sug' of
-                             Just sug -> findMinSug ps (Just (min newsug sug))
-                             Nothing -> findMinSug ps (Just newsug)
+findMinSug :: [(t, CritPair ord)] -> Sugar ord
+findMinSug [] = S 0
+findMinSug ((_,CP (initsug,_)):as) = DL.foldl' (\acc (_,CP (sug,_)) -> min sug acc) initsug as
 
 toSPoly :: Ord (Mon ord) =>
            Ideal ord -> ((Int, Int), CritPair ord) -> (Poly ord, Sugar ord)

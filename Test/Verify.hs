@@ -22,10 +22,10 @@ import Text.Printf
 import Criterion.Main
 
 main = do 
-  let gb = modgB x
+  let gb = modgB p
   putStrLn "8"
   putStrLn "Lex"
-  putStrLn (show $ getPolys xideal)
+  putStrLn (show $ getPolys pideal)
   start <- getCurrentTime
   gb `seq` return ()
   end <- getCurrentTime
@@ -55,15 +55,6 @@ y_2 = P.fromList [(M.fromList [0,0,8,0,1],1),(M.fromList [0,0,7,0,0],-34),(M.fro
 y' = [y_1,y_2]
 y = DS.fromList (initPolySugars y')
 yideal = I $ DV.fromList (initSugars y') :: Ideal M.Lex
-
-{-
-x_1 = P.fromList [(M.fromList [1,0,0,0],1),(M.fromList [0,1,0,0],1),(M.fromList [0,0,1,0],1),(M.fromList [0,0,0,1],1)]
-x_2 = P.fromList [(M.fromList [1,1,0,0],1),(M.fromList [1,0,0,1],1),(M.fromList [0,1,1,0],1),(M.fromList [0,0,1,1],1)]
-x_3 = P.fromList [(M.fromList [1,1,1,0],1),(M.fromList [1,1,0,1],1),(M.fromList [1,0,1,1],1),(M.fromList [0,1,1,1],1)]
-x_4 = P.fromList [(M.fromList [1,1,1,1],1),(M.fromList [0,0,0,0],-1)]
-x' = [x_1,x_2,x_3,x_4]
-x = DS.fromList (initPolySugars x')
-xideal = I $ DV.fromList (initSugars x') :: Ideal M.Lex-}
 
 x_1 = P.fromList [(M.fromList [1,0,0,0,0],1),(M.fromList [0,1,0,0,0],1),(M.fromList [0,0,1,0,0],1),(M.fromList [0,0,0,1,0],1),(M.fromList [0,0,0,0,1],1)]
 x_2 = P.fromList [(M.fromList [1,1,0,0,0],1),(M.fromList [1,0,0,0,1],1),(M.fromList [0,1,1,0,0],1),(M.fromList [0,0,1,1,0],1),(M.fromList [0,0,0,1,1],1)]
@@ -95,7 +86,7 @@ p_3 = P.fromList [(M.fromList [3,1,0,0],2),(M.fromList [1,3,0,0],3),(M.fromList 
 p_4 = P.fromList [(M.fromList [4,0,0,0],-3),(M.fromList [3,1,0,0],3),(M.fromList [2,2,0,0],1),(M.fromList [1,3,0,0],-3),(M.fromList [0,4,0,0],-2),(M.fromList [3,0,1,0],-1),(M.fromList [2,1,1,0],-3),(M.fromList [1,2,1,0],2),(M.fromList [0,3,1,0],-3),(M.fromList [2,0,2,0],-1),(M.fromList [1,1,2,0],-2),(M.fromList [0,2,2,0],3),(M.fromList [1,0,3,0],1),(M.fromList [0,1,3,0],2),(M.fromList [0,0,4,0],2),(M.fromList [3,0,0,1],-2),(M.fromList [1,2,0,1],1),(M.fromList [2,0,1,1],-3),(M.fromList [1,1,1,1],-2),(M.fromList [0,2,1,1],-2),(M.fromList [1,0,2,1],3),(M.fromList [0,1,2,1],-1),(M.fromList [0,0,3,1],-3),(M.fromList [2,0,0,2],1),(M.fromList [1,1,0,2],-3),(M.fromList [0,2,0,2],-2),(M.fromList [1,0,1,2],-3),(M.fromList [0,1,1,2],-1),(M.fromList [0,0,2,2],2),(M.fromList [1,0,0,3],2),(M.fromList [0,1,0,3],3),(M.fromList [0,0,1,3],1),(M.fromList [0,0,0,4],1)]
 p' = [p_1,p_2,p_3,p_4]
 p = DS.fromList (initPolySugars p')
-pideal = I $ DV.fromList (initSugars p') :: Ideal M.Grevlex
+pideal = I $ DV.fromList (initSugars p') :: Ideal M.Lex
 
 {-p_1 = P.fromList [(M.fromList [2,1,0,0],-1),(M.fromList [1,2,0,0],-3),(M.fromList [2,0,1,0],1),(M.fromList [1,1,1,0],2),(M.fromList [0,2,1,0],-3),(M.fromList [1,0,2,0],2),(M.fromList [0,1,2,0],1),(M.fromList [0,0,3,0],-2),(M.fromList [1,1,0,1],-1),(M.fromList [0,2,0,1],-1),(M.fromList [1,0,1,1],3),(M.fromList [0,1,1,1],2),(M.fromList [0,0,2,1],-3),(M.fromList [0,0,1,2],2)]
 p_2 = P.fromList [(M.fromList [3,0,0,0],-3),(M.fromList [2,1,0,0],3),(M.fromList [1,2,0,0],-3),(M.fromList [0,3,0,0],3),(M.fromList [2,0,1,0],-1),(M.fromList [1,1,1,0],1),(M.fromList [0,2,1,0],2),(M.fromList [1,0,2,0],-2),(M.fromList [0,1,2,0],2),(M.fromList [2,0,0,1],-2),(M.fromList [1,1,0,1],2),(M.fromList [0,2,0,1],2),(M.fromList [1,0,1,1],3),(M.fromList [0,1,1,1],2),(M.fromList [0,0,2,1],2),(M.fromList [1,0,0,2],-1),(M.fromList [0,1,0,2],1),(M.fromList [0,0,1,2],2),(M.fromList [0,0,0,3],3)]
