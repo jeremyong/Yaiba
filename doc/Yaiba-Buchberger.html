@@ -21,6 +21,10 @@
 ><IMG SRC="haskell_icon.gif" WIDTH="16" HEIGHT="16" ALT=" "
 ></TD
 ><TD CLASS="title"
+>Yaiba-0.2.2: Implementation of Buchberger's algorithms</TD
+><TD CLASS="topbut"
+><A HREF="src/Yaiba-Buchberger.html"
+>Source code</A
 ></TD
 ><TD CLASS="topbut"
 ><A HREF="index.html"
@@ -76,15 +80,19 @@
 ><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
 ><TR
 ><TD CLASS="decl"
-><A HREF="#v%3AgB"
->gB</A
-> :: Ord (<A HREF="Yaiba-Monomial.html#t%3AMon"
+><A HREF="#v%3AreducePolys"
+>reducePolys</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
 >Mon</A
 > ord) =&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
 >Ideal</A
-> ord -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
->Ideal</A
-> ord</TD
+> ord -&gt; [<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord] -&gt; [<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord]</TD
 ></TR
 ><TR
 ><TD CLASS="s8"
@@ -92,13 +100,17 @@
 ></TR
 ><TR
 ><TD CLASS="decl"
-><A HREF="#v%3AnPgB"
->nPgB</A
-> :: Ord (<A HREF="Yaiba-Monomial.html#t%3AMon"
+><A HREF="#v%3AgB%27%27"
+>gB''</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
 >Mon</A
 > ord) =&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
 >Ideal</A
-> ord -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+> ord -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
 >Ideal</A
 > ord</TD
 ></TR
@@ -118,50 +130,73 @@
 ></TD
 ></TR
 ><TR
-><TD CLASS="decl"
-><A NAME="v:gB"
-><A NAME="v%3AgB"
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:reducePolys"
+><A NAME="v%3AreducePolys"
 ></A
 ></A
 ><B
->gB</B
-> :: Ord (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>reducePolys</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
 >Mon</A
 > ord) =&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
 >Ideal</A
-> ord -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
->Ideal</A
-> ord</TD
+> ord -&gt; [<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord] -&gt; [<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord]</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Buchberger.html#reducePolys"
+>Source</A
+></TD
 ></TR
-><TR
-><TD CLASS="doc"
->Partitions each value in an SPoly map and executes in parallel if the
- value list is sufficiently long.
-</TD
+></TABLE
+></TD
 ></TR
 ><TR
 ><TD CLASS="s15"
 ></TD
 ></TR
 ><TR
-><TD CLASS="decl"
-><A NAME="v:nPgB"
-><A NAME="v%3AnPgB"
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:gB''"
+><A NAME="v%3AgB%27%27"
 ></A
 ></A
 ><B
->nPgB</B
-> :: Ord (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>gB''</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
 >Mon</A
 > ord) =&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
 >Ideal</A
-> ord -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+> ord -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
 >Ideal</A
 > ord</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Buchberger.html#gB%27%27"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
 ></TR
 ><TR
 ><TD CLASS="doc"
->Non-parallelized implementation.
+>Partitions each value in an SPoly map and executes in parallel if the
+ value list is sufficiently long.
 </TD
 ></TR
 ><TR

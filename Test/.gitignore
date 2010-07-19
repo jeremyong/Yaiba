@@ -1,3 +1,6 @@
+Bench
+Test
+Verify
 *#
 *~
 *.pdf
@@ -8,3 +11,4 @@
 dist/*
 *.eventlog
 *.prof
+*.ps

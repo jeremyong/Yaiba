@@ -21,6 +21,10 @@
 ><IMG SRC="haskell_icon.gif" WIDTH="16" HEIGHT="16" ALT=" "
 ></TD
 ><TD CLASS="title"
+>Yaiba-0.2.2: Implementation of Buchberger's algorithms</TD
+><TD CLASS="topbut"
+><A HREF="src/Yaiba-SPoly.html"
+>Source code</A
 ></TD
 ><TD CLASS="topbut"
 ><A HREF="index.html"
@@ -83,9 +87,13 @@
 >SPoly</A
 > ord = <A HREF="#v%3ASP"
 >SP</A
-> (Map (<A HREF="Yaiba-Sugar.html#t%3ASugar"
+> (<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/containers-0.3.0.0/Data-Map.html#t%3AMap"
+>Map</A
+> (<A HREF="Yaiba-Sugar.html#t%3ASugar"
 >Sugar</A
-> ord) (Set (<A HREF="Yaiba-Polynomial.html#t%3APoly"
+> ord) (<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/containers-0.3.0.0/Data-Set.html#t%3ASet"
+>Set</A
+> (<A HREF="Yaiba-Polynomial.html#t%3APoly"
 >Poly</A
 > ord)))</TD
 ></TR
@@ -97,7 +105,9 @@
 ><TD CLASS="decl"
 ><A HREF="#v%3AsPoly"
 >sPoly</A
-> :: Ord (<A HREF="Yaiba-Monomial.html#t%3AMon"
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
 >Mon</A
 > ord) =&gt; (<A HREF="Yaiba-Polynomial.html#t%3APoly"
 >Poly</A
@@ -107,7 +117,9 @@
 >Poly</A
 > ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
 >Sugar</A
-> ord) -&gt; Maybe (<A HREF="Yaiba-Polynomial.html#t%3APoly"
+> ord) -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> (<A HREF="Yaiba-Polynomial.html#t%3APoly"
 >Poly</A
 > ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
 >Sugar</A
@@ -123,7 +135,9 @@
 ><TD CLASS="decl"
 ><A HREF="#v%3Asyzygy"
 >syzygy</A
-> :: Ord (<A HREF="Yaiba-Monomial.html#t%3AMon"
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
 >Mon</A
 > ord) =&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
 >Ideal</A
@@ -167,7 +181,9 @@
 ><TD CLASS="decl"
 ><A HREF="#v%3AgetSPolys"
 >getSPolys</A
-> :: Ord (<A HREF="Yaiba-Monomial.html#t%3AMon"
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
 >Mon</A
 > ord) =&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
 >Ideal</A
@@ -193,7 +209,10 @@
 ></TD
 ></TR
 ><TR
-><TD CLASS="decl"
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
 ><SPAN CLASS="keyword"
 >newtype</SPAN
 >  <A NAME="t:SPoly"
@@ -203,6 +222,13 @@
 ><B
 >SPoly</B
 > ord </TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#SPoly"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
 ></TR
 ><TR
 ><TD CLASS="body"
@@ -222,9 +248,13 @@
 ></A
 ><B
 >SP</B
-> (Map (<A HREF="Yaiba-Sugar.html#t%3ASugar"
+> (<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/containers-0.3.0.0/Data-Map.html#t%3AMap"
+>Map</A
+> (<A HREF="Yaiba-Sugar.html#t%3ASugar"
 >Sugar</A
-> ord) (Set (<A HREF="Yaiba-Polynomial.html#t%3APoly"
+> ord) (<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/containers-0.3.0.0/Data-Set.html#t%3ASet"
+>Set</A
+> (<A HREF="Yaiba-Polynomial.html#t%3APoly"
 >Poly</A
 > ord)))</TD
 ><TD CLASS="rdoc"
@@ -241,14 +271,19 @@
 ></TD
 ></TR
 ><TR
-><TD CLASS="decl"
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
 ><A NAME="v:sPoly"
 ><A NAME="v%3AsPoly"
 ></A
 ></A
 ><B
 >sPoly</B
-> :: Ord (<A HREF="Yaiba-Monomial.html#t%3AMon"
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
 >Mon</A
 > ord) =&gt; (<A HREF="Yaiba-Polynomial.html#t%3APoly"
 >Poly</A
@@ -258,13 +293,22 @@
 >Poly</A
 > ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
 >Sugar</A
-> ord) -&gt; Maybe (<A HREF="Yaiba-Polynomial.html#t%3APoly"
+> ord) -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> (<A HREF="Yaiba-Polynomial.html#t%3APoly"
 >Poly</A
 > ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
 >Sugar</A
 > ord, <A HREF="Yaiba-Monomial.html#t%3AMon"
 >Mon</A
 > ord)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#sPoly"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
 ></TR
 ><TR
 ><TD CLASS="doc"
@@ -276,14 +320,19 @@
 ></TD
 ></TR
 ><TR
-><TD CLASS="decl"
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
 ><A NAME="v:syzygy"
 ><A NAME="v%3Asyzygy"
 ></A
 ></A
 ><B
 >syzygy</B
-> :: Ord (<A HREF="Yaiba-Monomial.html#t%3AMon"
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
 >Mon</A
 > ord) =&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
 >Ideal</A
@@ -298,6 +347,13 @@
 > ord, <A HREF="Yaiba-Monomial.html#t%3AMon"
 >Mon</A
 > ord)]</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#syzygy"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
 ></TR
 ><TR
 ><TD CLASS="doc"
@@ -310,7 +366,10 @@
 ></TD
 ></TR
 ><TR
-><TD CLASS="decl"
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
 ><A NAME="v:minimize"
 ><A NAME="v%3Aminimize"
 ></A
@@ -328,6 +387,13 @@
 > ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
 >Sugar</A
 > ord)]</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#minimize"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
 ></TR
 ><TR
 ><TD CLASS="doc"
@@ -341,14 +407,19 @@
 ></TD
 ></TR
 ><TR
-><TD CLASS="decl"
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
 ><A NAME="v:getSPolys"
 ><A NAME="v%3AgetSPolys"
 ></A
 ></A
 ><B
 >getSPolys</B
-> :: Ord (<A HREF="Yaiba-Monomial.html#t%3AMon"
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
 >Mon</A
 > ord) =&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
 >Ideal</A
@@ -357,6 +428,13 @@
 > ord -&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
 >SPoly</A
 > ord</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#getSPolys"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
 ></TR
 ><TR
 ><TD CLASS="doc"

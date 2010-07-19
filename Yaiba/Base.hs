@@ -12,8 +12,8 @@ import Control.DeepSeq
 -- so that we can change fields easily
 myPrime = 32003 :: Int
 --newtype Field = Field F2 deriving (Eq,Ord,Num,Fractional)
---newtype Field = Field FiniteField deriving (Eq,Ord,Num,Fractional)
-newtype Field = Field Q deriving (Eq,Ord,Num,Fractional)
+newtype Field = Field FiniteField deriving (Eq,Ord,Num,Fractional)
+--newtype Field = Field Q deriving (Eq,Ord,Num,Fractional)
 
 instance Show Field where show (Field a) = show a
 
@@ -40,6 +40,9 @@ denominatorQ (Q x) = Data.Ratio.denominator x
 -- Finite Fields
 
 newtype FiniteField = FF Int deriving (Eq,Ord)
+
+instance NFData FiniteField where
+    rnf (FF a) = rnf a
 
 instance Show FiniteField where show (FF a) = show a
 
