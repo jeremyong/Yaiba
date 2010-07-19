@@ -20,7 +20,7 @@ modgB seed = let (initial,restSeed) = deleteFindMin seed
              in gB' (I $ DV.singleton initial) restSeed empty where
                  gB' res fks queue | DS.null fks && isEmpty queue = res
                                    | DS.null fks = let (lowSugPolys, higherSugPolys) = delFindLowest queue res
-                                                       !redPolys' = worker $ parMap rdeepseq (/. res) lowSugPolys
+                                                       !redPolys' = worker $ parMap rdeepseq (\f -> (lppRed f res)) lowSugPolys
                                                        !worker = DL.filter (\(poly,_) -> not $ isNull poly)
                                                        !redPolys = parMap rdeepseq makeMonic redPolys'
                                                        newfks = DL.foldl' (\acc x -> DS.insert (PS x) acc) fks redPolys
@@ -30,7 +30,7 @@ modgB seed = let (initial,restSeed) = deleteFindMin seed
                                                      newQueue = updateSPolys queue reducedGen res
                                                      newres = res `snoc` reducedGen
                                                      (lowSugPolys, higherSugPolys) = delFindLowest newQueue newres
-                                                     !redPolys' = worker $ parMap rdeepseq (/. res) lowSugPolys
+                                                     !redPolys' = worker $ parMap rdeepseq (\f -> (lppRed f res)) lowSugPolys
                                                      !worker = DL.filter (\(poly,_) -> not $ isNull poly)
                                                      !redPolys = parMap rdeepseq makeMonic redPolys'
                                                      newfks = DL.foldl' (\acc x -> DS.insert (PS x) acc) newGens redPolys

@@ -12,13 +12,13 @@ import Yaiba.Ideal
 import Data.Ord
 import Control.Parallel.Strategies
 import Control.DeepSeq
-import Debug.Trace
+import Control.Parallel
 
 -- | SPoly is a map of CritPairs keyed to the generators of an ideal.
 newtype SPoly ord = SP [ ((Int,Int),CritPair ord) ]
 
 instance NFData (SPoly ord) where
-    rnf (SP as) = rnf as
+    rnf (SP as) = DL.foldl' (\_ (a,b) -> rnf a `seq` rnf b) () as
 
 -- | CritPair stores a critical pair as a tuple with the sugar and lcm as
 -- in Giovini et al. 1991.
@@ -79,11 +79,11 @@ tTest nps = SP $ [ ps | (ps,_) <- notcoprs, tTest' ps ] where
 -- before (j,k) when sorted according to sugar (Fussy).
 mTest :: Ord (Mon ord) => SPoly ord -> SPoly ord
 mTest (SP nps) = SP $ [ ps | ps <- nps, mTest' ps ] where
-    mTest' (jk,jkcp@(CP (_,taujk))) = DL.null [ qs |
-                                                qs@(ik,ikcp@(CP (_,tauik))) <- nps
-                                              , ik /= jk
-                                              , ikcp <= jkcp
-                                              , taujk `isFactor` tauik]
+    mTest' ((j,_),jkcp@(CP (_,taujk))) = DL.null [ qs |
+                                                   qs@((i,_),ikcp@(CP (_,tauik))) <- nps
+                                                 , i /= j
+                                                 , ikcp <= jkcp
+                                                 , taujk `isFactor` tauik]
 
 -- | Applies the b-test to the existing queue. Then applies the t-test and m-test to the new pairs
 -- with the addition of an [;f_k;]. Finally, merges the results to produce a new queue.
@@ -92,7 +92,6 @@ updateSPolys oldsp (fk,sugk) ideal = let SP bPass = bTest oldsp ideal (monLT fk)
                                          nsp = constructN ideal (fk,sugk) (numGens ideal)
                                          tPass = tTest nsp
                                          SP mPass = mTest tPass
-                                         SP oldPass = oldsp
                                      in SP $ bPass ++ mPass
 
 

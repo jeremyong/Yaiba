@@ -68,6 +68,27 @@ allExcept index (I as) | index == 0 = I back
       front = DV.take (index-1) as
       back = DV.drop index as
 
+lppRed p (I fs) = lppRed' p nullPoly where
+    lppRed' (poly,S psug) rem = if isNull poly then (rem,S psug) else
+                                    let ((tauk,ck),newpoly) = deleteFindLT poly
+                                        fi = DV.find (\(f,_) -> monLT f `isFactor` tauk) fs
+                                    in case fi of
+                                         Just (polyf,S sugf) -> (rem + poly - monMult (divide tauk (monLT polyf)) ck polyf,
+                                                                 S $ max psug (degree tauk * sugf))
+                                         Nothing -> lppRed' (newpoly,S psug) (monAdd tauk ck rem)
+
+
+lppRedDivOcc p (I fs) = lppRed' p nullPoly False where
+    lppRed' (poly,S psug) rem divOcc = if isNull poly then (rem,S psug) else
+                                           let ((tauk,ck),newpoly) = deleteFindLT poly
+                                               fi = DV.find (\(f,_) -> monLT f `isFactor` tauk) fs
+                                           in case fi of
+                                                Just (polyf,S sugf) -> (rem + poly - monMult (divide tauk (monLT polyf)) ck polyf,
+                                                                            S $ max psug (degree tauk * sugf))
+                                                Nothing -> lppRed' (newpoly,S psug) (monAdd tauk ck rem)
+
+totalRed p (I fs) = 
+
 -- | Reduces a polynomial by an ideal into something irreducible. Records
 -- its "history" in the Sugar
 (/.) :: Ord (Mon ord) => (Poly ord, Sugar ord) -> 

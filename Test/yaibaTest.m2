@@ -16,6 +16,7 @@ ltList = apply(gbList, f -> leadTerm f)
 myTime = timing (ltOrigIdeal = leadTerm origIdeal)
 << "Time to compute gb in M2 : " << first myTime << endl;
 << cputime << endl;
+
 assert(ideal leadTerm origIdeal == ideal ltList)
 
 I = ideal mingens ideal ltList
