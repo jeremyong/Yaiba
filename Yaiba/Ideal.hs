@@ -89,8 +89,8 @@ lppRedDivOcc (poly,S psug) rem (I fs) divOcc = if isNull poly then (rem,poly, S 
 
 totalRed p fs = totalRed' p nullPoly where
     totalRed' polysug rem = let (rem', poly', sug, divOcc) = lppRedDivOcc polysug rem fs False
-                            in if isNull rem' then
-                                   (poly',sug)
+                            in if isNull poly' then
+                                   (rem',sug)
                                else
                                    if divOcc then
                                        totalRed' (poly',sug) rem'
