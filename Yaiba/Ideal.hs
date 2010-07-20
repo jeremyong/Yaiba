@@ -74,6 +74,20 @@ totalRed p (I fs) = totalRed' p nullPoly where
                                                                                   S $ max psug (degree tauki * sugf), True)
                                                      Nothing -> lppRedDivOcc (newpoly,S psug) (monAdd tauk ck rem) divOcc
 
+lppRed p (I fs) = lppRed' p nullPoly where
+    lppRed' polysug rem = let !(rem', poly', sug, divOcc) = lppRedDivOcc polysug rem False
+                          in (rem'+poly',sug)
+    lppRedDivOcc (poly,S psug) rem divOcc = if isNull poly then (rem,poly, S psug, divOcc) else
+                                                let !((tauk,ck),newpoly) = deleteFindLT poly
+                                                    !fi = DV.find (\(f,_) -> monLT f `isFactor` tauk) fs
+                                                in case fi of
+                                                     Just (polyf,S sugf) -> let (taui,ci) = leadTerm polyf
+                                                                                tauki = divide tauk taui
+                                                                            in --(scalePoly ci rem, scalePoly ci poly - monMult (divide tauk taui) ck polyf,
+                                                                              (rem, poly - monMult tauki (ck/ci) polyf,
+                                                                                  S $ max psug (degree tauki * sugf), True)
+                                                     Nothing -> lppRedDivOcc (newpoly,S psug) (monAdd tauk ck rem) divOcc
+
 
 {-
 totalSaccRed p fs = totalRed' p nullPoly where
