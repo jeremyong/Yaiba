@@ -24,7 +24,6 @@ E Variable buffer width (a-la Amrhein-Gloor-Kuchlin).                           
 M Make number of terms (size of coeffs, etc) part of the sugar.                                -F newsugar
 H Make it possible to move certain elements of the buffer back to the cloud.                   -J evaporate
 -- M Defer reduction after N terms have been introduced.                                       -
-E Lpp reduction when reducing from the buffer.                                                 - lppred
 I Investigate a tree-like structure for computing Grobner bases.                               -
 
 MISCELLANEOUS IMPROVEMENTS
@@ -47,3 +46,4 @@ X Implement strategy accurate version.                                          
 X Keep track of minimal cloud generators.                                                    -J
 X Try implementing ideals using [: :] -- dph *itself* is still not developed enough          -J
 X Look at e/f4/moninfo.hpp in the M2 code. (one of the tests from Gebauer-Moller)            -J
+X Lpp reduction when reducing from the buffer.                                               -J lppred
