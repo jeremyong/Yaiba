@@ -76,7 +76,7 @@ totalRed p (I fs) = totalRed' p nullPoly where
 
 
 {-
-totalRed p fs = totalRed' p nullPoly where
+totalSaccRed p fs = totalRed' p nullPoly where
     totalRed' polysug rem = let !(rem', poly', sug, divOcc) = lppRedDivOcc polysug rem False
                             in if divOcc then
                                    totalRed' (poly',sug) rem'
@@ -93,7 +93,7 @@ totalRed p fs = totalRed' p nullPoly where
                                                    else 
                                                        let gs = DL.minimumBy (\a b -> comparing 
 
-                                                  case fi of
+                                                                              case fi of
                                                      Just (polyf,S sugf) -> let (taui,ci) = leadTerm polyf
                                                                             in --(scalePoly ci rem, scalePoly ci poly - monMult (divide tauk taui) ck polyf,
                                                                               (rem, poly - monMult (divide tauk taui) (ck/ci) polyf,

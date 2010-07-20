@@ -22,10 +22,10 @@ import Text.Printf
 import Criterion.Main
 
 main = do 
-  let gb = modgB p
+  let gb = accgB x
   putStrLn "8"
   putStrLn "Lex"
-  putStrLn (show $ getPolys pideal)
+  putStrLn (show $ getPolys xideal)
   start <- getCurrentTime
   gb `seq` return ()
   end <- getCurrentTime

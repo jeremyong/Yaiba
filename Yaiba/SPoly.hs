@@ -13,6 +13,7 @@ import Data.Ord
 import Control.Parallel.Strategies
 import Control.DeepSeq
 import Control.Parallel
+import Debug.Trace
 
 -- | SPoly is a map of CritPairs keyed to the generators of an ideal.
 newtype SPoly ord = SP [ ((Int,Int),CritPair ord) ]
@@ -101,14 +102,20 @@ delFindSingleLowest (SP pairs) ideal = let minsug = findMinSug pairs
                                            (bottom':top',top) = DL.partition (\(_,CP (sug,_)) -> sug == minsug) pairs
                                            bottom = toSPoly ideal bottom'
                                        in (bottom, SP (top'++top))
-
+{-
+delFindSingleLowest (SP []) _ = ((nullPoly, S 0), empty)
+delFindSingleLowest (SP pairs) ideal = let lowest:rest = DL.sortBy (comparing snd) pairs
+                                           lowestSPoly = toSPoly ideal lowest
+                                       in (lowestSPoly, SP rest)
+-}
 
 delFindLowest :: Ord (Mon ord) => SPoly ord -> Ideal ord -> ([(Poly ord, Sugar ord)],SPoly ord)
 delFindLowest (SP []) _ = ([],empty)
 delFindLowest (SP pairs) ideal = let minsug = findMinSug pairs
                                      (bottom',top) = DL.partition (\(_,CP (sug,_)) -> sug == minsug) pairs
                                      bottom = DL.map (toSPoly ideal) bottom'
-                                 in (bottom, SP top)
+                                 in --("Bin size: " ++ show (DL.length bottom) ++ " Sugar: " ++ show minsug) `trace` 
+                                        (bottom, SP top)
 
 findMinSug :: [(t, CritPair ord)] -> Sugar ord
 findMinSug [] = S 0
