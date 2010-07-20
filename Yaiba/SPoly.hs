@@ -49,7 +49,7 @@ updateSPolys (SP cpMap oldGens) (newGen,sug) = let !k = numGens oldGens
                                                    pairs = pairing oldGens (newGen,sug)
                                                    (fPass,bPass) = (fTest pairs, bTest cpMap fPass newGen k)                                                 
                                                    newcpMap = DM.union bPass fPass
-                                               in ("Deleted Pairs: " ++ DM.showTree (DM.difference cpMap bPass)) `trace`
+                                               in --("Deleted Pairs: " ++ DM.showTree (DM.difference cpMap bPass)) `trace`
                                                   SP newcpMap (snoc oldGens (newGen,sug))
 
 pairing :: Ideal ord
@@ -73,7 +73,7 @@ fTest nMap = reformat $ DM.foldrWithKey fTest' DM.empty nMap where
                                                                                                    in if check then
                                                                                                           True
                                                                                                       else
-                                                                                                          ("fTest removed: "++show (i,k)) `trace`
+                                                                                                          --("fTest removed: "++show (i,k)) `trace`
                                                                                                           False) acc
                                                    in DM.insertWith (\(nv,copr) (l,coprAcc) -> (l++nv,copr || coprAcc))
                                                              tauik ([((i,k),cp)],coprime) filteredAcc
