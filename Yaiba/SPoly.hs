@@ -4,9 +4,7 @@
 -- all Polys with that sugar.
 module Yaiba.SPoly where
 
-import qualified Data.Map as DM
-import qualified Data.IntSet as DI
-import qualified Data.Vector as DV
+import qualified Data.List as DL
 import Yaiba.Sugar
 import Yaiba.Monomial
 import Yaiba.Polynomial
@@ -14,126 +12,118 @@ import Yaiba.Ideal
 import Data.Ord
 import Control.Parallel.Strategies
 import Control.DeepSeq
+import Control.Parallel
 import Debug.Trace
 
--- | SPoly is a map of CritPairs keyed to the ideal provided in the second argument.
-data SPoly ord = SP (DM.Map (Int, Int) (CritPair ord)) (Ideal ord)
+-- | SPoly is a map of CritPairs keyed to the generators of an ideal.
+newtype SPoly ord = SP [ ((Int,Int),CritPair ord) ]
 
 instance NFData (SPoly ord) where
-    rnf (SP m _) = rnf m
+    rnf (SP as) = DL.foldl' (\_ (a,b) -> rnf a `seq` rnf b) () as
 
--- | CritPair stores a critical pair as a tuple with the sugar and lcm as described
--- in the Sugar paper.
+-- | CritPair stores a critical pair as a tuple with the sugar and lcm as
+-- in Giovini et al. 1991.
 newtype CritPair ord = CP (Sugar ord, Mon ord) deriving Eq
 
 instance NFData (CritPair ord) where
     rnf (CP (sug,mon)) = rnf sug `seq` rnf mon
 
-instance Ord (CritPair ord) where
-    compare (CP (a,_)) (CP (b,_)) = compare a b
+-- | CritPairs are sorted first by sugar, then by lcm.
+instance Ord (Mon ord) => Ord (CritPair ord) where
+    compare (CP (a,mona)) (CP (b,monb)) = 
+        case compare a b of
+          LT -> LT
+          GT -> GT
+          EQ -> compare mona monb
 
 instance Show (CritPair ord) where
     show (CP cp) = show cp 
 
 empty :: SPoly ord
-empty = SP (DM.empty) (I $ DV.empty)
+empty = SP []
 
-isEmpty :: SPoly t -> Bool
-isEmpty (SP spmap _) = DM.null spmap
+isEmpty :: SPoly ord -> Bool
+isEmpty (SP []) = True
+isEmpty _       = False
 
-sizespMap :: SPoly t -> Int
-sizespMap (SP spmap _) = DM.size spmap
+sizeSP :: SPoly ord -> Int
+sizeSP (SP pairs) = DL.length pairs
 
-updateSPolys :: Ord (Mon ord) => SPoly ord -> (Poly ord, Sugar ord) -> SPoly ord
-updateSPolys (SP cpMap oldGens) (newGen,sug) = let !k = numGens oldGens
-                                                   pairs = pairing oldGens (newGen,sug)
-                                                   (fPass,bPass) = (fTest pairs, bTest cpMap fPass newGen k)                                                 
-                                                   newcpMap = DM.union bPass fPass
-                                               in --("Deleted Pairs: " ++ DM.showTree (DM.difference cpMap bPass)) `trace`
-                                                  SP newcpMap (snoc oldGens (newGen,sug))
+-- | Delete from the existing queue of CritPairs every pair (i,j) such that
+-- [;\tau_i;] and [;\tau_j;] strictly divide [;\tau_k;].
+bTest :: SPoly ord -> Ideal ord -> Mon ord -> SPoly ord
+bTest (SP ps) fs tauk = let test ((i,j),CP (_,tauij)) = tauk `isFactor` tauij &&
+                                                        tau fs i tauk /= tauij &&
+                                                        tau fs j tauk /= tauij
+                                                        --(monLT $ fst $ fs!i) `strictDiv` tauk &&
+                                                        --(monLT $ fst $ fs!j) `strictDiv` tauk
+                        in SP $ DL.filter (not . test) ps
 
-pairing :: Ideal ord
-        -> (Poly ord, Sugar ord)
-        -> DM.Map (Int, Int) (CritPair ord, Bool)
-pairing oldGens (newGen,S sugk) = ifoldl' pairing' DM.empty oldGens where
-  k = numGens oldGens
-  pairing' acc index (poly,S sugi) = let taui = monLT poly
-                                         tauk = monLT newGen
-                                         tauik = lcmMon tauk taui
-                                         g = gcdMon taui tauk
-                                         coprime = g == Constant
-                                         newsug = S $ (degree tauik) + max (sugi - (degree taui)) (sugk - (degree tauk))
-                                     in DM.insert (index,k) (CP (newsug,tauik),coprime) acc
+constructN :: Ideal ord -> (Poly ord, Sugar ord) -> Int -> [( ((Int,Int), CritPair ord) , Bool)]
+constructN fs (fk,S sugk) k = let tauk = monLT fk
+                              in [ (((i,k),CP (sug,tauik)),copr) |
+                                   i <- [0..(k-1)]
+                                 , let (fi,S sugi) = fs!i
+                                 , let taui = monLT fi
+                                 , let tauik = lcmMon taui tauk
+                                 , let sug = S $ degree tauik + max (sugi - degree taui) (sugk - degree tauk)
+                                 , let copr = gcdMon taui tauk == Constant ]
 
--- | fTest does nothing if all pairs added are not coprime
-fTest :: Ord (Mon ord) =>
-         DM.Map (Int, Int) (CritPair ord, Bool) -> DM.Map (Int, Int) (CritPair ord)
-fTest nMap = reformat $ DM.foldrWithKey fTest' DM.empty nMap where
-    fTest' (i,k) (cp@(CP (_,tauik)),coprime) acc = let filteredAcc = DM.filterWithKey (\taujk _ -> let check = not $ tauik `isFactor` taujk
-                                                                                                   in if check then
-                                                                                                          True
-                                                                                                      else
-                                                                                                          --("fTest removed: "++show (i,k)) `trace`
-                                                                                                          False) acc
-                                                   in DM.insertWith (\(nv,copr) (l,coprAcc) -> (l++nv,copr || coprAcc))
-                                                             tauik ([((i,k),cp)],coprime) filteredAcc
-    reformat minMap = let notCoprime = DM.filter (\(_,copr) -> not copr) minMap
-                          reformat' _ ([],_) acc = acc
-                          reformat' _ ((k,v):_,_) acc = DM.insert k v acc
-                          --reformat' _ (kvs,_) acc = let (k,v) = DL.maximumBy (comparing fst) kvs
-                          --                          in DM.insert k v acc
-                      in DM.foldrWithKey reformat' DM.empty notCoprime
+-- | Consider the set of new pairs nps. Discard all pairs (j,k) s.t. [;\tau_j;] and [;\tau_k;] are
+-- comprime, along with any other pair (i,k) s.t. [;\tau_{jk}\left|\tau_{ik}\right.;].
+tTest :: [(((Int,Int),CritPair ord),Bool)] -> SPoly ord
+tTest nps = SP $ [ ps | (ps,_) <- notcoprs, tTest' ps ] where
+    (coprs,notcoprs) = DL.partition snd nps
+    tTest' (_,CP (_,taujk)) = DL.null $ filter (\((_,CP (_,tauik)),_) -> tauik `isFactor` taujk) coprs
 
-bTest :: Ord (Mon ord) =>
-         DM.Map (Int, Int) (CritPair ord)
-             -> DM.Map (Int, Int) (CritPair ord)
-             -> Poly ord
-             -> Int
-             -> DM.Map (Int, Int) (CritPair ord)
-bTest oldMap nMap newGen k = DM.mapMaybeWithKey bTest' oldMap where
-  bTest' (i,j) (CP (sug,tauij)) = let lookupi = DM.lookup (i,k) nMap
-                                      lookupj = DM.lookup (j,k) nMap
-                                      tauk = monLT newGen
-                                      taukDivides = tauk `isFactor` tauij
-                                  in if taukDivides then
-                                         if lookupi == Nothing || lookupj == Nothing
-                                         then --("bTest1: "++show (i,j)) `trace`
-                                              Nothing
-                                         else let Just (CP (_,tauik)) = lookupi
-                                                  Just (CP (_,taujk)) = lookupj
-                                              in if tauik /= taujk && tauik /= tauij && taujk /= tauij
-                                                 then --("bTest2: "++show (i,j)) `trace`
-                                                      Nothing
-                                                 else Just (CP (sug,tauij))
-                                     else
-                                       Just (CP (sug,tauij))
+-- | Discards from a set of new pairs all pairs (j,k) s.t. [;\tau_{ik}\left|\tau_{jk}\right.;] with (i,k)
+-- before (j,k) when sorted according to sugar (Fussy).
+mTest :: Ord (Mon ord) => SPoly ord -> SPoly ord
+mTest (SP nps) = SP $ [ ps | ps <- nps, mTest' ps ] where
+    mTest' ((j,_),jkcp@(CP (_,taujk))) = DL.null [ qs |
+                                                   qs@((i,_),ikcp@(CP (_,tauik))) <- nps
+                                                 , i /= j
+                                                 , ikcp <= jkcp
+                                                 , taujk `isFactor` tauik]
 
-delFindLowest :: (Ord (Mon t)) =>
-                 SPoly t -> ([(Poly t, Sugar t)], DM.Map (Int, Int) (CritPair t))
-delFindLowest (SP spMap ideal) = let sugSet = DM.fold (\(CP (S x,_)) acc -> DI.insert x acc) DI.empty spMap
-                                     minSug = S $ DI.findMin sugSet
-                                     (bottom,top) = DM.partition (\(CP (x,_)) -> x == minSug) spMap
-                                     botelems = toSPolys (SP bottom ideal)
-                                 in if DM.null spMap then
-                                        ([],DM.empty)
-                                    else (botelems,top)
+-- | Applies the b-test to the existing queue. Then applies the t-test and m-test to the new pairs
+-- with the addition of an [;f_k;]. Finally, merges the results to produce a new queue.
+updateSPolys :: Ord (Mon ord) => SPoly ord -> (Poly ord, Sugar ord) -> Ideal ord -> SPoly ord
+updateSPolys oldsp (fk,sugk) ideal = let SP bPass = bTest oldsp ideal (monLT fk)
+                                         nsp = constructN ideal (fk,sugk) (numGens ideal)
+                                         tPass = tTest nsp
+                                         SP mPass = mTest tPass
+                                     in SP $ bPass ++ mPass
 
-delFindSingleLowest :: (Ord (Mon ord)) =>
-                       SPoly ord
-                           -> ((Poly ord, Sugar ord), DM.Map (Int, Int) (CritPair ord))
-delFindSingleLowest (SP spMap ideal) = let sugSet = DM.fold (\(CP (S x,_)) acc -> DI.insert x acc) DI.empty spMap
-                                           minSug = S $ DI.findMin sugSet
-                                           (bottom,top) = DM.partition (\(CP (x,_)) -> x == minSug) spMap
-                                           (botelem',smallbot) = DM.deleteFindMin bottom
-                                           botelem = toSPoly botelem' ideal
-                                           newTop = DM.union smallbot top
-                                       in if DM.null spMap then
-                                              ((nullPoly,S 0),DM.empty)
-                                          else (botelem,newTop)
+
+delFindSingleLowest :: Ord (Mon ord) => SPoly ord -> Ideal ord -> ((Poly ord, Sugar ord),SPoly ord)
+delFindSingleLowest (SP []) _ = ((nullPoly,S 0),empty)
+delFindSingleLowest (SP pairs) ideal = let minsug = findMinSug pairs
+                                           (bottom':top',top) = DL.partition (\(_,CP (sug,_)) -> sug == minsug) pairs
+                                           bottom = toSPoly ideal bottom'
+                                       in (bottom, SP (top'++top))
+{-
+delFindSingleLowest (SP []) _ = ((nullPoly, S 0), empty)
+delFindSingleLowest (SP pairs) ideal = let lowest:rest = DL.sortBy (comparing snd) pairs
+                                           lowestSPoly = toSPoly ideal lowest
+                                       in (lowestSPoly, SP rest)
+-}
+
+delFindLowest :: Ord (Mon ord) => SPoly ord -> Ideal ord -> ([(Poly ord, Sugar ord)],SPoly ord)
+delFindLowest (SP []) _ = ([],empty)
+delFindLowest (SP pairs) ideal = let minsug = findMinSug pairs
+                                     (bottom',top) = DL.partition (\(_,CP (sug,_)) -> sug == minsug) pairs
+                                     bottom = DL.map (toSPoly ideal) bottom'
+                                 in --("Bin size: " ++ show (DL.length bottom) ++ " Sugar: " ++ show minsug) `trace` 
+                                        (bottom, SP top)
+
+findMinSug :: [(t, CritPair ord)] -> Sugar ord
+findMinSug [] = S 0
+findMinSug ((_,CP (initsug,_)):as) = DL.foldl' (\acc (_,CP (sug,_)) -> min sug acc) initsug as
 
 toSPoly :: Ord (Mon ord) =>
-           ((Int, Int), CritPair ord) -> Ideal ord -> (Poly ord, Sugar ord)
-toSPoly ((i,j),(CP (sug,_))) ideal = let (polyi,_) = ideal ! i
+           Ideal ord -> ((Int, Int), CritPair ord) -> (Poly ord, Sugar ord)
+toSPoly ideal ((i,j),(CP (sug,_))) = let (polyi,_) = ideal ! i
                                          (polyj,_) = ideal ! j
                                          (taui,ci) = leadTerm polyi
                                          (tauj,cj) = leadTerm polyj
@@ -141,65 +131,3 @@ toSPoly ((i,j),(CP (sug,_))) ideal = let (polyi,_) = ideal ! i
                                          spoly = monMult (divide tauij taui) cj polyi -
                                                  monMult (divide tauij tauj) ci polyj
                                      in (spoly,sug)
-
-toSPolys :: Ord (Mon ord) => SPoly ord -> [(Poly ord, Sugar ord)]
-toSPolys (SP spMap ideal) = DM.foldlWithKey toSPolys' [] spMap where
-    toSPolys' acc (i,j) (CP (sug,_)) = let (polyi,_) = ideal ! i
-                                           (polyj,_) = ideal ! j
-                                           (taui,ci) = leadTerm polyi
-                                           (tauj,cj) = leadTerm polyj
-                                           tauij = lcmMon taui tauj
-                                           spoly = monMult (divide tauij taui) cj polyi -
-                                                   monMult (divide tauij tauj) ci polyj
-                                       in (spoly,sug):acc
-
-{-
--- | Criterion M described in Gebauer-Moller 1988. Sloppy variant from "One sugar cube, please"
-mTest (SP cpMap oldGens) newGen = DM.mapMaybeWithKey mTest' cpMap where
-    ltk = monLT newGen
-    mTest' (i,j) cp@(CP (_,tauij)) = let tauik = tau oldGens i ltk
-                                         taujk = tau oldGens j ltk
-                                     in if tauij `isFactor` tauik && tauij `isFactor` taujk && tauij /= tauik && tauij /= taujk then
-                                            --("DeletedM"++ show i ++ show j) `trace` 
-                                            Nothing
-                                        else
-                                            Just cp
--}
-
-{-
--- | Criterion F described in Gebauer-Moller 1988.
-fTest nMap = let (coprimes,notCoprimes) = DM.partition snd nMap
-                 coprimes' = DM.map (\(x,_) -> x) coprimes
-                 notCoprimes' = DM.map (\(x,_) -> x) notCoprimes
-             in DM.fold fTest' notCoprimes' coprimes' where
-                 fTest' (CP (_,tauik)) acc = DM.mapMaybe (\cp@(CP (_,taujk)) -> if tauik == taujk then 
-                                                                                    --("DeletedF"++show tauik) `trace` 
-                                                                                    Nothing 
-                                                                                else Just cp) acc
--}
-
-
-{-
-bTest oldMap nMap newGen k = DM.mapMaybeWithKey bTest' oldMap where
-  bTest' (i,j) (CP (sug,tauij)) = let lookupi = DM.lookup (i,k) nMap
-                                      lookupj = DM.lookup (j,k) nMap
-                                      tauk = monLT newGen
-                                      taukDivides = tauk `isFactor` tauij
-                                  in if taukDivides then case lookupi of
-                                                           Nothing -> case lookupj of
-                                                                        Nothing -> Nothing
-                                                                        Just (CP (_,taujk)) -> if taujk /= tauij then
-                                                                                                   Nothing
-                                                                                               else Just (CP (sug,tauij))
-                                                           Just (CP (_,tauik)) -> case lookupj of
-                                                                                    Nothing -> if tauik /= tauij then
-                                                                                                   Nothing
-                                                                                               else Just (CP (sug,tauij))
-                                                                                    Just (CP (_,taujk)) -> if tauij /= tauik && tauij /= taujk && tauik /= taujk then
-                                                                                                               Nothing
-                                                                                                           else
-                                                                                                               Just (CP (sug,tauij))
-                                     else
-                                         Just (CP (sug,tauij))
-
--}

@@ -135,7 +135,7 @@ instance Ord (Mon ord) => Num (Poly ord) where
 
 -- | Just adds a monomial without turning it into a polynomial first
 monAdd mon coef (P poly) = P $ YM.alter (maybeAdd coef) mon poly
-monAdd' mon coef (P poly) = YM.alter (maybeAdd coef) mon poly
+--monAdd' mon coef (P poly) = YM.alter (maybeAdd coef) mon poly
 
 -- | Scales every term of a Polynomial by a Mon list and rational number.
 monMult mon coef (P poly) = P $! YM.mapKeysValuesMonotonic (\(!k,!v) -> (multiply mon k, v*coef)) poly

@@ -9,6 +9,7 @@ import Yaiba.Sugar
 import qualified Data.List as DL
 import qualified Data.Vector as DV
 import Control.DeepSeq
+import Data.Ord
 import Prelude hiding (rem)
 
 newtype Ideal ord = I (DV.Vector (Poly ord,Sugar ord))
@@ -45,8 +46,6 @@ foldl' f acc (I as) = DV.foldl' f acc as
 snoc :: Ideal ord -> (Poly ord, Sugar ord) -> Ideal ord
 snoc (I as) a = I $! DV.snoc as a
 
---union (I as) (I bs) = I $! DV.++ as bs
-
 numGens :: Ideal t -> Int
 numGens (I as) = DV.length as
 
@@ -56,49 +55,48 @@ null (I as) = DV.null as
 (!) :: Ideal t -> Int -> (Poly t, Sugar t)
 (!) (I as) index = (DV.!) as index
 
-reduceIdeal :: (Ord (Mon ord)) => Ideal ord -> Ideal ord
-reduceIdeal ideal@(I as) = I $ DV.imap (\i a -> a /. (allExcept i ideal)) as 
+find tauk fs = [ gi | i <- [0..(numGens fs -1)], let gi@(polyi,_) = fs!i, let taui = monLT polyi, taui `isFactor` tauk ]
 
-allExcept :: Int -> Ideal t -> Ideal t
-allExcept index (I as) | index == 0 = I back
-                       | index == len = I front
-                       | otherwise = I (front DV.++ back) 
-    where
-      len = DV.length as -1
-      front = DV.take (index-1) as
-      back = DV.drop index as
+totalRed p (I fs) = totalRed' p nullPoly where
+    totalRed' polysug rem = let !(rem', poly', sug, divOcc) = lppRedDivOcc polysug rem False
+                            in if divOcc then
+                                   totalRed' (poly',sug) rem'
+                               else
+                                   (rem'+poly',sug)
+    lppRedDivOcc (poly,S psug) rem divOcc = if isNull poly then (rem,poly, S psug, divOcc) else
+                                                let !((tauk,ck),newpoly) = deleteFindLT poly
+                                                    !fi = DV.find (\(f,_) -> monLT f `isFactor` tauk) fs
+                                                in case fi of
+                                                     Just (polyf,S sugf) -> let (taui,ci) = leadTerm polyf
+                                                                                tauki = divide tauk taui
+                                                                            in --(scalePoly ci rem, scalePoly ci poly - monMult (divide tauk taui) ck polyf,
+                                                                              (rem, poly - monMult tauki (ck/ci) polyf,
+                                                                                  S $ max psug (degree tauki * sugf), True)
+                                                     Nothing -> lppRedDivOcc (newpoly,S psug) (monAdd tauk ck rem) divOcc
 
--- | Reduces a polynomial by an ideal into something irreducible. Records
--- its "history" in the Sugar
-(/.) :: Ord (Mon ord) => (Poly ord, Sugar ord) -> 
-        Ideal ord -> (Poly ord, Sugar ord)
-(/.) p ideal = (/..) p nullPoly where
-    (/..) (poly,psug) rem = if isNull poly then (rem,psug) else
-                                let !(new,newsug,divOcc) = divByIdeal (poly,psug) ideal
-                                in if divOcc then (/..) (new,newsug) rem
-                                   else let !((m,q),rest) = deleteFindLT poly
-                                            !newrem = rem + monPoly m q
-                                        in (/..) (rest,newsug) newrem
 
 {-
-(/.) :: Ord (Mon ord) => (Poly ord, Sugar ord) -> 
-         Ideal ord -> (Poly ord, Sugar ord)
-(/.) p ideal = (/..) p nullPoly where
-    (/..) (poly,psug) rem = if isNull poly then (rem,psug) else
-                                let !(new,newsug,divOcc) = divByIdeal (poly,psug) ideal
-                                in if divOcc then (/..) (new,newsug) rem
-                                   else (/..) (nullPoly,psug) poly
--}
--- | Auxilliary function to /.
-divByIdeal :: Ord (Mon ord) => (Poly ord, Sugar ord) -> 
-              Ideal ord -> (Poly ord, Sugar ord, Bool)
-divByIdeal (poly,sug) ideal = foldl' divByIdeal' (poly, sug, False) ideal where
-  divByIdeal' (p,s,divOcc) d | isNull $ fst d = (p,s,divOcc) 
-                             | otherwise = if divOcc then (p,s,divOcc) else
-                                               let (quo,rem,remsug) = quoRem (p,s) d
-                                               in if isNull quo then (p,s,divOcc) 
-                                                  else (rem,remsug,True)
+totalSaccRed p fs = totalRed' p nullPoly where
+    totalRed' polysug rem = let !(rem', poly', sug, divOcc) = lppRedDivOcc polysug rem False
+                            in if divOcc then
+                                   totalRed' (poly',sug) rem'
+                                   --let (red,redsug) = (poly',sug) /. fs
+                                   --in (rem'+red,redsug)
+                               else
+                                   (rem'+poly',sug)
+    lppRedDivOcc (poly,S psug) rem divOcc = if isNull poly then (rem,poly, S psug, divOcc) else
+                                                let !((tauk,ck),newpoly) = deleteFindLT poly
+                                                    -- !fi = DV.find (\(f,_) -> monLT f `isFactor` tauk) fs
+                                                    !fi = find tauk fs
+                                                in if fi == [] then
+                                                       lppRedDivOcc (newpoly, S psug) (monAdd tauk ck rem) divOcc
+                                                   else 
+                                                       let gs = DL.minimumBy (\a b -> comparing 
 
-reducePolys :: Ord (Mon ord) => Ideal ord ->
-               [(Poly ord,Sugar ord)] -> [(Poly ord,Sugar ord)]
-reducePolys d = DL.map (/. d)
+                                                                              case fi of
+                                                     Just (polyf,S sugf) -> let (taui,ci) = leadTerm polyf
+                                                                            in --(scalePoly ci rem, scalePoly ci poly - monMult (divide tauk taui) ck polyf,
+                                                                              (rem, poly - monMult (divide tauk taui) (ck/ci) polyf,
+                                                                                  S $ max psug (degree tauk * sugf), True)
+                                                     Nothing -> lppRedDivOcc (newpoly,S psug) (monAdd tauk ck rem) divOcc
+-}

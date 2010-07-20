@@ -6,12 +6,10 @@ import Yaiba.Monomial
 import Yaiba.Polynomial
 import Yaiba.Ideal
 import Yaiba.SPoly
-import Yaiba.Cluster
 import qualified Data.List as DL
 import Control.Parallel.Strategies
 import qualified Data.Set as DS
 import qualified Data.Vector as DV
-import qualified Data.Map as DM
 import Prelude hiding (rem,null,map,filter)
 import Debug.Trace
 
@@ -19,55 +17,59 @@ import Debug.Trace
 -- inserted by sugar degree.
 modgB :: Ord (Mon ord) => DS.Set (PolySug ord) -> Ideal ord
 modgB seed = let (initial,restSeed) = deleteFindMin seed
-             in gB' (I $ DV.singleton initial) restSeed DM.empty where
-                 gB' res oneByOne spMap | DS.null oneByOne && DM.null spMap = res
-                                        | DS.null oneByOne = let (lowSugPolys, higherSugPolys) = delFindLowest (SP spMap res)
-                                                                 !redPolys' = worker $ parMap rdeepseq (/. res) lowSugPolys
-                                                                 !worker = DL.filter (\(poly,_) -> not $ isNull poly)
-                                                                 !redPolys = parMap rdeepseq makeMonic redPolys'
-                                                                 newOneByOne = DL.foldl' (\acc x -> DS.insert (PS x) acc) oneByOne redPolys
-                                                             in gB' res newOneByOne higherSugPolys
-                                        | otherwise = let (gen,newGens) = deleteFindMin oneByOne
-                                                          reducedGen = makeMonic $ gen /. res
-                                                          SP newspMap newres = updateSPolys (SP spMap res) reducedGen
-                                                          (lowSugPolys, higherSugPolys) = delFindLowest (SP newspMap newres)
-                                                          !redPolys' = worker $ parMap rdeepseq (/. res) lowSugPolys
-                                                          !worker = DL.filter (\(poly,_) -> not $ isNull poly)
-                                                          !redPolys = parMap rdeepseq makeMonic redPolys'
-                                                          newOneByOne = DL.foldl' (\acc x -> DS.insert (PS x) acc) newGens redPolys
-                                                      in if isNull $ fst reducedGen then
-                                                             gB' res newGens spMap
-                                                         else gB' newres newOneByOne higherSugPolys
+             in gB' (I $ DV.singleton initial) restSeed empty where
+                 gB' res fks queue | DS.null fks && isEmpty queue = res
+                                   | DS.null fks = let (lowSugPolys, higherSugPolys) = delFindLowest queue res
+                                                       !redPolys' = worker $ parMap rdeepseq (\f -> (totalRed f res)) lowSugPolys
+                                                       -- !redPolys' = worker $ parMap rdeepseq (\f -> (f /. res)) lowSugPolys
+                                                       !worker = DL.filter (\(poly,_) -> not $ isNull poly)
+                                                       !redPolys = parMap rdeepseq makeMonic redPolys'
+                                                       newfks = DL.foldl' (\acc x -> DS.insert (PS x) acc) fks redPolys
+                                                   in gB' res newfks higherSugPolys
+                                   | otherwise = let (gen,newGens) = deleteFindMin fks
+                                                     reducedGen = makeMonic $ totalRed gen res
+                                                     --reducedGen = makeMonic $ gen /. res
+                                                     newQueue = updateSPolys queue reducedGen res
+                                                     newres = res `snoc` reducedGen
+                                                     (lowSugPolys, higherSugPolys) = delFindLowest newQueue newres
+                                                     !redPolys' = worker $ parMap rdeepseq (\f -> (totalRed f res)) lowSugPolys
+                                                     -- !redPolys' = worker $ parMap rdeepseq (\f -> (f /. res)) lowSugPolys
+                                                     !worker = DL.filter (\(poly,_) -> not $ isNull poly)
+                                                     !redPolys = parMap rdeepseq makeMonic redPolys'
+                                                     newfks = DL.foldl' (\acc x -> DS.insert (PS x) acc) newGens redPolys
+                                                 in if isNull $ fst reducedGen then
+                                                        gB' res newGens queue
+                                                    else --show newres `trace` 
+                                                         gB' newres newfks higherSugPolys
+
 
 -- | Strategy accurate implementation of gB
 accgB :: Ord (Mon ord) => DS.Set (PolySug ord) -> Ideal ord
 accgB seed = let (initial,restSeed) = deleteFindMin seed
-             in gB' (I $ DV.singleton initial) restSeed DM.empty where
-                 gB' res oneByOne spMap | DS.null oneByOne && DM.null spMap = res
-                                        | DS.null oneByOne = let (lowSugPoly, higherSugPolys) = delFindSingleLowest (SP spMap res)
-                                                                 !redPoly = (show res ++ "\n" ++ DM.showTree spMap) `trace`
-                                                                            makeMonic $ lowSugPoly /. res
-                                                                 newOneByOne = if not $ isNull $ fst redPoly then
-                                                                                   DS.insert (PS redPoly) oneByOne
-                                                                               else
-                                                                                   oneByOne
-                                                             in gB' res newOneByOne higherSugPolys
-                                        | otherwise = let (gen,newGens) = deleteFindMin oneByOne
-                                                          reducedGen = makeMonic $ gen /. res
-                                                          --reducedGen = gen
-                                                          SP newspMap newres = updateSPolys (SP spMap res) reducedGen
-                                                          (lowSugPoly, higherSugPolys) = delFindSingleLowest (SP newspMap newres)
-                                                          !redPoly = (show res ++ "\n" ++"Adding: " ++ show reducedGen++"\n"++ DM.showTree newspMap) `trace`
-                                                                     makeMonic $ lowSugPoly /. res
-                                                          newOneByOne = if not $ isNull $ fst redPoly then
-                                                                            DS.insert (PS redPoly) newGens
-                                                                        else
-                                                                            newGens
-                                                      in if isNull $ fst reducedGen then
-                                                             gB' res newGens spMap
-                                                         else gB' newres newOneByOne higherSugPolys
+             in gB' (I $ DV.singleton initial) restSeed (SP []) where
+                 gB' res fks queue | DS.null fks && isEmpty queue = res
+                                   | DS.null fks = let (lowSugPoly, higherSugPolys) = delFindSingleLowest queue res
+                                                       !redPoly = makeMonic $ totalRed lowSugPoly res
+                                                       newfks = if not $ isNull $ fst redPoly then
+                                                                         DS.insert (PS redPoly) fks
+                                                                     else
+                                                                         fks
+                                                   in gB' res newfks higherSugPolys
+                                   | otherwise = let (gen,newGens) = deleteFindMin fks
+                                                     reducedGen = makeMonic $ totalRed gen res
+                                                     newQueue = updateSPolys queue reducedGen res
+                                                     newres = res `snoc` reducedGen
+                                                     (lowSugPoly, higherSugPolys) = delFindSingleLowest newQueue newres
+                                                     !redPoly = makeMonic $ totalRed lowSugPoly res
+                                                     newfks = if not $ isNull $ fst redPoly then
+                                                                  DS.insert (PS redPoly) newGens
+                                                              else
+                                                                  newGens
+                                                 in if isNull $ fst reducedGen then
+                                                        gB' res newGens queue
+                                                    else gB' newres newfks higherSugPolys
 
-
+{-
 gB :: Ord (Mon ord) => DS.Set (PolySug ord) -> Ideal ord
 gB seed = let (initial,restSeed) = deleteFindMin seed
           in gB1 (I $ DV.singleton initial) restSeed DM.empty DS.empty where
@@ -105,7 +107,7 @@ gB seed = let (initial,restSeed) = deleteFindMin seed
                                                           gB2 res newGens spMap
                                                       else --("Queue size: "++(show $ DS.size newOneByOne)) `trace`
                                                           gB2 newRes newTierTwo highSugPolys
-
+-}
 {-
 oldgB :: Ord (Mon ord) => DS.Set (PolySug ord) -> Ideal ord
 oldgB seed = let (initial,restSeed) = deleteFindMin seed
@@ -162,7 +164,7 @@ modgB' seed = let (initial,restSeed) = deleteFindMin seed
                                                          else --("Queue size: "++(show $ DS.size newOneByOne)) `trace`
                                                              gB' newres newOneByOne higherSugPolys
 -}
-
+{-
 gB'' :: Ord (Mon ord) => DS.Set (PolySug ord) -> Int -> Ideal ord
 gB'' seed c = let (initial,restSeed) = deleteFindMin seed
               in gB' (I $ DV.singleton initial) restSeed DM.empty c where
@@ -190,3 +192,4 @@ gB'' seed c = let (initial,restSeed) = deleteFindMin seed
                                                           else --("Queue size: "++(show $ DS.size newOneByOne)) `trace`
                                                                --("Sug deg: "++(show $ snd gen)++" Poly: " ++ (show $ fst (gen /. res))) `trace` 
                                                                gB' newres newOneByOne higherSugPolys (n-1)
+-}

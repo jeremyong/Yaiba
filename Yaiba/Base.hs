@@ -41,6 +41,9 @@ denominatorQ (Q x) = Data.Ratio.denominator x
 
 newtype FiniteField = FF Int deriving (Eq,Ord)
 
+instance NFData FiniteField where
+    rnf (FF a) = rnf a
+
 instance Show FiniteField where show (FF a) = show a
 
 instance Num FiniteField where
