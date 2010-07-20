@@ -24,6 +24,7 @@ E Variable buffer width (a-la Amrhein-Gloor-Kuchlin).                           
 M Make number of terms (size of coeffs, etc) part of the sugar.                                -F newsugar
 H Make it possible to move certain elements of the buffer back to the cloud.                   -J evaporate
 -- M Defer reduction after N terms have been introduced.                                       -
+-- M Allow scheduler to roll back poor reductions                                              -
 I Investigate a tree-like structure for computing Grobner bases.                               -
 
 MISCELLANEOUS IMPROVEMENTS
