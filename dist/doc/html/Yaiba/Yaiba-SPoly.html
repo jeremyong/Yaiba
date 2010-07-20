@@ -1,0 +1,1006 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--Rendered using the Haskell Html Library v0.2-->
+<HTML
+><HEAD
+><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8"
+><TITLE
+>Yaiba.SPoly</TITLE
+><LINK HREF="haddock.css" REL="stylesheet" TYPE="text/css"
+><SCRIPT SRC="haddock-util.js" TYPE="text/javascript"
+></SCRIPT
+><SCRIPT TYPE="text/javascript"
+>window.onload = function () {setSynopsis("mini_Yaiba-SPoly.html")};</SCRIPT
+></HEAD
+><BODY
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="topbar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><IMG SRC="haskell_icon.gif" WIDTH="16" HEIGHT="16" ALT=" "
+></TD
+><TD CLASS="title"
+>Yaiba-0.2.2: Implementation of Buchberger's algorithms</TD
+><TD CLASS="topbut"
+><A HREF="src/Yaiba-SPoly.html"
+>Source code</A
+></TD
+><TD CLASS="topbut"
+><A HREF="index.html"
+>Contents</A
+></TD
+><TD CLASS="topbut"
+><A HREF="doc-index.html"
+>Index</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="modulebar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><FONT SIZE="6"
+>Yaiba.SPoly</FONT
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Description</TD
+></TR
+><TR
+><TD CLASS="doc"
+>An object of type SPoly ord is a map from a Sugar to a list of
+ all Polys with that sugar.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Synopsis</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>newtype</SPAN
+>  <A HREF="#t%3ASPoly"
+>SPoly</A
+> ord = <A HREF="#v%3ASP"
+>SP</A
+> [((<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>), <A HREF="Yaiba-SPoly.html#t%3ACritPair"
+>CritPair</A
+> ord)]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>newtype</SPAN
+>  <A HREF="#t%3ACritPair"
+>CritPair</A
+> ord = <A HREF="#v%3ACP"
+>CP</A
+> (<A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord, <A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aempty"
+>empty</A
+> ::  <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AisEmpty"
+>isEmpty</A
+> ::  <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AsizeSP"
+>sizeSP</A
+> ::  <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AbTest"
+>bTest</A
+> ::  <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; <A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord -&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AconstructN"
+>constructN</A
+> ::  <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; (<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord) -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; [(((<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>), <A HREF="Yaiba-SPoly.html#t%3ACritPair"
+>CritPair</A
+> ord), <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+>)]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AtTest"
+>tTest</A
+> ::  [(((<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>), <A HREF="Yaiba-SPoly.html#t%3ACritPair"
+>CritPair</A
+> ord), <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+>)] -&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmTest"
+>mTest</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord -&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AupdateSPolys"
+>updateSPolys</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord -&gt; (<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord) -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AdelFindSingleLowest"
+>delFindSingleLowest</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; ((<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord), <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AdelFindLowest"
+>delFindLowest</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; ([(<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord)], <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfindMinSug"
+>findMinSug</A
+> ::  [(t, <A HREF="Yaiba-SPoly.html#t%3ACritPair"
+>CritPair</A
+> ord)] -&gt; <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AtoSPoly"
+>toSPoly</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; ((<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>), <A HREF="Yaiba-SPoly.html#t%3ACritPair"
+>CritPair</A
+> ord) -&gt; (<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord)</TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Documentation</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><SPAN CLASS="keyword"
+>newtype</SPAN
+>  <A NAME="t:SPoly"
+><A NAME="t%3ASPoly"
+></A
+></A
+><B
+>SPoly</B
+> ord </TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#SPoly"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+>SPoly is a map of CritPairs keyed to the generators of an ideal.
+</TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:SP"
+><A NAME="v%3ASP"
+></A
+></A
+><B
+>SP</B
+> [((<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>), <A HREF="Yaiba-SPoly.html#t%3ACritPair"
+>CritPair</A
+> ord)]</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:SPoly')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:SPoly" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+>NFData (<A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><SPAN CLASS="keyword"
+>newtype</SPAN
+>  <A NAME="t:CritPair"
+><A NAME="t%3ACritPair"
+></A
+></A
+><B
+>CritPair</B
+> ord </TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#CritPair"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+>CritPair stores a critical pair as a tuple with the sugar and lcm as
+ in Giovini et al. 1991.
+</TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v:CP"
+><A NAME="v%3ACP"
+></A
+></A
+><B
+>CP</B
+> (<A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord, <A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:CritPair')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:CritPair" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> (<A HREF="Yaiba-SPoly.html#t%3ACritPair"
+>CritPair</A
+> ord)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-SPoly.html#t%3ACritPair"
+>CritPair</A
+> ord)</TD
+><TD CLASS="rdoc"
+>CritPairs are sorted first by sugar, then by lcm.
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> (<A HREF="Yaiba-SPoly.html#t%3ACritPair"
+>CritPair</A
+> ord)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+>NFData (<A HREF="Yaiba-SPoly.html#t%3ACritPair"
+>CritPair</A
+> ord)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:empty"
+><A NAME="v%3Aempty"
+></A
+></A
+><B
+>empty</B
+> ::  <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#empty"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:isEmpty"
+><A NAME="v%3AisEmpty"
+></A
+></A
+><B
+>isEmpty</B
+> ::  <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#isEmpty"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:sizeSP"
+><A NAME="v%3AsizeSP"
+></A
+></A
+><B
+>sizeSP</B
+> ::  <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#sizeSP"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:bTest"
+><A NAME="v%3AbTest"
+></A
+></A
+><B
+>bTest</B
+> ::  <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; <A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord -&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#bTest"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Delete from the existing queue of CritPairs every pair (i,j) such that
+ [;\tau_i;] and [;\tau_j;] strictly divide [;\tau_k;].
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:constructN"
+><A NAME="v%3AconstructN"
+></A
+></A
+><B
+>constructN</B
+> ::  <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; (<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord) -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; [(((<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>), <A HREF="Yaiba-SPoly.html#t%3ACritPair"
+>CritPair</A
+> ord), <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+>)]</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#constructN"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:tTest"
+><A NAME="v%3AtTest"
+></A
+></A
+><B
+>tTest</B
+> ::  [(((<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>), <A HREF="Yaiba-SPoly.html#t%3ACritPair"
+>CritPair</A
+> ord), <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+>)] -&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#tTest"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Consider the set of new pairs nps. Discard all pairs (j,k) s.t. [;\tau_j;] and [;\tau_k;] are
+ comprime, along with any other pair (i,k) s.t. [;\tau_{jk}left|\tau_{ik}\right.;].
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:mTest"
+><A NAME="v%3AmTest"
+></A
+></A
+><B
+>mTest</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord -&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#mTest"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Discards from a set of new pairs all pairs (j,k) s.t. [;\tau_{ik}left|\tau_{jk}\right.;] with (i,k)
+ before (j,k) when sorted according to sugar (Fussy).
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:updateSPolys"
+><A NAME="v%3AupdateSPolys"
+></A
+></A
+><B
+>updateSPolys</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord -&gt; (<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord) -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#updateSPolys"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Applies the b-test to the existing queue. Then applies the t-test and m-test to the new pairs
+ with the addition of an [;f_k;]. Finally, merges the results to produce a new queue.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:delFindSingleLowest"
+><A NAME="v%3AdelFindSingleLowest"
+></A
+></A
+><B
+>delFindSingleLowest</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; ((<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord), <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#delFindSingleLowest"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:delFindLowest"
+><A NAME="v%3AdelFindLowest"
+></A
+></A
+><B
+>delFindLowest</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; ([(<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord)], <A HREF="Yaiba-SPoly.html#t%3ASPoly"
+>SPoly</A
+> ord)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#delFindLowest"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:findMinSug"
+><A NAME="v%3AfindMinSug"
+></A
+></A
+><B
+>findMinSug</B
+> ::  [(t, <A HREF="Yaiba-SPoly.html#t%3ACritPair"
+>CritPair</A
+> ord)] -&gt; <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#findMinSug"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:toSPoly"
+><A NAME="v%3AtoSPoly"
+></A
+></A
+><B
+>toSPoly</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord -&gt; ((<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+>), <A HREF="Yaiba-SPoly.html#t%3ACritPair"
+>CritPair</A
+> ord) -&gt; (<A HREF="Yaiba-Polynomial.html#t%3APoly"
+>Poly</A
+> ord, <A HREF="Yaiba-Sugar.html#t%3ASugar"
+>Sugar</A
+> ord)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-SPoly.html#toSPoly"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="botbar"
+>Produced by <A HREF="http://www.haskell.org/haddock/"
+>Haddock</A
+> version 2.7.2</TD
+></TR
+></TABLE
+></BODY
+></HTML
+>

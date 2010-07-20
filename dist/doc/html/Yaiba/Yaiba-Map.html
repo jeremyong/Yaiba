@@ -1,0 +1,7396 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--Rendered using the Haskell Html Library v0.2-->
+<HTML
+><HEAD
+><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8"
+><TITLE
+>Yaiba.Map</TITLE
+><LINK HREF="haddock.css" REL="stylesheet" TYPE="text/css"
+><SCRIPT SRC="haddock-util.js" TYPE="text/javascript"
+></SCRIPT
+><SCRIPT TYPE="text/javascript"
+>window.onload = function () {setSynopsis("mini_Yaiba-Map.html")};</SCRIPT
+></HEAD
+><BODY
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="topbar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><IMG SRC="haskell_icon.gif" WIDTH="16" HEIGHT="16" ALT=" "
+></TD
+><TD CLASS="title"
+>Yaiba-0.2.2: Implementation of Buchberger's algorithms</TD
+><TD CLASS="topbut"
+><A HREF="src/Yaiba-Map.html"
+>Source code</A
+></TD
+><TD CLASS="topbut"
+><A HREF="index.html"
+>Contents</A
+></TD
+><TD CLASS="topbut"
+><A HREF="doc-index.html"
+>Index</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="modulebar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><FONT SIZE="6"
+>Yaiba.Map</FONT
+></TD
+><TD ALIGN="right"
+><TABLE CLASS="narrow" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="infohead"
+>Portability</TD
+><TD CLASS="infoval"
+>portable</TD
+></TR
+><TR
+><TD CLASS="infohead"
+>Stability</TD
+><TD CLASS="infoval"
+>provisional</TD
+></TR
+><TR
+><TD CLASS="infohead"
+>Maintainer</TD
+><TD CLASS="infoval"
+>libraries@haskell.org</TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="section4"
+><B
+>Contents</B
+></TD
+></TR
+><TR
+><TD
+><DL
+><DT
+><A HREF="#1"
+>Map type
+</A
+></DT
+><DT
+><A HREF="#2"
+>Operators
+</A
+></DT
+><DT
+><A HREF="#3"
+>Query
+</A
+></DT
+><DT
+><A HREF="#4"
+>Construction
+</A
+></DT
+><DD
+><DL
+><DT
+><A HREF="#5"
+>Insertion
+</A
+></DT
+><DT
+><A HREF="#6"
+>Delete/Update
+</A
+></DT
+></DL
+></DD
+><DT
+><A HREF="#7"
+>Combine
+</A
+></DT
+><DD
+><DL
+><DT
+><A HREF="#8"
+>Union
+</A
+></DT
+><DT
+><A HREF="#9"
+>Difference
+</A
+></DT
+><DT
+><A HREF="#10"
+>Intersection
+</A
+></DT
+></DL
+></DD
+><DT
+><A HREF="#11"
+>Traversal
+</A
+></DT
+><DD
+><DL
+><DT
+><A HREF="#12"
+>Map
+</A
+></DT
+><DT
+><A HREF="#13"
+>Fold
+</A
+></DT
+></DL
+></DD
+><DT
+><A HREF="#14"
+>Conversion
+</A
+></DT
+><DD
+><DL
+><DT
+><A HREF="#15"
+>Lists
+</A
+></DT
+><DT
+><A HREF="#16"
+>Ordered lists
+</A
+></DT
+></DL
+></DD
+><DT
+><A HREF="#17"
+>Filter 
+</A
+></DT
+><DT
+><A HREF="#18"
+>Submap
+</A
+></DT
+><DT
+><A HREF="#19"
+>Indexed 
+</A
+></DT
+><DT
+><A HREF="#20"
+>Min/Max
+</A
+></DT
+><DT
+><A HREF="#21"
+>Debugging
+</A
+></DT
+></DL
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Description</TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>An efficient implementation of maps from keys to values (dictionaries).
+</P
+><P
+>Since many function names (but not the type name) clash with
+ <A HREF="Prelude.html"
+>Prelude</A
+> names, this module is usually imported <TT
+>qualified</TT
+>, e.g.
+</P
+><PRE
+>  import Data.Map (Map)
+  import qualified Data.Map as Map
+</PRE
+><P
+>The implementation of <TT
+><A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+></TT
+> is based on <EM
+>size balanced</EM
+> binary trees (or
+ trees of <EM
+>bounded balance</EM
+>) as described by:
+</P
+><UL
+><LI
+> Stephen Adams, &quot;<EM
+>Efficient sets: a balancing act</EM
+>&quot;,
+	Journal of Functional Programming 3(4):553-562, October 1993,
+	<A HREF="http://www.swiss.ai.mit.edu/~adams/BB/"
+>http://www.swiss.ai.mit.edu/~adams/BB/</A
+>.
+</LI
+><LI
+> J. Nievergelt and E.M. Reingold,
+	&quot;<EM
+>Binary search trees of bounded balance</EM
+>&quot;,
+	SIAM journal of computing 2(1), March 1973.
+</LI
+></UL
+><P
+>Note that the implementation is <EM
+>left-biased</EM
+> -- the elements of a
+ first argument are always preferred to the second, for example in
+ <TT
+><A HREF="Yaiba-Map.html#v%3Aunion"
+>union</A
+></TT
+> or <TT
+><A HREF="Yaiba-Map.html#v%3Ainsert"
+>insert</A
+></TT
+>.
+</P
+><P
+>Operation comments contain the operation time complexity in
+ the Big-O notation <A HREF="http://en.wikipedia.org/wiki/Big_O_notation"
+>http://en.wikipedia.org/wiki/Big_O_notation</A
+>.
+</P
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Synopsis</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A HREF="#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3A%21"
+>(!)</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; k -&gt; a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3A%5C%5C"
+>(\\)</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Anull"
+>null</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Asize"
+>size</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Amember"
+>member</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AnotMember"
+>notMember</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Alookup"
+>lookup</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfindWithDefault"
+>findWithDefault</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; a -&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aempty"
+>empty</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Asingleton"
+>singleton</A
+> ::  k -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Ainsert"
+>insert</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AinsertWith"
+>insertWith</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; a -&gt; a) -&gt; k -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AinsertWithKey"
+>insertWithKey</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; a -&gt; a) -&gt; k -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AinsertLookupWithKey"
+>insertLookupWithKey</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; a -&gt; a) -&gt; k -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AinsertWith%27"
+>insertWith'</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; a -&gt; a) -&gt; k -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AinsertWithKey%27"
+>insertWithKey'</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; a -&gt; a) -&gt; k -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Adelete"
+>delete</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aadjust"
+>adjust</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; a) -&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AadjustWithKey"
+>adjustWithKey</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; a) -&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aupdate"
+>update</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AupdateWithKey"
+>updateWithKey</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AupdateLookupWithKey"
+>updateLookupWithKey</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aalter"
+>alter</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aunion"
+>union</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AunionWith"
+>unionWith</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; a -&gt; a) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AunionWithKey"
+>unionWithKey</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; a -&gt; a) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aunions"
+>unions</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; [<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AunionsWith"
+>unionsWith</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; a -&gt; a) -&gt; [<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Adifference"
+>difference</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AdifferenceWith"
+>differenceWith</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; b -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AdifferenceWithKey"
+>differenceWithKey</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; b -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aintersection"
+>intersection</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AintersectionWith"
+>intersectionWith</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; b -&gt; c) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k c</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AintersectionWithKey"
+>intersectionWithKey</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; b -&gt; c) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k c</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Amap"
+>map</A
+> ::  (a -&gt; b) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmapWithKey"
+>mapWithKey</A
+> ::  (k -&gt; a -&gt; b) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmapAccum"
+>mapAccum</A
+> ::  (a -&gt; b -&gt; (a, c)) -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; (a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k c)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmapAccumWithKey"
+>mapAccumWithKey</A
+> ::  (a -&gt; k -&gt; b -&gt; (a, c)) -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; (a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k c)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmapAccumRWithKey"
+>mapAccumRWithKey</A
+> ::  (a -&gt; k -&gt; b -&gt; (a, c)) -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; (a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k c)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmapKeys"
+>mapKeys</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k2 =&gt; (k1 -&gt; k2) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k1 a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k2 a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmapKeysWith"
+>mapKeysWith</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k2 =&gt; (a -&gt; a -&gt; a) -&gt; (k1 -&gt; k2) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k1 a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k2 a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmapKeysMonotonic"
+>mapKeysMonotonic</A
+> ::  (k1 -&gt; k2) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k1 a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k2 a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmapKeysValuesMonotonic"
+>mapKeysValuesMonotonic</A
+> ::  ((k1, a) -&gt; (k1, a)) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k1 a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k1 a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Afold"
+>fold</A
+> ::  (a -&gt; b -&gt; b) -&gt; b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; b</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfoldWithKey"
+>foldWithKey</A
+> ::  (k -&gt; a -&gt; b -&gt; b) -&gt; b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; b</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfoldrWithKey"
+>foldrWithKey</A
+> ::  (k -&gt; a -&gt; b -&gt; b) -&gt; b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; b</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfoldlWithKey"
+>foldlWithKey</A
+> ::  (b -&gt; k -&gt; a -&gt; b) -&gt; b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; b</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aelems"
+>elems</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; [a]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Akeys"
+>keys</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; [k]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AkeysSet"
+>keysSet</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/containers-0.3.0.0/Data-Set.html#t%3ASet"
+>Set</A
+> k</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Aassocs"
+>assocs</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; [(k, a)]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AtoList"
+>toList</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; [(k, a)]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfromList"
+>fromList</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; [(k, a)] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfromListWith"
+>fromListWith</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; a -&gt; a) -&gt; [(k, a)] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfromListWithKey"
+>fromListWithKey</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; a -&gt; a) -&gt; [(k, a)] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AtoAscList"
+>toAscList</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; [(k, a)]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AtoDescList"
+>toDescList</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; [(k, a)]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfromAscList"
+>fromAscList</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> k =&gt; [(k, a)] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfromAscListWith"
+>fromAscListWith</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> k =&gt; (a -&gt; a -&gt; a) -&gt; [(k, a)] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfromAscListWithKey"
+>fromAscListWithKey</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> k =&gt; (k -&gt; a -&gt; a -&gt; a) -&gt; [(k, a)] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfromDistinctAscList"
+>fromDistinctAscList</A
+> ::  [(k, a)] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Afilter"
+>filter</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+>) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfilterWithKey"
+>filterWithKey</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+>) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Apartition"
+>partition</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+>) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3ApartitionWithKey"
+>partitionWithKey</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+>) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmapMaybe"
+>mapMaybe</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> b) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmapMaybeWithKey"
+>mapMaybeWithKey</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> b) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmapEither"
+>mapEither</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Either.html#t%3AEither"
+>Either</A
+> b c) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k c)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmapEitherWithKey"
+>mapEitherWithKey</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Either.html#t%3AEither"
+>Either</A
+> b c) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k c)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Asplit"
+>split</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AsplitLookup"
+>splitLookup</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AisSubmapOf"
+>isSubmapOf</A
+> :: (<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> a) =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AisSubmapOfBy"
+>isSubmapOfBy</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; b -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+>) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AisProperSubmapOf"
+>isProperSubmapOf</A
+> :: (<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> a) =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AisProperSubmapOfBy"
+>isProperSubmapOfBy</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; b -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+>) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AlookupIndex"
+>lookupIndex</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfindIndex"
+>findIndex</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AelemAt"
+>elemAt</A
+> ::  <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (k, a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AupdateAt"
+>updateAt</A
+> ::  (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AdeleteAt"
+>deleteAt</A
+> ::  <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfindMin"
+>findMin</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (k, a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfindMax"
+>findMax</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (k, a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AdeleteMin"
+>deleteMin</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AdeleteMax"
+>deleteMax</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AdeleteFindMin"
+>deleteFindMin</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; ((k, a), <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AdeleteFindMax"
+>deleteFindMax</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; ((k, a), <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AupdateMin"
+>updateMin</A
+> ::  (a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AupdateMax"
+>updateMax</A
+> ::  (a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AupdateMinWithKey"
+>updateMinWithKey</A
+> ::  (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AupdateMaxWithKey"
+>updateMaxWithKey</A
+> ::  (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AminView"
+>minView</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> (a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmaxView"
+>maxView</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> (a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AminViewWithKey"
+>minViewWithKey</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> ((k, a), <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmaxViewWithKey"
+>maxViewWithKey</A
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> ((k, a), <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AshowTree"
+>showTree</A
+> :: (<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> k, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> a) =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AshowTreeWith"
+>showTreeWith</A
+> ::  (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+>) -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+> -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+> -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3Avalid"
+>valid</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="1"
+><A NAME="1"
+>Map type
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><SPAN CLASS="keyword"
+>data</SPAN
+>  <A NAME="t:Map"
+><A NAME="t%3AMap"
+></A
+></A
+><B
+>Map</B
+> k a </TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#Map"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+>A Map from keys <TT
+>k</TT
+> to values <TT
+>a</TT
+>. 
+</TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:Map')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:Map" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Typeable.html#t%3ATypeable2"
+>Typeable2</A
+> <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Control-Monad.html#t%3AFunctor"
+>Functor</A
+> (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Foldable.html#t%3AFoldable"
+>Foldable</A
+> (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Traversable.html#t%3ATraversable"
+>Traversable</A
+> (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+>(<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> k, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> a) =&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+>(<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Data.html#t%3AData"
+>Data</A
+> k, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Data.html#t%3AData"
+>Data</A
+> a, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k) =&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Data.html#t%3AData"
+>Data</A
+> (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+>(<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> v) =&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k v)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+>(<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Read.html#t%3ARead"
+>Read</A
+> k, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Read.html#t%3ARead"
+>Read</A
+> e) =&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Read.html#t%3ARead"
+>Read</A
+> (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k e)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+>(<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> k, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> a) =&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Monoid.html#t%3AMonoid"
+>Monoid</A
+> (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k v)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+>NFData (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) <A HREF="Yaiba-Base.html#t%3AField"
+>Field</A
+>)</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="2"
+><A NAME="2"
+>Operators
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:!"
+><A NAME="v%3A%21"
+></A
+></A
+><B
+>(!)</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; k -&gt; a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#%21"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Find the value at a key.
+ Calls <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#v%3Aerror"
+>error</A
+></TT
+> when the element can not be found.
+</P
+><PRE
+> fromList [(5,'a'), (3,'b')] ! 1    Error: element not in the map
+ fromList [(5,'a'), (3,'b')] ! 5 == 'a'
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:\\"
+><A NAME="v%3A%5C%5C"
+></A
+></A
+><B
+>(\\)</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#%5C%5C"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Same as <TT
+><A HREF="Yaiba-Map.html#v%3Adifference"
+>difference</A
+></TT
+>.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="3"
+><A NAME="3"
+>Query
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:null"
+><A NAME="v%3Anull"
+></A
+></A
+><B
+>null</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#null"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(1)</EM
+>. Is the map empty?
+</P
+><PRE
+> Data.Map.null (empty)           == True
+ Data.Map.null (singleton 1 'a') == False
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:size"
+><A NAME="v%3Asize"
+></A
+></A
+><B
+>size</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#size"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(1)</EM
+>. The number of elements in the map.
+</P
+><PRE
+> size empty                                   == 0
+ size (singleton 1 'a')                       == 1
+ size (fromList([(1,'a'), (2,'c'), (3,'b')])) == 3
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:member"
+><A NAME="v%3Amember"
+></A
+></A
+><B
+>member</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#member"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Is the key a member of the map? See also <TT
+><A HREF="Yaiba-Map.html#v%3AnotMember"
+>notMember</A
+></TT
+>.
+</P
+><PRE
+> member 5 (fromList [(5,'a'), (3,'b')]) == True
+ member 1 (fromList [(5,'a'), (3,'b')]) == False
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:notMember"
+><A NAME="v%3AnotMember"
+></A
+></A
+><B
+>notMember</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#notMember"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Is the key not a member of the map? See also <TT
+><A HREF="Yaiba-Map.html#v%3Amember"
+>member</A
+></TT
+>.
+</P
+><PRE
+> notMember 5 (fromList [(5,'a'), (3,'b')]) == False
+ notMember 1 (fromList [(5,'a'), (3,'b')]) == True
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:lookup"
+><A NAME="v%3Alookup"
+></A
+></A
+><B
+>lookup</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#lookup"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Lookup the value at a key in the map.
+</P
+><P
+>The function will return the corresponding value as <TT
+>(<TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3AJust"
+>Just</A
+></TT
+> value)</TT
+>,
+ or <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3ANothing"
+>Nothing</A
+></TT
+> if the key isn't in the map.
+</P
+><P
+>An example of using <TT
+>lookup</TT
+>:
+</P
+><PRE
+> import Prelude hiding (lookup)
+ import Data.Map
+
+ employeeDept = fromList([(&quot;John&quot;,&quot;Sales&quot;), (&quot;Bob&quot;,&quot;IT&quot;)])
+ deptCountry = fromList([(&quot;IT&quot;,&quot;USA&quot;), (&quot;Sales&quot;,&quot;France&quot;)])
+ countryCurrency = fromList([(&quot;USA&quot;, &quot;Dollar&quot;), (&quot;France&quot;, &quot;Euro&quot;)])
+
+ employeeCurrency :: String -&gt; Maybe String
+ employeeCurrency name = do
+     dept &lt;- lookup name employeeDept
+     country &lt;- lookup dept deptCountry
+     lookup country countryCurrency
+
+ main = do
+     putStrLn $ &quot;John's currency: &quot; ++ (show (employeeCurrency &quot;John&quot;))
+     putStrLn $ &quot;Pete's currency: &quot; ++ (show (employeeCurrency &quot;Pete&quot;))
+</PRE
+><P
+>The output of this program:
+</P
+><PRE
+>   John's currency: Just &quot;Euro&quot;
+   Pete's currency: Nothing
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:findWithDefault"
+><A NAME="v%3AfindWithDefault"
+></A
+></A
+><B
+>findWithDefault</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; a -&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#findWithDefault"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. The expression <TT
+>(<TT
+><A HREF="Yaiba-Map.html#v%3AfindWithDefault"
+>findWithDefault</A
+></TT
+> def k map)</TT
+> returns
+ the value at key <TT
+>k</TT
+> or returns default value <TT
+>def</TT
+>
+ when the key is not in the map.
+</P
+><PRE
+> findWithDefault 'x' 1 (fromList [(5,'a'), (3,'b')]) == 'x'
+ findWithDefault 'x' 5 (fromList [(5,'a'), (3,'b')]) == 'a'
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="4"
+><A NAME="4"
+>Construction
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:empty"
+><A NAME="v%3Aempty"
+></A
+></A
+><B
+>empty</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#empty"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(1)</EM
+>. The empty map.
+</P
+><PRE
+> empty      == fromList []
+ size empty == 0
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:singleton"
+><A NAME="v%3Asingleton"
+></A
+></A
+><B
+>singleton</B
+> ::  k -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#singleton"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(1)</EM
+>. A map with a single element.
+</P
+><PRE
+> singleton 1 'a'        == fromList [(1, 'a')]
+ size (singleton 1 'a') == 1
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="5"
+><A NAME="5"
+>Insertion
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:insert"
+><A NAME="v%3Ainsert"
+></A
+></A
+><B
+>insert</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#insert"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Insert a new key and value in the map.
+ If the key is already present in the map, the associated value is
+ replaced with the supplied value. <TT
+><A HREF="Yaiba-Map.html#v%3Ainsert"
+>insert</A
+></TT
+> is equivalent to
+ <TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AinsertWith"
+>insertWith</A
+></TT
+> <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#v%3Aconst"
+>const</A
+></TT
+></TT
+>.
+</P
+><PRE
+> insert 5 'x' (fromList [(5,'a'), (3,'b')]) == fromList [(3, 'b'), (5, 'x')]
+ insert 7 'x' (fromList [(5,'a'), (3,'b')]) == fromList [(3, 'b'), (5, 'a'), (7, 'x')]
+ insert 5 'x' empty                         == singleton 5 'x'
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:insertWith"
+><A NAME="v%3AinsertWith"
+></A
+></A
+><B
+>insertWith</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; a -&gt; a) -&gt; k -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#insertWith"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Insert with a function, combining new value and old value.
+ <TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AinsertWith"
+>insertWith</A
+></TT
+> f key value mp</TT
+> 
+ will insert the pair (key, value) into <TT
+>mp</TT
+> if key does
+ not exist in the map. If the key does exist, the function will
+ insert the pair <TT
+>(key, f new_value old_value)</TT
+>.
+</P
+><PRE
+> insertWith (++) 5 &quot;xxx&quot; (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;xxxa&quot;)]
+ insertWith (++) 7 &quot;xxx&quot; (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;a&quot;), (7, &quot;xxx&quot;)]
+ insertWith (++) 5 &quot;xxx&quot; empty                         == singleton 5 &quot;xxx&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:insertWithKey"
+><A NAME="v%3AinsertWithKey"
+></A
+></A
+><B
+>insertWithKey</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; a -&gt; a) -&gt; k -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#insertWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Insert with a function, combining key, new value and old value.
+ <TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AinsertWithKey"
+>insertWithKey</A
+></TT
+> f key value mp</TT
+> 
+ will insert the pair (key, value) into <TT
+>mp</TT
+> if key does
+ not exist in the map. If the key does exist, the function will
+ insert the pair <TT
+>(key,f key new_value old_value)</TT
+>.
+ Note that the key passed to f is the same key passed to <TT
+><A HREF="Yaiba-Map.html#v%3AinsertWithKey"
+>insertWithKey</A
+></TT
+>.
+</P
+><PRE
+> let f key new_value old_value = (show key) ++ &quot;:&quot; ++ new_value ++ &quot;|&quot; ++ old_value
+ insertWithKey f 5 &quot;xxx&quot; (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;5:xxx|a&quot;)]
+ insertWithKey f 7 &quot;xxx&quot; (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;a&quot;), (7, &quot;xxx&quot;)]
+ insertWithKey f 5 &quot;xxx&quot; empty                         == singleton 5 &quot;xxx&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:insertLookupWithKey"
+><A NAME="v%3AinsertLookupWithKey"
+></A
+></A
+><B
+>insertLookupWithKey</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; a -&gt; a) -&gt; k -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#insertLookupWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Combines insert operation with old value retrieval.
+ The expression (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AinsertLookupWithKey"
+>insertLookupWithKey</A
+></TT
+> f k x map</TT
+>)
+ is a pair where the first element is equal to (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3Alookup"
+>lookup</A
+></TT
+> k map</TT
+>)
+ and the second element equal to (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AinsertWithKey"
+>insertWithKey</A
+></TT
+> f k x map</TT
+>).
+</P
+><PRE
+> let f key new_value old_value = (show key) ++ &quot;:&quot; ++ new_value ++ &quot;|&quot; ++ old_value
+ insertLookupWithKey f 5 &quot;xxx&quot; (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (Just &quot;a&quot;, fromList [(3, &quot;b&quot;), (5, &quot;5:xxx|a&quot;)])
+ insertLookupWithKey f 7 &quot;xxx&quot; (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (Nothing,  fromList [(3, &quot;b&quot;), (5, &quot;a&quot;), (7, &quot;xxx&quot;)])
+ insertLookupWithKey f 5 &quot;xxx&quot; empty                         == (Nothing,  singleton 5 &quot;xxx&quot;)
+</PRE
+><P
+>This is how to define <TT
+>insertLookup</TT
+> using <TT
+>insertLookupWithKey</TT
+>:
+</P
+><PRE
+> let insertLookup kx x t = insertLookupWithKey (\_ a _ -&gt; a) kx x t
+ insertLookup 5 &quot;x&quot; (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (Just &quot;a&quot;, fromList [(3, &quot;b&quot;), (5, &quot;x&quot;)])
+ insertLookup 7 &quot;x&quot; (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (Nothing,  fromList [(3, &quot;b&quot;), (5, &quot;a&quot;), (7, &quot;x&quot;)])
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:insertWith'"
+><A NAME="v%3AinsertWith%27"
+></A
+></A
+><B
+>insertWith'</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; a -&gt; a) -&gt; k -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#insertWith%27"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Same as <TT
+><A HREF="Yaiba-Map.html#v%3AinsertWith"
+>insertWith</A
+></TT
+>, but the combining function is applied strictly.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:insertWithKey'"
+><A NAME="v%3AinsertWithKey%27"
+></A
+></A
+><B
+>insertWithKey'</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; a -&gt; a) -&gt; k -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#insertWithKey%27"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Same as <TT
+><A HREF="Yaiba-Map.html#v%3AinsertWithKey"
+>insertWithKey</A
+></TT
+>, but the combining function is applied strictly.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="6"
+><A NAME="6"
+>Delete/Update
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:delete"
+><A NAME="v%3Adelete"
+></A
+></A
+><B
+>delete</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#delete"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Delete a key and its value from the map. When the key is not
+ a member of the map, the original map is returned.
+</P
+><PRE
+> delete 5 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == singleton 3 &quot;b&quot;
+ delete 7 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;a&quot;)]
+ delete 5 empty                         == empty
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:adjust"
+><A NAME="v%3Aadjust"
+></A
+></A
+><B
+>adjust</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; a) -&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#adjust"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Update a value at a specific key with the result of the provided function.
+ When the key is not
+ a member of the map, the original map is returned.
+</P
+><PRE
+> adjust (&quot;new &quot; ++) 5 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;new a&quot;)]
+ adjust (&quot;new &quot; ++) 7 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;a&quot;)]
+ adjust (&quot;new &quot; ++) 7 empty                         == empty
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:adjustWithKey"
+><A NAME="v%3AadjustWithKey"
+></A
+></A
+><B
+>adjustWithKey</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; a) -&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#adjustWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Adjust a value at a specific key. When the key is not
+ a member of the map, the original map is returned.
+</P
+><PRE
+> let f key x = (show key) ++ &quot;:new &quot; ++ x
+ adjustWithKey f 5 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;5:new a&quot;)]
+ adjustWithKey f 7 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;a&quot;)]
+ adjustWithKey f 7 empty                         == empty
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:update"
+><A NAME="v%3Aupdate"
+></A
+></A
+><B
+>update</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#update"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. The expression (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3Aupdate"
+>update</A
+></TT
+> f k map</TT
+>) updates the value <TT
+>x</TT
+>
+ at <TT
+>k</TT
+> (if it is in the map). If (<TT
+>f x</TT
+>) is <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3ANothing"
+>Nothing</A
+></TT
+>, the element is
+ deleted. If it is (<TT
+><TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3AJust"
+>Just</A
+></TT
+> y</TT
+>), the key <TT
+>k</TT
+> is bound to the new value <TT
+>y</TT
+>.
+</P
+><PRE
+> let f x = if x == &quot;a&quot; then Just &quot;new a&quot; else Nothing
+ update f 5 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;new a&quot;)]
+ update f 7 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;a&quot;)]
+ update f 3 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == singleton 5 &quot;a&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:updateWithKey"
+><A NAME="v%3AupdateWithKey"
+></A
+></A
+><B
+>updateWithKey</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#updateWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. The expression (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AupdateWithKey"
+>updateWithKey</A
+></TT
+> f k map</TT
+>) updates the
+ value <TT
+>x</TT
+> at <TT
+>k</TT
+> (if it is in the map). If (<TT
+>f k x</TT
+>) is <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3ANothing"
+>Nothing</A
+></TT
+>,
+ the element is deleted. If it is (<TT
+><TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3AJust"
+>Just</A
+></TT
+> y</TT
+>), the key <TT
+>k</TT
+> is bound
+ to the new value <TT
+>y</TT
+>.
+</P
+><PRE
+> let f k x = if x == &quot;a&quot; then Just ((show k) ++ &quot;:new a&quot;) else Nothing
+ updateWithKey f 5 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;5:new a&quot;)]
+ updateWithKey f 7 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;a&quot;)]
+ updateWithKey f 3 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == singleton 5 &quot;a&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:updateLookupWithKey"
+><A NAME="v%3AupdateLookupWithKey"
+></A
+></A
+><B
+>updateLookupWithKey</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#updateLookupWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Lookup and update. See also <TT
+><A HREF="Yaiba-Map.html#v%3AupdateWithKey"
+>updateWithKey</A
+></TT
+>.
+ The function returns changed value, if it is updated.
+ Returns the original key value if the map entry is deleted. 
+</P
+><PRE
+> let f k x = if x == &quot;a&quot; then Just ((show k) ++ &quot;:new a&quot;) else Nothing
+ updateLookupWithKey f 5 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (Just &quot;5:new a&quot;, fromList [(3, &quot;b&quot;), (5, &quot;5:new a&quot;)])
+ updateLookupWithKey f 7 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (Nothing,  fromList [(3, &quot;b&quot;), (5, &quot;a&quot;)])
+ updateLookupWithKey f 3 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (Just &quot;b&quot;, singleton 5 &quot;a&quot;)
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:alter"
+><A NAME="v%3Aalter"
+></A
+></A
+><B
+>alter</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#alter"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. The expression (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3Aalter"
+>alter</A
+></TT
+> f k map</TT
+>) alters the value <TT
+>x</TT
+> at <TT
+>k</TT
+>, or absence thereof.
+ <TT
+><A HREF="Yaiba-Map.html#v%3Aalter"
+>alter</A
+></TT
+> can be used to insert, delete, or update a value in a <TT
+><A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+></TT
+>.
+ In short : <TT
+><TT
+><A HREF="Yaiba-Map.html#v%3Alookup"
+>lookup</A
+></TT
+> k (<TT
+><A HREF="Yaiba-Map.html#v%3Aalter"
+>alter</A
+></TT
+> f k m) = f (<TT
+><A HREF="Yaiba-Map.html#v%3Alookup"
+>lookup</A
+></TT
+> k m)</TT
+>.
+</P
+><PRE
+> let f _ = Nothing
+ alter f 7 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;a&quot;)]
+ alter f 5 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == singleton 3 &quot;b&quot;
+
+ let f _ = Just &quot;c&quot;
+ alter f 7 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;a&quot;), (7, &quot;c&quot;)]
+ alter f 5 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;c&quot;)]
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="7"
+><A NAME="7"
+>Combine
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="8"
+><A NAME="8"
+>Union
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:union"
+><A NAME="v%3Aunion"
+></A
+></A
+><B
+>union</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#union"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n+m)</EM
+>.
+ The expression (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3Aunion"
+>union</A
+></TT
+> t1 t2</TT
+>) takes the left-biased union of <TT
+>t1</TT
+> and <TT
+>t2</TT
+>. 
+ It prefers <TT
+>t1</TT
+> when duplicate keys are encountered,
+ i.e. (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3Aunion"
+>union</A
+></TT
+> == <TT
+><A HREF="Yaiba-Map.html#v%3AunionWith"
+>unionWith</A
+></TT
+> <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#v%3Aconst"
+>const</A
+></TT
+></TT
+>).
+ The implementation uses the efficient <EM
+>hedge-union</EM
+> algorithm.
+ Hedge-union is more efficient on (bigset `<TT
+><A HREF="Yaiba-Map.html#v%3Aunion"
+>union</A
+></TT
+>` smallset).
+</P
+><PRE
+> union (fromList [(5, &quot;a&quot;), (3, &quot;b&quot;)]) (fromList [(5, &quot;A&quot;), (7, &quot;C&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;a&quot;), (7, &quot;C&quot;)]
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:unionWith"
+><A NAME="v%3AunionWith"
+></A
+></A
+><B
+>unionWith</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; a -&gt; a) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#unionWith"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n+m)</EM
+>. Union with a combining function. The implementation uses the efficient <EM
+>hedge-union</EM
+> algorithm.
+</P
+><PRE
+> unionWith (++) (fromList [(5, &quot;a&quot;), (3, &quot;b&quot;)]) (fromList [(5, &quot;A&quot;), (7, &quot;C&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;aA&quot;), (7, &quot;C&quot;)]
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:unionWithKey"
+><A NAME="v%3AunionWithKey"
+></A
+></A
+><B
+>unionWithKey</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; a -&gt; a) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#unionWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n+m)</EM
+>.
+ Union with a combining function. The implementation uses the efficient <EM
+>hedge-union</EM
+> algorithm.
+ Hedge-union is more efficient on (bigset `<TT
+><A HREF="Yaiba-Map.html#v%3Aunion"
+>union</A
+></TT
+>` smallset).
+</P
+><PRE
+> let f key left_value right_value = (show key) ++ &quot;:&quot; ++ left_value ++ &quot;|&quot; ++ right_value
+ unionWithKey f (fromList [(5, &quot;a&quot;), (3, &quot;b&quot;)]) (fromList [(5, &quot;A&quot;), (7, &quot;C&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;5:a|A&quot;), (7, &quot;C&quot;)]
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:unions"
+><A NAME="v%3Aunions"
+></A
+></A
+><B
+>unions</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; [<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#unions"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>The union of a list of maps:
+   (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3Aunions"
+>unions</A
+></TT
+> == <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-List.html#v%3Afoldl"
+>foldl</A
+></TT
+> <TT
+><A HREF="Yaiba-Map.html#v%3Aunion"
+>union</A
+></TT
+> <TT
+><A HREF="Yaiba-Map.html#v%3Aempty"
+>empty</A
+></TT
+></TT
+>).
+</P
+><PRE
+> unions [(fromList [(5, &quot;a&quot;), (3, &quot;b&quot;)]), (fromList [(5, &quot;A&quot;), (7, &quot;C&quot;)]), (fromList [(5, &quot;A3&quot;), (3, &quot;B3&quot;)])]
+     == fromList [(3, &quot;b&quot;), (5, &quot;a&quot;), (7, &quot;C&quot;)]
+ unions [(fromList [(5, &quot;A3&quot;), (3, &quot;B3&quot;)]), (fromList [(5, &quot;A&quot;), (7, &quot;C&quot;)]), (fromList [(5, &quot;a&quot;), (3, &quot;b&quot;)])]
+     == fromList [(3, &quot;B3&quot;), (5, &quot;A3&quot;), (7, &quot;C&quot;)]
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:unionsWith"
+><A NAME="v%3AunionsWith"
+></A
+></A
+><B
+>unionsWith</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; a -&gt; a) -&gt; [<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#unionsWith"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>The union of a list of maps, with a combining operation:
+   (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AunionsWith"
+>unionsWith</A
+></TT
+> f == <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-List.html#v%3Afoldl"
+>foldl</A
+></TT
+> (<TT
+><A HREF="Yaiba-Map.html#v%3AunionWith"
+>unionWith</A
+></TT
+> f) <TT
+><A HREF="Yaiba-Map.html#v%3Aempty"
+>empty</A
+></TT
+></TT
+>).
+</P
+><PRE
+> unionsWith (++) [(fromList [(5, &quot;a&quot;), (3, &quot;b&quot;)]), (fromList [(5, &quot;A&quot;), (7, &quot;C&quot;)]), (fromList [(5, &quot;A3&quot;), (3, &quot;B3&quot;)])]
+     == fromList [(3, &quot;bB3&quot;), (5, &quot;aAA3&quot;), (7, &quot;C&quot;)]
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="9"
+><A NAME="9"
+>Difference
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:difference"
+><A NAME="v%3Adifference"
+></A
+></A
+><B
+>difference</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#difference"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n+m)</EM
+>. Difference of two maps. 
+ Return elements of the first map not existing in the second map.
+ The implementation uses an efficient <EM
+>hedge</EM
+> algorithm comparable with <EM
+>hedge-union</EM
+>.
+</P
+><PRE
+> difference (fromList [(5, &quot;a&quot;), (3, &quot;b&quot;)]) (fromList [(5, &quot;A&quot;), (7, &quot;C&quot;)]) == singleton 3 &quot;b&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:differenceWith"
+><A NAME="v%3AdifferenceWith"
+></A
+></A
+><B
+>differenceWith</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; b -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#differenceWith"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n+m)</EM
+>. Difference with a combining function. 
+ When two equal keys are
+ encountered, the combining function is applied to the values of these keys.
+ If it returns <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3ANothing"
+>Nothing</A
+></TT
+>, the element is discarded (proper set difference). If
+ it returns (<TT
+><TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3AJust"
+>Just</A
+></TT
+> y</TT
+>), the element is updated with a new value <TT
+>y</TT
+>. 
+ The implementation uses an efficient <EM
+>hedge</EM
+> algorithm comparable with <EM
+>hedge-union</EM
+>.
+</P
+><PRE
+> let f al ar = if al == &quot;b&quot; then Just (al ++ &quot;:&quot; ++ ar) else Nothing
+ differenceWith f (fromList [(5, &quot;a&quot;), (3, &quot;b&quot;)]) (fromList [(5, &quot;A&quot;), (3, &quot;B&quot;), (7, &quot;C&quot;)])
+     == singleton 3 &quot;b:B&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:differenceWithKey"
+><A NAME="v%3AdifferenceWithKey"
+></A
+></A
+><B
+>differenceWithKey</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; b -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#differenceWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n+m)</EM
+>. Difference with a combining function. When two equal keys are
+ encountered, the combining function is applied to the key and both values.
+ If it returns <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3ANothing"
+>Nothing</A
+></TT
+>, the element is discarded (proper set difference). If
+ it returns (<TT
+><TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3AJust"
+>Just</A
+></TT
+> y</TT
+>), the element is updated with a new value <TT
+>y</TT
+>. 
+ The implementation uses an efficient <EM
+>hedge</EM
+> algorithm comparable with <EM
+>hedge-union</EM
+>.
+</P
+><PRE
+> let f k al ar = if al == &quot;b&quot; then Just ((show k) ++ &quot;:&quot; ++ al ++ &quot;|&quot; ++ ar) else Nothing
+ differenceWithKey f (fromList [(5, &quot;a&quot;), (3, &quot;b&quot;)]) (fromList [(5, &quot;A&quot;), (3, &quot;B&quot;), (10, &quot;C&quot;)])
+     == singleton 3 &quot;3:b|B&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="10"
+><A NAME="10"
+>Intersection
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:intersection"
+><A NAME="v%3Aintersection"
+></A
+></A
+><B
+>intersection</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#intersection"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n+m)</EM
+>. Intersection of two maps.
+ Return data in the first map for the keys existing in both maps.
+ (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3Aintersection"
+>intersection</A
+></TT
+> m1 m2 == <TT
+><A HREF="Yaiba-Map.html#v%3AintersectionWith"
+>intersectionWith</A
+></TT
+> <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#v%3Aconst"
+>const</A
+></TT
+> m1 m2</TT
+>).
+</P
+><PRE
+> intersection (fromList [(5, &quot;a&quot;), (3, &quot;b&quot;)]) (fromList [(5, &quot;A&quot;), (7, &quot;C&quot;)]) == singleton 5 &quot;a&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:intersectionWith"
+><A NAME="v%3AintersectionWith"
+></A
+></A
+><B
+>intersectionWith</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; b -&gt; c) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k c</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#intersectionWith"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n+m)</EM
+>. Intersection with a combining function.
+</P
+><PRE
+> intersectionWith (++) (fromList [(5, &quot;a&quot;), (3, &quot;b&quot;)]) (fromList [(5, &quot;A&quot;), (7, &quot;C&quot;)]) == singleton 5 &quot;aA&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:intersectionWithKey"
+><A NAME="v%3AintersectionWithKey"
+></A
+></A
+><B
+>intersectionWithKey</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; b -&gt; c) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k c</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#intersectionWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n+m)</EM
+>. Intersection with a combining function.
+ Intersection is more efficient on (bigset `<TT
+><A HREF="Yaiba-Map.html#v%3Aintersection"
+>intersection</A
+></TT
+>` smallset).
+</P
+><PRE
+> let f k al ar = (show k) ++ &quot;:&quot; ++ al ++ &quot;|&quot; ++ ar
+ intersectionWithKey f (fromList [(5, &quot;a&quot;), (3, &quot;b&quot;)]) (fromList [(5, &quot;A&quot;), (7, &quot;C&quot;)]) == singleton 5 &quot;5:a|A&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="11"
+><A NAME="11"
+>Traversal
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="12"
+><A NAME="12"
+>Map
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:map"
+><A NAME="v%3Amap"
+></A
+></A
+><B
+>map</B
+> ::  (a -&gt; b) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#map"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Map a function over all values in the map.
+</P
+><PRE
+> map (++ &quot;x&quot;) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;bx&quot;), (5, &quot;ax&quot;)]
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:mapWithKey"
+><A NAME="v%3AmapWithKey"
+></A
+></A
+><B
+>mapWithKey</B
+> ::  (k -&gt; a -&gt; b) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#mapWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Map a function over all values in the map.
+</P
+><PRE
+> let f key x = (show key) ++ &quot;:&quot; ++ x
+ mapWithKey f (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;3:b&quot;), (5, &quot;5:a&quot;)]
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:mapAccum"
+><A NAME="v%3AmapAccum"
+></A
+></A
+><B
+>mapAccum</B
+> ::  (a -&gt; b -&gt; (a, c)) -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; (a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k c)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#mapAccum"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. The function <TT
+><A HREF="Yaiba-Map.html#v%3AmapAccum"
+>mapAccum</A
+></TT
+> threads an accumulating
+ argument through the map in ascending order of keys.
+</P
+><PRE
+> let f a b = (a ++ b, b ++ &quot;X&quot;)
+ mapAccum f &quot;Everything: &quot; (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (&quot;Everything: ba&quot;, fromList [(3, &quot;bX&quot;), (5, &quot;aX&quot;)])
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:mapAccumWithKey"
+><A NAME="v%3AmapAccumWithKey"
+></A
+></A
+><B
+>mapAccumWithKey</B
+> ::  (a -&gt; k -&gt; b -&gt; (a, c)) -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; (a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k c)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#mapAccumWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. The function <TT
+><A HREF="Yaiba-Map.html#v%3AmapAccumWithKey"
+>mapAccumWithKey</A
+></TT
+> threads an accumulating
+ argument through the map in ascending order of keys.
+</P
+><PRE
+> let f a k b = (a ++ &quot; &quot; ++ (show k) ++ &quot;-&quot; ++ b, b ++ &quot;X&quot;)
+ mapAccumWithKey f &quot;Everything:&quot; (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (&quot;Everything: 3-b 5-a&quot;, fromList [(3, &quot;bX&quot;), (5, &quot;aX&quot;)])
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:mapAccumRWithKey"
+><A NAME="v%3AmapAccumRWithKey"
+></A
+></A
+><B
+>mapAccumRWithKey</B
+> ::  (a -&gt; k -&gt; b -&gt; (a, c)) -&gt; a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; (a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k c)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#mapAccumRWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><EM
+>O(n)</EM
+>. The function mapAccumR threads an accumulating
+ argument through the map in descending order of keys.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:mapKeys"
+><A NAME="v%3AmapKeys"
+></A
+></A
+><B
+>mapKeys</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k2 =&gt; (k1 -&gt; k2) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k1 a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k2 a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#mapKeys"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n*log n)</EM
+>.
+ <TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AmapKeys"
+>mapKeys</A
+></TT
+> f s</TT
+> is the map obtained by applying <TT
+>f</TT
+> to each key of <TT
+>s</TT
+>.
+</P
+><P
+>The size of the result may be smaller if <TT
+>f</TT
+> maps two or more distinct
+ keys to the same new key.  In this case the value at the smallest of
+ these keys is retained.
+</P
+><PRE
+> mapKeys (+ 1) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)])                        == fromList [(4, &quot;b&quot;), (6, &quot;a&quot;)]
+ mapKeys (\ _ -&gt; 1) (fromList [(1,&quot;b&quot;), (2,&quot;a&quot;), (3,&quot;d&quot;), (4,&quot;c&quot;)]) == singleton 1 &quot;c&quot;
+ mapKeys (\ _ -&gt; 3) (fromList [(1,&quot;b&quot;), (2,&quot;a&quot;), (3,&quot;d&quot;), (4,&quot;c&quot;)]) == singleton 3 &quot;c&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:mapKeysWith"
+><A NAME="v%3AmapKeysWith"
+></A
+></A
+><B
+>mapKeysWith</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k2 =&gt; (a -&gt; a -&gt; a) -&gt; (k1 -&gt; k2) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k1 a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k2 a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#mapKeysWith"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n*log n)</EM
+>.
+ <TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AmapKeysWith"
+>mapKeysWith</A
+></TT
+> c f s</TT
+> is the map obtained by applying <TT
+>f</TT
+> to each key of <TT
+>s</TT
+>.
+</P
+><P
+>The size of the result may be smaller if <TT
+>f</TT
+> maps two or more distinct
+ keys to the same new key.  In this case the associated values will be
+ combined using <TT
+>c</TT
+>.
+</P
+><PRE
+> mapKeysWith (++) (\ _ -&gt; 1) (fromList [(1,&quot;b&quot;), (2,&quot;a&quot;), (3,&quot;d&quot;), (4,&quot;c&quot;)]) == singleton 1 &quot;cdab&quot;
+ mapKeysWith (++) (\ _ -&gt; 3) (fromList [(1,&quot;b&quot;), (2,&quot;a&quot;), (3,&quot;d&quot;), (4,&quot;c&quot;)]) == singleton 3 &quot;cdab&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:mapKeysMonotonic"
+><A NAME="v%3AmapKeysMonotonic"
+></A
+></A
+><B
+>mapKeysMonotonic</B
+> ::  (k1 -&gt; k2) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k1 a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k2 a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#mapKeysMonotonic"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>.
+ <TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AmapKeysMonotonic"
+>mapKeysMonotonic</A
+></TT
+> f s == <TT
+><A HREF="Yaiba-Map.html#v%3AmapKeys"
+>mapKeys</A
+></TT
+> f s</TT
+>, but works only when <TT
+>f</TT
+>
+ is strictly monotonic.
+ That is, for any values <TT
+>x</TT
+> and <TT
+>y</TT
+>, if <TT
+>x</TT
+> &lt; <TT
+>y</TT
+> then <TT
+>f x</TT
+> &lt; <TT
+>f y</TT
+>.
+ <EM
+>The precondition is not checked.</EM
+>
+ Semi-formally, we have:
+</P
+><PRE
+> and [x &lt; y ==&gt; f x &lt; f y | x &lt;- ls, y &lt;- ls] 
+                     ==&gt; mapKeysMonotonic f s == mapKeys f s
+     where ls = keys s
+</PRE
+><P
+>This means that <TT
+>f</TT
+> maps distinct original keys to distinct resulting keys.
+ This function has better performance than <TT
+><A HREF="Yaiba-Map.html#v%3AmapKeys"
+>mapKeys</A
+></TT
+>.
+</P
+><PRE
+> mapKeysMonotonic (\ k -&gt; k * 2) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(6, &quot;b&quot;), (10, &quot;a&quot;)]
+ valid (mapKeysMonotonic (\ k -&gt; k * 2) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)])) == True
+ valid (mapKeysMonotonic (\ _ -&gt; 1)     (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)])) == False
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:mapKeysValuesMonotonic"
+><A NAME="v%3AmapKeysValuesMonotonic"
+></A
+></A
+><B
+>mapKeysValuesMonotonic</B
+> ::  ((k1, a) -&gt; (k1, a)) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k1 a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k1 a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#mapKeysValuesMonotonic"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="13"
+><A NAME="13"
+>Fold
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:fold"
+><A NAME="v%3Afold"
+></A
+></A
+><B
+>fold</B
+> ::  (a -&gt; b -&gt; b) -&gt; b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; b</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#fold"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Fold the values in the map, such that
+ <TT
+><TT
+><A HREF="Yaiba-Map.html#v%3Afold"
+>fold</A
+></TT
+> f z == <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-List.html#v%3Afoldr"
+>foldr</A
+></TT
+> f z . <TT
+><A HREF="Yaiba-Map.html#v%3Aelems"
+>elems</A
+></TT
+></TT
+>.
+ For example,
+</P
+><PRE
+> elems map = fold (:) [] map
+</PRE
+><PRE
+> let f a len = len + (length a)
+ fold f 0 (fromList [(5,&quot;a&quot;), (3,&quot;bbb&quot;)]) == 4
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:foldWithKey"
+><A NAME="v%3AfoldWithKey"
+></A
+></A
+><B
+>foldWithKey</B
+> ::  (k -&gt; a -&gt; b -&gt; b) -&gt; b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; b</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#foldWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Fold the keys and values in the map, such that
+ <TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AfoldWithKey"
+>foldWithKey</A
+></TT
+> f z == <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-List.html#v%3Afoldr"
+>foldr</A
+></TT
+> (<TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Tuple.html#v%3Auncurry"
+>uncurry</A
+></TT
+> f) z . <TT
+><A HREF="Yaiba-Map.html#v%3AtoAscList"
+>toAscList</A
+></TT
+></TT
+>.
+ For example,
+</P
+><PRE
+> keys map = foldWithKey (\k x ks -&gt; k:ks) [] map
+</PRE
+><PRE
+> let f k a result = result ++ &quot;(&quot; ++ (show k) ++ &quot;:&quot; ++ a ++ &quot;)&quot;
+ foldWithKey f &quot;Map: &quot; (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == &quot;Map: (5:a)(3:b)&quot;
+</PRE
+><P
+>This is identical to <TT
+><A HREF="Yaiba-Map.html#v%3AfoldrWithKey"
+>foldrWithKey</A
+></TT
+>, and you should use that one instead of
+ this one.  This name is kept for backward compatibility.
+</P
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:foldrWithKey"
+><A NAME="v%3AfoldrWithKey"
+></A
+></A
+><B
+>foldrWithKey</B
+> ::  (k -&gt; a -&gt; b -&gt; b) -&gt; b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; b</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#foldrWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><EM
+>O(n)</EM
+>. Post-order fold.  The function will be applied from the lowest
+ value to the highest.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:foldlWithKey"
+><A NAME="v%3AfoldlWithKey"
+></A
+></A
+><B
+>foldlWithKey</B
+> ::  (b -&gt; k -&gt; a -&gt; b) -&gt; b -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; b</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#foldlWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><EM
+>O(n)</EM
+>. Pre-order fold.  The function will be applied from the highest
+ value to the lowest.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="14"
+><A NAME="14"
+>Conversion
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:elems"
+><A NAME="v%3Aelems"
+></A
+></A
+><B
+>elems</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; [a]</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#elems"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>.
+ Return all elements of the map in the ascending order of their keys.
+</P
+><PRE
+> elems (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == [&quot;b&quot;,&quot;a&quot;]
+ elems empty == []
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:keys"
+><A NAME="v%3Akeys"
+></A
+></A
+><B
+>keys</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; [k]</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#keys"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Return all keys of the map in ascending order.
+</P
+><PRE
+> keys (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == [3,5]
+ keys empty == []
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:keysSet"
+><A NAME="v%3AkeysSet"
+></A
+></A
+><B
+>keysSet</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/containers-0.3.0.0/Data-Set.html#t%3ASet"
+>Set</A
+> k</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#keysSet"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. The set of all keys of the map.
+</P
+><PRE
+> keysSet (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == Data.Set.fromList [3,5]
+ keysSet empty == Data.Set.empty
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:assocs"
+><A NAME="v%3Aassocs"
+></A
+></A
+><B
+>assocs</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; [(k, a)]</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#assocs"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Return all key/value pairs in the map in ascending key order.
+</P
+><PRE
+> assocs (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == [(3,&quot;b&quot;), (5,&quot;a&quot;)]
+ assocs empty == []
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="15"
+><A NAME="15"
+>Lists
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:toList"
+><A NAME="v%3AtoList"
+></A
+></A
+><B
+>toList</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; [(k, a)]</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#toList"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Convert to a list of key/value pairs.
+</P
+><PRE
+> toList (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == [(3,&quot;b&quot;), (5,&quot;a&quot;)]
+ toList empty == []
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:fromList"
+><A NAME="v%3AfromList"
+></A
+></A
+><B
+>fromList</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; [(k, a)] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#fromList"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n*log n)</EM
+>. Build a map from a list of key/value pairs. See also <TT
+><A HREF="Yaiba-Map.html#v%3AfromAscList"
+>fromAscList</A
+></TT
+>.
+ If the list contains more than one value for the same key, the last value
+ for the key is retained.
+</P
+><PRE
+> fromList [] == empty
+ fromList [(5,&quot;a&quot;), (3,&quot;b&quot;), (5, &quot;c&quot;)] == fromList [(5,&quot;c&quot;), (3,&quot;b&quot;)]
+ fromList [(5,&quot;c&quot;), (3,&quot;b&quot;), (5, &quot;a&quot;)] == fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:fromListWith"
+><A NAME="v%3AfromListWith"
+></A
+></A
+><B
+>fromListWith</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; a -&gt; a) -&gt; [(k, a)] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#fromListWith"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n*log n)</EM
+>. Build a map from a list of key/value pairs with a combining function. See also <TT
+><A HREF="Yaiba-Map.html#v%3AfromAscListWith"
+>fromAscListWith</A
+></TT
+>.
+</P
+><PRE
+> fromListWith (++) [(5,&quot;a&quot;), (5,&quot;b&quot;), (3,&quot;b&quot;), (3,&quot;a&quot;), (5,&quot;a&quot;)] == fromList [(3, &quot;ab&quot;), (5, &quot;aba&quot;)]
+ fromListWith (++) [] == empty
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:fromListWithKey"
+><A NAME="v%3AfromListWithKey"
+></A
+></A
+><B
+>fromListWithKey</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; a -&gt; a) -&gt; [(k, a)] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#fromListWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n*log n)</EM
+>. Build a map from a list of key/value pairs with a combining function. See also <TT
+><A HREF="Yaiba-Map.html#v%3AfromAscListWithKey"
+>fromAscListWithKey</A
+></TT
+>.
+</P
+><PRE
+> let f k a1 a2 = (show k) ++ a1 ++ a2
+ fromListWithKey f [(5,&quot;a&quot;), (5,&quot;b&quot;), (3,&quot;b&quot;), (3,&quot;a&quot;), (5,&quot;a&quot;)] == fromList [(3, &quot;3ab&quot;), (5, &quot;5a5ba&quot;)]
+ fromListWithKey f [] == empty
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="16"
+><A NAME="16"
+>Ordered lists
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:toAscList"
+><A NAME="v%3AtoAscList"
+></A
+></A
+><B
+>toAscList</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; [(k, a)]</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#toAscList"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Convert to an ascending list.
+</P
+><PRE
+> toAscList (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == [(3,&quot;b&quot;), (5,&quot;a&quot;)]
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:toDescList"
+><A NAME="v%3AtoDescList"
+></A
+></A
+><B
+>toDescList</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; [(k, a)]</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#toDescList"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><EM
+>O(n)</EM
+>. Convert to a descending list.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:fromAscList"
+><A NAME="v%3AfromAscList"
+></A
+></A
+><B
+>fromAscList</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> k =&gt; [(k, a)] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#fromAscList"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Build a map from an ascending list in linear time.
+ <EM
+>The precondition (input list is ascending) is not checked.</EM
+>
+</P
+><PRE
+> fromAscList [(3,&quot;b&quot;), (5,&quot;a&quot;)]          == fromList [(3, &quot;b&quot;), (5, &quot;a&quot;)]
+ fromAscList [(3,&quot;b&quot;), (5,&quot;a&quot;), (5,&quot;b&quot;)] == fromList [(3, &quot;b&quot;), (5, &quot;b&quot;)]
+ valid (fromAscList [(3,&quot;b&quot;), (5,&quot;a&quot;), (5,&quot;b&quot;)]) == True
+ valid (fromAscList [(5,&quot;a&quot;), (3,&quot;b&quot;), (5,&quot;b&quot;)]) == False
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:fromAscListWith"
+><A NAME="v%3AfromAscListWith"
+></A
+></A
+><B
+>fromAscListWith</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> k =&gt; (a -&gt; a -&gt; a) -&gt; [(k, a)] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#fromAscListWith"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Build a map from an ascending list in linear time with a combining function for equal keys.
+ <EM
+>The precondition (input list is ascending) is not checked.</EM
+>
+</P
+><PRE
+> fromAscListWith (++) [(3,&quot;b&quot;), (5,&quot;a&quot;), (5,&quot;b&quot;)] == fromList [(3, &quot;b&quot;), (5, &quot;ba&quot;)]
+ valid (fromAscListWith (++) [(3,&quot;b&quot;), (5,&quot;a&quot;), (5,&quot;b&quot;)]) == True
+ valid (fromAscListWith (++) [(5,&quot;a&quot;), (3,&quot;b&quot;), (5,&quot;b&quot;)]) == False
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:fromAscListWithKey"
+><A NAME="v%3AfromAscListWithKey"
+></A
+></A
+><B
+>fromAscListWithKey</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> k =&gt; (k -&gt; a -&gt; a -&gt; a) -&gt; [(k, a)] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#fromAscListWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Build a map from an ascending list in linear time with a
+ combining function for equal keys.
+ <EM
+>The precondition (input list is ascending) is not checked.</EM
+>
+</P
+><PRE
+> let f k a1 a2 = (show k) ++ &quot;:&quot; ++ a1 ++ a2
+ fromAscListWithKey f [(3,&quot;b&quot;), (5,&quot;a&quot;), (5,&quot;b&quot;), (5,&quot;b&quot;)] == fromList [(3, &quot;b&quot;), (5, &quot;5:b5:ba&quot;)]
+ valid (fromAscListWithKey f [(3,&quot;b&quot;), (5,&quot;a&quot;), (5,&quot;b&quot;), (5,&quot;b&quot;)]) == True
+ valid (fromAscListWithKey f [(5,&quot;a&quot;), (3,&quot;b&quot;), (5,&quot;b&quot;), (5,&quot;b&quot;)]) == False
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:fromDistinctAscList"
+><A NAME="v%3AfromDistinctAscList"
+></A
+></A
+><B
+>fromDistinctAscList</B
+> ::  [(k, a)] -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#fromDistinctAscList"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Build a map from an ascending list of distinct elements in linear time.
+ <EM
+>The precondition is not checked.</EM
+>
+</P
+><PRE
+> fromDistinctAscList [(3,&quot;b&quot;), (5,&quot;a&quot;)] == fromList [(3, &quot;b&quot;), (5, &quot;a&quot;)]
+ valid (fromDistinctAscList [(3,&quot;b&quot;), (5,&quot;a&quot;)])          == True
+ valid (fromDistinctAscList [(3,&quot;b&quot;), (5,&quot;a&quot;), (5,&quot;b&quot;)]) == False
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="17"
+><A NAME="17"
+>Filter 
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:filter"
+><A NAME="v%3Afilter"
+></A
+></A
+><B
+>filter</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+>) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#filter"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Filter all values that satisfy the predicate.
+</P
+><PRE
+> filter (&gt; &quot;a&quot;) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == singleton 3 &quot;b&quot;
+ filter (&gt; &quot;x&quot;) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == empty
+ filter (&lt; &quot;a&quot;) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == empty
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:filterWithKey"
+><A NAME="v%3AfilterWithKey"
+></A
+></A
+><B
+>filterWithKey</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+>) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#filterWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Filter all keys/values that satisfy the predicate.
+</P
+><PRE
+> filterWithKey (\k _ -&gt; k &gt; 4) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == singleton 5 &quot;a&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:partition"
+><A NAME="v%3Apartition"
+></A
+></A
+><B
+>partition</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+>) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#partition"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Partition the map according to a predicate. The first
+ map contains all elements that satisfy the predicate, the second all
+ elements that fail the predicate. See also <TT
+><A HREF="Yaiba-Map.html#v%3Asplit"
+>split</A
+></TT
+>.
+</P
+><PRE
+> partition (&gt; &quot;a&quot;) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (singleton 3 &quot;b&quot;, singleton 5 &quot;a&quot;)
+ partition (&lt; &quot;x&quot;) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (fromList [(3, &quot;b&quot;), (5, &quot;a&quot;)], empty)
+ partition (&gt; &quot;x&quot;) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (empty, fromList [(3, &quot;b&quot;), (5, &quot;a&quot;)])
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:partitionWithKey"
+><A NAME="v%3ApartitionWithKey"
+></A
+></A
+><B
+>partitionWithKey</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+>) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#partitionWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Partition the map according to a predicate. The first
+ map contains all elements that satisfy the predicate, the second all
+ elements that fail the predicate. See also <TT
+><A HREF="Yaiba-Map.html#v%3Asplit"
+>split</A
+></TT
+>.
+</P
+><PRE
+> partitionWithKey (\ k _ -&gt; k &gt; 3) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (singleton 5 &quot;a&quot;, singleton 3 &quot;b&quot;)
+ partitionWithKey (\ k _ -&gt; k &lt; 7) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (fromList [(3, &quot;b&quot;), (5, &quot;a&quot;)], empty)
+ partitionWithKey (\ k _ -&gt; k &gt; 7) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (empty, fromList [(3, &quot;b&quot;), (5, &quot;a&quot;)])
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:mapMaybe"
+><A NAME="v%3AmapMaybe"
+></A
+></A
+><B
+>mapMaybe</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> b) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#mapMaybe"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Map values and collect the <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3AJust"
+>Just</A
+></TT
+> results.
+</P
+><PRE
+> let f x = if x == &quot;a&quot; then Just &quot;new a&quot; else Nothing
+ mapMaybe f (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == singleton 5 &quot;new a&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:mapMaybeWithKey"
+><A NAME="v%3AmapMaybeWithKey"
+></A
+></A
+><B
+>mapMaybeWithKey</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> b) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#mapMaybeWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Map keys/values and collect the <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3AJust"
+>Just</A
+></TT
+> results.
+</P
+><PRE
+> let f k _ = if k &lt; 5 then Just (&quot;key : &quot; ++ (show k)) else Nothing
+ mapMaybeWithKey f (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == singleton 3 &quot;key : 3&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:mapEither"
+><A NAME="v%3AmapEither"
+></A
+></A
+><B
+>mapEither</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Either.html#t%3AEither"
+>Either</A
+> b c) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k c)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#mapEither"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Map values and separate the <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Either.html#v%3ALeft"
+>Left</A
+></TT
+> and <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Either.html#v%3ARight"
+>Right</A
+></TT
+> results.
+</P
+><PRE
+> let f a = if a &lt; &quot;c&quot; then Left a else Right a
+ mapEither f (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;), (1,&quot;x&quot;), (7,&quot;z&quot;)])
+     == (fromList [(3,&quot;b&quot;), (5,&quot;a&quot;)], fromList [(1,&quot;x&quot;), (7,&quot;z&quot;)])
+
+ mapEither (\ a -&gt; Right a) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;), (1,&quot;x&quot;), (7,&quot;z&quot;)])
+     == (empty, fromList [(5,&quot;a&quot;), (3,&quot;b&quot;), (1,&quot;x&quot;), (7,&quot;z&quot;)])
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:mapEitherWithKey"
+><A NAME="v%3AmapEitherWithKey"
+></A
+></A
+><B
+>mapEitherWithKey</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Either.html#t%3AEither"
+>Either</A
+> b c) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k c)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#mapEitherWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Map keys/values and separate the <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Either.html#v%3ALeft"
+>Left</A
+></TT
+> and <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Either.html#v%3ARight"
+>Right</A
+></TT
+> results.
+</P
+><PRE
+> let f k a = if k &lt; 5 then Left (k * 2) else Right (a ++ a)
+ mapEitherWithKey f (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;), (1,&quot;x&quot;), (7,&quot;z&quot;)])
+     == (fromList [(1,2), (3,6)], fromList [(5,&quot;aa&quot;), (7,&quot;zz&quot;)])
+
+ mapEitherWithKey (\_ a -&gt; Right a) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;), (1,&quot;x&quot;), (7,&quot;z&quot;)])
+     == (empty, fromList [(1,&quot;x&quot;), (3,&quot;b&quot;), (5,&quot;a&quot;), (7,&quot;z&quot;)])
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:split"
+><A NAME="v%3Asplit"
+></A
+></A
+><B
+>split</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#split"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. The expression (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3Asplit"
+>split</A
+></TT
+> k map</TT
+>) is a pair <TT
+>(map1,map2)</TT
+> where
+ the keys in <TT
+>map1</TT
+> are smaller than <TT
+>k</TT
+> and the keys in <TT
+>map2</TT
+> larger than <TT
+>k</TT
+>.
+ Any key equal to <TT
+>k</TT
+> is found in neither <TT
+>map1</TT
+> nor <TT
+>map2</TT
+>.
+</P
+><PRE
+> split 2 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (empty, fromList [(3,&quot;b&quot;), (5,&quot;a&quot;)])
+ split 3 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (empty, singleton 5 &quot;a&quot;)
+ split 4 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (singleton 3 &quot;b&quot;, singleton 5 &quot;a&quot;)
+ split 5 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (singleton 3 &quot;b&quot;, empty)
+ split 6 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (fromList [(3,&quot;b&quot;), (5,&quot;a&quot;)], empty)
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:splitLookup"
+><A NAME="v%3AsplitLookup"
+></A
+></A
+><B
+>splitLookup</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (<A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#splitLookup"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. The expression (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AsplitLookup"
+>splitLookup</A
+></TT
+> k map</TT
+>) splits a map just
+ like <TT
+><A HREF="Yaiba-Map.html#v%3Asplit"
+>split</A
+></TT
+> but also returns <TT
+><TT
+><A HREF="Yaiba-Map.html#v%3Alookup"
+>lookup</A
+></TT
+> k map</TT
+>.
+</P
+><PRE
+> splitLookup 2 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (empty, Nothing, fromList [(3,&quot;b&quot;), (5,&quot;a&quot;)])
+ splitLookup 3 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (empty, Just &quot;b&quot;, singleton 5 &quot;a&quot;)
+ splitLookup 4 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (singleton 3 &quot;b&quot;, Nothing, singleton 5 &quot;a&quot;)
+ splitLookup 5 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (singleton 3 &quot;b&quot;, Just &quot;a&quot;, empty)
+ splitLookup 6 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (fromList [(3,&quot;b&quot;), (5,&quot;a&quot;)], Nothing, empty)
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="18"
+><A NAME="18"
+>Submap
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:isSubmapOf"
+><A NAME="v%3AisSubmapOf"
+></A
+></A
+><B
+>isSubmapOf</B
+> :: (<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> a) =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#isSubmapOf"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><EM
+>O(n+m)</EM
+>.
+ This function is defined as (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AisSubmapOf"
+>isSubmapOf</A
+></TT
+> = <TT
+><A HREF="Yaiba-Map.html#v%3AisSubmapOfBy"
+>isSubmapOfBy</A
+></TT
+> (==)</TT
+>).
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:isSubmapOfBy"
+><A NAME="v%3AisSubmapOfBy"
+></A
+></A
+><B
+>isSubmapOfBy</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; b -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+>) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#isSubmapOfBy"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n+m)</EM
+>.
+ The expression (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AisSubmapOfBy"
+>isSubmapOfBy</A
+></TT
+> f t1 t2</TT
+>) returns <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#v%3ATrue"
+>True</A
+></TT
+> if
+ all keys in <TT
+>t1</TT
+> are in tree <TT
+>t2</TT
+>, and when <TT
+>f</TT
+> returns <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#v%3ATrue"
+>True</A
+></TT
+> when
+ applied to their respective values. For example, the following 
+ expressions are all <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#v%3ATrue"
+>True</A
+></TT
+>:
+</P
+><PRE
+> isSubmapOfBy (==) (fromList [('a',1)]) (fromList [('a',1),('b',2)])
+ isSubmapOfBy (&lt;=) (fromList [('a',1)]) (fromList [('a',1),('b',2)])
+ isSubmapOfBy (==) (fromList [('a',1),('b',2)]) (fromList [('a',1),('b',2)])
+</PRE
+><P
+>But the following are all <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#v%3AFalse"
+>False</A
+></TT
+>:
+</P
+><PRE
+> isSubmapOfBy (==) (fromList [('a',2)]) (fromList [('a',1),('b',2)])
+ isSubmapOfBy (&lt;)  (fromList [('a',1)]) (fromList [('a',1),('b',2)])
+ isSubmapOfBy (==) (fromList [('a',1),('b',2)]) (fromList [('a',1)])
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:isProperSubmapOf"
+><A NAME="v%3AisProperSubmapOf"
+></A
+></A
+><B
+>isProperSubmapOf</B
+> :: (<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Eq.html#t%3AEq"
+>Eq</A
+> a) =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#isProperSubmapOf"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><EM
+>O(n+m)</EM
+>. Is this a proper submap? (ie. a submap but not equal). 
+ Defined as (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AisProperSubmapOf"
+>isProperSubmapOf</A
+></TT
+> = <TT
+><A HREF="Yaiba-Map.html#v%3AisProperSubmapOfBy"
+>isProperSubmapOfBy</A
+></TT
+> (==)</TT
+>).
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:isProperSubmapOfBy"
+><A NAME="v%3AisProperSubmapOfBy"
+></A
+></A
+><B
+>isProperSubmapOfBy</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; (a -&gt; b -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+>) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k b -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#isProperSubmapOfBy"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n+m)</EM
+>. Is this a proper submap? (ie. a submap but not equal).
+ The expression (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AisProperSubmapOfBy"
+>isProperSubmapOfBy</A
+></TT
+> f m1 m2</TT
+>) returns <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#v%3ATrue"
+>True</A
+></TT
+> when
+ <TT
+>m1</TT
+> and <TT
+>m2</TT
+> are not equal,
+ all keys in <TT
+>m1</TT
+> are in <TT
+>m2</TT
+>, and when <TT
+>f</TT
+> returns <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#v%3ATrue"
+>True</A
+></TT
+> when
+ applied to their respective values. For example, the following 
+ expressions are all <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#v%3ATrue"
+>True</A
+></TT
+>:
+</P
+><PRE
+> isProperSubmapOfBy (==) (fromList [(1,1)]) (fromList [(1,1),(2,2)])
+ isProperSubmapOfBy (&lt;=) (fromList [(1,1)]) (fromList [(1,1),(2,2)])
+</PRE
+><P
+>But the following are all <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#v%3AFalse"
+>False</A
+></TT
+>:
+</P
+><PRE
+> isProperSubmapOfBy (==) (fromList [(1,1),(2,2)]) (fromList [(1,1),(2,2)])
+ isProperSubmapOfBy (==) (fromList [(1,1),(2,2)]) (fromList [(1,1)])
+ isProperSubmapOfBy (&lt;)  (fromList [(1,1)])       (fromList [(1,1),(2,2)])
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="19"
+><A NAME="19"
+>Indexed 
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:lookupIndex"
+><A NAME="v%3AlookupIndex"
+></A
+></A
+><B
+>lookupIndex</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#lookupIndex"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Lookup the <EM
+>index</EM
+> of a key. The index is a number from
+ <EM
+>0</EM
+> up to, but not including, the <TT
+><A HREF="Yaiba-Map.html#v%3Asize"
+>size</A
+></TT
+> of the map.
+</P
+><PRE
+> isJust (lookupIndex 2 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]))   == False
+ fromJust (lookupIndex 3 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)])) == 0
+ fromJust (lookupIndex 5 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)])) == 1
+ isJust (lookupIndex 6 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]))   == False
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:findIndex"
+><A NAME="v%3AfindIndex"
+></A
+></A
+><B
+>findIndex</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; k -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+></TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#findIndex"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Return the <EM
+>index</EM
+> of a key. The index is a number from
+ <EM
+>0</EM
+> up to, but not including, the <TT
+><A HREF="Yaiba-Map.html#v%3Asize"
+>size</A
+></TT
+> of the map. Calls <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#v%3Aerror"
+>error</A
+></TT
+> when
+ the key is not a <TT
+><A HREF="Yaiba-Map.html#v%3Amember"
+>member</A
+></TT
+> of the map.
+</P
+><PRE
+> findIndex 2 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)])    Error: element is not in the map
+ findIndex 3 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == 0
+ findIndex 5 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == 1
+ findIndex 6 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)])    Error: element is not in the map
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:elemAt"
+><A NAME="v%3AelemAt"
+></A
+></A
+><B
+>elemAt</B
+> ::  <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (k, a)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#elemAt"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Retrieve an element by <EM
+>index</EM
+>. Calls <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#v%3Aerror"
+>error</A
+></TT
+> when an
+ invalid index is used.
+</P
+><PRE
+> elemAt 0 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (3,&quot;b&quot;)
+ elemAt 1 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (5, &quot;a&quot;)
+ elemAt 2 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)])    Error: index out of range
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:updateAt"
+><A NAME="v%3AupdateAt"
+></A
+></A
+><B
+>updateAt</B
+> ::  (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#updateAt"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Update the element at <EM
+>index</EM
+>. Calls <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#v%3Aerror"
+>error</A
+></TT
+> when an
+ invalid index is used.
+</P
+><PRE
+> updateAt (\ _ _ -&gt; Just &quot;x&quot;) 0    (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;x&quot;), (5, &quot;a&quot;)]
+ updateAt (\ _ _ -&gt; Just &quot;x&quot;) 1    (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;x&quot;)]
+ updateAt (\ _ _ -&gt; Just &quot;x&quot;) 2    (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)])    Error: index out of range
+ updateAt (\ _ _ -&gt; Just &quot;x&quot;) (-1) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)])    Error: index out of range
+ updateAt (\_ _  -&gt; Nothing)  0    (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == singleton 5 &quot;a&quot;
+ updateAt (\_ _  -&gt; Nothing)  1    (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == singleton 3 &quot;b&quot;
+ updateAt (\_ _  -&gt; Nothing)  2    (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)])    Error: index out of range
+ updateAt (\_ _  -&gt; Nothing)  (-1) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)])    Error: index out of range
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:deleteAt"
+><A NAME="v%3AdeleteAt"
+></A
+></A
+><B
+>deleteAt</B
+> ::  <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Int.html#t%3AInt"
+>Int</A
+> -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#deleteAt"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Delete the element at <EM
+>index</EM
+>.
+ Defined as (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AdeleteAt"
+>deleteAt</A
+></TT
+> i map = <TT
+><A HREF="Yaiba-Map.html#v%3AupdateAt"
+>updateAt</A
+></TT
+> (k x -&gt; <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3ANothing"
+>Nothing</A
+></TT
+>) i map</TT
+>).
+</P
+><PRE
+> deleteAt 0  (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == singleton 5 &quot;a&quot;
+ deleteAt 1  (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == singleton 3 &quot;b&quot;
+ deleteAt 2 (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)])     Error: index out of range
+ deleteAt (-1) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)])  Error: index out of range
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="20"
+><A NAME="20"
+>Min/Max
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:findMin"
+><A NAME="v%3AfindMin"
+></A
+></A
+><B
+>findMin</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (k, a)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#findMin"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. The minimal key of the map. Calls <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#v%3Aerror"
+>error</A
+></TT
+> is the map is empty.
+</P
+><PRE
+> findMin (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (3,&quot;b&quot;)
+ findMin empty                            Error: empty map has no minimal element
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:findMax"
+><A NAME="v%3AfindMax"
+></A
+></A
+><B
+>findMax</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; (k, a)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#findMax"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. The maximal key of the map. Calls <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Prelude.html#v%3Aerror"
+>error</A
+></TT
+> is the map is empty.
+</P
+><PRE
+> findMax (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == (5,&quot;a&quot;)
+ findMax empty                            Error: empty map has no maximal element
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:deleteMin"
+><A NAME="v%3AdeleteMin"
+></A
+></A
+><B
+>deleteMin</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#deleteMin"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Delete the minimal key. Returns an empty map if the map is empty.
+</P
+><PRE
+> deleteMin (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;), (7,&quot;c&quot;)]) == fromList [(5,&quot;a&quot;), (7,&quot;c&quot;)]
+ deleteMin empty == empty
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:deleteMax"
+><A NAME="v%3AdeleteMax"
+></A
+></A
+><B
+>deleteMax</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#deleteMax"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Delete the maximal key. Returns an empty map if the map is empty.
+</P
+><PRE
+> deleteMax (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;), (7,&quot;c&quot;)]) == fromList [(3,&quot;b&quot;), (5,&quot;a&quot;)]
+ deleteMax empty == empty
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:deleteFindMin"
+><A NAME="v%3AdeleteFindMin"
+></A
+></A
+><B
+>deleteFindMin</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; ((k, a), <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#deleteFindMin"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Delete and find the minimal element.
+</P
+><PRE
+> deleteFindMin (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;), (10,&quot;c&quot;)]) == ((3,&quot;b&quot;), fromList[(5,&quot;a&quot;), (10,&quot;c&quot;)]) 
+ deleteFindMin                                            Error: can not return the minimal element of an empty map
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:deleteFindMax"
+><A NAME="v%3AdeleteFindMax"
+></A
+></A
+><B
+>deleteFindMax</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; ((k, a), <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#deleteFindMax"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Delete and find the maximal element.
+</P
+><PRE
+> deleteFindMax (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;), (10,&quot;c&quot;)]) == ((10,&quot;c&quot;), fromList [(3,&quot;b&quot;), (5,&quot;a&quot;)])
+ deleteFindMax empty                                      Error: can not return the maximal element of an empty map
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:updateMin"
+><A NAME="v%3AupdateMin"
+></A
+></A
+><B
+>updateMin</B
+> ::  (a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#updateMin"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Update the value at the minimal key.
+</P
+><PRE
+> updateMin (\ a -&gt; Just (&quot;X&quot; ++ a)) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;Xb&quot;), (5, &quot;a&quot;)]
+ updateMin (\ _ -&gt; Nothing)         (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == singleton 5 &quot;a&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:updateMax"
+><A NAME="v%3AupdateMax"
+></A
+></A
+><B
+>updateMax</B
+> ::  (a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#updateMax"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Update the value at the maximal key.
+</P
+><PRE
+> updateMax (\ a -&gt; Just (&quot;X&quot; ++ a)) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3, &quot;b&quot;), (5, &quot;Xa&quot;)]
+ updateMax (\ _ -&gt; Nothing)         (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == singleton 3 &quot;b&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:updateMinWithKey"
+><A NAME="v%3AupdateMinWithKey"
+></A
+></A
+><B
+>updateMinWithKey</B
+> ::  (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#updateMinWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Update the value at the minimal key.
+</P
+><PRE
+> updateMinWithKey (\ k a -&gt; Just ((show k) ++ &quot;:&quot; ++ a)) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3,&quot;3:b&quot;), (5,&quot;a&quot;)]
+ updateMinWithKey (\ _ _ -&gt; Nothing)                     (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == singleton 5 &quot;a&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:updateMaxWithKey"
+><A NAME="v%3AupdateMaxWithKey"
+></A
+></A
+><B
+>updateMaxWithKey</B
+> ::  (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> a) -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#updateMaxWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Update the value at the maximal key.
+</P
+><PRE
+> updateMaxWithKey (\ k a -&gt; Just ((show k) ++ &quot;:&quot; ++ a)) (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == fromList [(3,&quot;b&quot;), (5,&quot;5:a&quot;)]
+ updateMaxWithKey (\ _ _ -&gt; Nothing)                     (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == singleton 3 &quot;b&quot;
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:minView"
+><A NAME="v%3AminView"
+></A
+></A
+><B
+>minView</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> (a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#minView"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Retrieves the value associated with minimal key of the
+ map, and the map stripped of that element, or <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3ANothing"
+>Nothing</A
+></TT
+> if passed an
+ empty map.
+</P
+><PRE
+> minView (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == Just (&quot;b&quot;, singleton 5 &quot;a&quot;)
+ minView empty == Nothing
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:maxView"
+><A NAME="v%3AmaxView"
+></A
+></A
+><B
+>maxView</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> (a, <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#maxView"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Retrieves the value associated with maximal key of the
+ map, and the map stripped of that element, or <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3ANothing"
+>Nothing</A
+></TT
+> if passed an
+</P
+><PRE
+> maxView (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == Just (&quot;a&quot;, singleton 3 &quot;b&quot;)
+ maxView empty == Nothing
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:minViewWithKey"
+><A NAME="v%3AminViewWithKey"
+></A
+></A
+><B
+>minViewWithKey</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> ((k, a), <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#minViewWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Retrieves the minimal (key,value) pair of the map, and
+ the map stripped of that element, or <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3ANothing"
+>Nothing</A
+></TT
+> if passed an empty map.
+</P
+><PRE
+> minViewWithKey (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == Just ((3,&quot;b&quot;), singleton 5 &quot;a&quot;)
+ minViewWithKey empty == Nothing
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:maxViewWithKey"
+><A NAME="v%3AmaxViewWithKey"
+></A
+></A
+><B
+>maxViewWithKey</B
+> ::  <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#t%3AMaybe"
+>Maybe</A
+> ((k, a), <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a)</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#maxViewWithKey"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(log n)</EM
+>. Retrieves the maximal (key,value) pair of the map, and
+ the map stripped of that element, or <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Maybe.html#v%3ANothing"
+>Nothing</A
+></TT
+> if passed an empty map.
+</P
+><PRE
+> maxViewWithKey (fromList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == Just ((5,&quot;a&quot;), singleton 3 &quot;b&quot;)
+ maxViewWithKey empty == Nothing
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="21"
+><A NAME="21"
+>Debugging
+</A
+></A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:showTree"
+><A NAME="v%3AshowTree"
+></A
+></A
+><B
+>showTree</B
+> :: (<A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> k, <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Text-Show.html#t%3AShow"
+>Show</A
+> a) =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+></TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#showTree"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><EM
+>O(n)</EM
+>. Show the tree that implements the map. The tree is shown
+ in a compressed, hanging format. See <TT
+><A HREF="Yaiba-Map.html#v%3AshowTreeWith"
+>showTreeWith</A
+></TT
+>.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:showTreeWith"
+><A NAME="v%3AshowTreeWith"
+></A
+></A
+><B
+>showTreeWith</B
+> ::  (k -&gt; a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+>) -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+> -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+> -&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Char.html#t%3AString"
+>String</A
+></TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#showTreeWith"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. The expression (<TT
+><TT
+><A HREF="Yaiba-Map.html#v%3AshowTreeWith"
+>showTreeWith</A
+></TT
+> showelem hang wide map</TT
+>) shows
+ the tree that implements the map. Elements are shown using the <TT
+>showElem</TT
+> function. If <TT
+>hang</TT
+> is
+ <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#v%3ATrue"
+>True</A
+></TT
+>, a <EM
+>hanging</EM
+> tree is shown otherwise a rotated tree is shown. If
+ <TT
+>wide</TT
+> is <TT
+><A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#v%3ATrue"
+>True</A
+></TT
+>, an extra wide version is shown.
+</P
+><PRE
+>  Map&gt; let t = fromDistinctAscList [(x,()) | x &lt;- [1..5]]
+  Map&gt; putStrLn $ showTreeWith (\k x -&gt; show (k,x)) True False t
+  (4,())
+  +--(2,())
+  |  +--(1,())
+  |  +--(3,())
+  +--(5,())
+
+  Map&gt; putStrLn $ showTreeWith (\k x -&gt; show (k,x)) True True t
+  (4,())
+  |
+  +--(2,())
+  |  |
+  |  +--(1,())
+  |  |
+  |  +--(3,())
+  |
+  +--(5,())
+
+  Map&gt; putStrLn $ showTreeWith (\k x -&gt; show (k,x)) False True t
+  +--(5,())
+  |
+  (4,())
+  |
+  |  +--(3,())
+  |  |
+  +--(2,())
+     |
+     +--(1,())
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:valid"
+><A NAME="v%3Avalid"
+></A
+></A
+><B
+>valid</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> k =&gt; <A HREF="Yaiba-Map.html#t%3AMap"
+>Map</A
+> k a -&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Bool.html#t%3ABool"
+>Bool</A
+></TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Map.html#valid"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+><EM
+>O(n)</EM
+>. Test if the internal map structure is valid.
+</P
+><PRE
+> valid (fromAscList [(3,&quot;b&quot;), (5,&quot;a&quot;)]) == True
+ valid (fromAscList [(5,&quot;a&quot;), (3,&quot;b&quot;)]) == False
+</PRE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="botbar"
+>Produced by <A HREF="http://www.haskell.org/haddock/"
+>Haddock</A
+> version 2.7.2</TD
+></TR
+></TABLE
+></BODY
+></HTML
+>

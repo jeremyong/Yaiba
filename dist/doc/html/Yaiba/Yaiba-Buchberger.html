@@ -1,0 +1,220 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--Rendered using the Haskell Html Library v0.2-->
+<HTML
+><HEAD
+><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8"
+><TITLE
+>Yaiba.Buchberger</TITLE
+><LINK HREF="haddock.css" REL="stylesheet" TYPE="text/css"
+><SCRIPT SRC="haddock-util.js" TYPE="text/javascript"
+></SCRIPT
+><SCRIPT TYPE="text/javascript"
+>window.onload = function () {setSynopsis("mini_Yaiba-Buchberger.html")};</SCRIPT
+></HEAD
+><BODY
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="topbar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><IMG SRC="haskell_icon.gif" WIDTH="16" HEIGHT="16" ALT=" "
+></TD
+><TD CLASS="title"
+>Yaiba-0.2.2: Implementation of Buchberger's algorithms</TD
+><TD CLASS="topbut"
+><A HREF="src/Yaiba-Buchberger.html"
+>Source code</A
+></TD
+><TD CLASS="topbut"
+><A HREF="index.html"
+>Contents</A
+></TD
+><TD CLASS="topbut"
+><A HREF="doc-index.html"
+>Index</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="modulebar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><FONT SIZE="6"
+>Yaiba.Buchberger</FONT
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Description</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Generates a Groebner basis of a supplied ideal.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Synopsis</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AmodgB"
+>modgB</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/containers-0.3.0.0/Data-Set.html#t%3ASet"
+>Set</A
+> (<A HREF="Yaiba-Polynomial.html#t%3APolySug"
+>PolySug</A
+> ord) -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AaccgB"
+>accgB</A
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/containers-0.3.0.0/Data-Set.html#t%3ASet"
+>Set</A
+> (<A HREF="Yaiba-Polynomial.html#t%3APolySug"
+>PolySug</A
+> ord) -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord</TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Documentation</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:modgB"
+><A NAME="v%3AmodgB"
+></A
+></A
+><B
+>modgB</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/containers-0.3.0.0/Data-Set.html#t%3ASet"
+>Set</A
+> (<A HREF="Yaiba-Polynomial.html#t%3APolySug"
+>PolySug</A
+> ord) -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Buchberger.html#modgB"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>This implementation of gB does not insert the supplied generators first. Instead, generators are
+ inserted by sugar degree.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="topdecl"
+><TABLE CLASS="declbar"
+><TR
+><TD CLASS="declname"
+><A NAME="v:accgB"
+><A NAME="v%3AaccgB"
+></A
+></A
+><B
+>accgB</B
+> :: <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/base-4.2.0.2/Data-Ord.html#t%3AOrd"
+>Ord</A
+> (<A HREF="Yaiba-Monomial.html#t%3AMon"
+>Mon</A
+> ord) =&gt; <A HREF="/Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/containers-0.3.0.0/Data-Set.html#t%3ASet"
+>Set</A
+> (<A HREF="Yaiba-Polynomial.html#t%3APolySug"
+>PolySug</A
+> ord) -&gt; <A HREF="Yaiba-Ideal.html#t%3AIdeal"
+>Ideal</A
+> ord</TD
+><TD CLASS="declbut"
+><A HREF="src/Yaiba-Buchberger.html#accgB"
+>Source</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Strategy accurate implementation of gB
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="botbar"
+>Produced by <A HREF="http://www.haskell.org/haddock/"
+>Haddock</A
+> version 2.7.2</TD
+></TR
+></TABLE
+></BODY
+></HTML
+>

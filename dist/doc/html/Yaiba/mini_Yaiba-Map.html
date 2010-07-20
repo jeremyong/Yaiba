@@ -1,0 +1,478 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--Rendered using the Haskell Html Library v0.2-->
+<HTML
+><HEAD
+><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8"
+><TITLE
+>Yaiba.Map</TITLE
+><LINK HREF="haddock.css" REL="stylesheet" TYPE="text/css"
+><SCRIPT SRC="haddock-util.js" TYPE="text/javascript"
+></SCRIPT
+></HEAD
+><BODY
+><DIV CLASS="outer"
+><DIV CLASS="mini-topbar"
+>Yaiba.Map</DIV
+><DIV CLASS="mini-synopsis"
+><H1
+>Map type
+</H1
+> <DIV CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+>&nbsp;<A HREF="Yaiba-Map.html#t%3AMap" TARGET="main"
+>Map</A
+> k a</DIV
+> <H1
+>Operators
+</H1
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3A%21" TARGET="main"
+>(!)</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3A%5C%5C" TARGET="main"
+>(\\)</A
+></DIV
+> <H1
+>Query
+</H1
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Anull" TARGET="main"
+>null</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Asize" TARGET="main"
+>size</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Amember" TARGET="main"
+>member</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AnotMember" TARGET="main"
+>notMember</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Alookup" TARGET="main"
+>lookup</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AfindWithDefault" TARGET="main"
+>findWithDefault</A
+></DIV
+> <H1
+>Construction
+</H1
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Aempty" TARGET="main"
+>empty</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Asingleton" TARGET="main"
+>singleton</A
+></DIV
+> <H2
+>Insertion
+</H2
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Ainsert" TARGET="main"
+>insert</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AinsertWith" TARGET="main"
+>insertWith</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AinsertWithKey" TARGET="main"
+>insertWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AinsertLookupWithKey" TARGET="main"
+>insertLookupWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AinsertWith%27" TARGET="main"
+>insertWith'</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AinsertWithKey%27" TARGET="main"
+>insertWithKey'</A
+></DIV
+> <H2
+>Delete/Update
+</H2
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Adelete" TARGET="main"
+>delete</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Aadjust" TARGET="main"
+>adjust</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AadjustWithKey" TARGET="main"
+>adjustWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Aupdate" TARGET="main"
+>update</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AupdateWithKey" TARGET="main"
+>updateWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AupdateLookupWithKey" TARGET="main"
+>updateLookupWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Aalter" TARGET="main"
+>alter</A
+></DIV
+> <H1
+>Combine
+</H1
+> <H2
+>Union
+</H2
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Aunion" TARGET="main"
+>union</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AunionWith" TARGET="main"
+>unionWith</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AunionWithKey" TARGET="main"
+>unionWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Aunions" TARGET="main"
+>unions</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AunionsWith" TARGET="main"
+>unionsWith</A
+></DIV
+> <H2
+>Difference
+</H2
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Adifference" TARGET="main"
+>difference</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AdifferenceWith" TARGET="main"
+>differenceWith</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AdifferenceWithKey" TARGET="main"
+>differenceWithKey</A
+></DIV
+> <H2
+>Intersection
+</H2
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Aintersection" TARGET="main"
+>intersection</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AintersectionWith" TARGET="main"
+>intersectionWith</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AintersectionWithKey" TARGET="main"
+>intersectionWithKey</A
+></DIV
+> <H1
+>Traversal
+</H1
+> <H2
+>Map
+</H2
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Amap" TARGET="main"
+>map</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AmapWithKey" TARGET="main"
+>mapWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AmapAccum" TARGET="main"
+>mapAccum</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AmapAccumWithKey" TARGET="main"
+>mapAccumWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AmapAccumRWithKey" TARGET="main"
+>mapAccumRWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AmapKeys" TARGET="main"
+>mapKeys</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AmapKeysWith" TARGET="main"
+>mapKeysWith</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AmapKeysMonotonic" TARGET="main"
+>mapKeysMonotonic</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AmapKeysValuesMonotonic" TARGET="main"
+>mapKeysValuesMonotonic</A
+></DIV
+> <H2
+>Fold
+</H2
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Afold" TARGET="main"
+>fold</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AfoldWithKey" TARGET="main"
+>foldWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AfoldrWithKey" TARGET="main"
+>foldrWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AfoldlWithKey" TARGET="main"
+>foldlWithKey</A
+></DIV
+> <H1
+>Conversion
+</H1
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Aelems" TARGET="main"
+>elems</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Akeys" TARGET="main"
+>keys</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AkeysSet" TARGET="main"
+>keysSet</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Aassocs" TARGET="main"
+>assocs</A
+></DIV
+> <H2
+>Lists
+</H2
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AtoList" TARGET="main"
+>toList</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AfromList" TARGET="main"
+>fromList</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AfromListWith" TARGET="main"
+>fromListWith</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AfromListWithKey" TARGET="main"
+>fromListWithKey</A
+></DIV
+> <H2
+>Ordered lists
+</H2
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AtoAscList" TARGET="main"
+>toAscList</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AtoDescList" TARGET="main"
+>toDescList</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AfromAscList" TARGET="main"
+>fromAscList</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AfromAscListWith" TARGET="main"
+>fromAscListWith</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AfromAscListWithKey" TARGET="main"
+>fromAscListWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AfromDistinctAscList" TARGET="main"
+>fromDistinctAscList</A
+></DIV
+> <H1
+>Filter 
+</H1
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Afilter" TARGET="main"
+>filter</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AfilterWithKey" TARGET="main"
+>filterWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Apartition" TARGET="main"
+>partition</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3ApartitionWithKey" TARGET="main"
+>partitionWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AmapMaybe" TARGET="main"
+>mapMaybe</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AmapMaybeWithKey" TARGET="main"
+>mapMaybeWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AmapEither" TARGET="main"
+>mapEither</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AmapEitherWithKey" TARGET="main"
+>mapEitherWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Asplit" TARGET="main"
+>split</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AsplitLookup" TARGET="main"
+>splitLookup</A
+></DIV
+> <H1
+>Submap
+</H1
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AisSubmapOf" TARGET="main"
+>isSubmapOf</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AisSubmapOfBy" TARGET="main"
+>isSubmapOfBy</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AisProperSubmapOf" TARGET="main"
+>isProperSubmapOf</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AisProperSubmapOfBy" TARGET="main"
+>isProperSubmapOfBy</A
+></DIV
+> <H1
+>Indexed 
+</H1
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AlookupIndex" TARGET="main"
+>lookupIndex</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AfindIndex" TARGET="main"
+>findIndex</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AelemAt" TARGET="main"
+>elemAt</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AupdateAt" TARGET="main"
+>updateAt</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AdeleteAt" TARGET="main"
+>deleteAt</A
+></DIV
+> <H1
+>Min/Max
+</H1
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AfindMin" TARGET="main"
+>findMin</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AfindMax" TARGET="main"
+>findMax</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AdeleteMin" TARGET="main"
+>deleteMin</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AdeleteMax" TARGET="main"
+>deleteMax</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AdeleteFindMin" TARGET="main"
+>deleteFindMin</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AdeleteFindMax" TARGET="main"
+>deleteFindMax</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AupdateMin" TARGET="main"
+>updateMin</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AupdateMax" TARGET="main"
+>updateMax</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AupdateMinWithKey" TARGET="main"
+>updateMinWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AupdateMaxWithKey" TARGET="main"
+>updateMaxWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AminView" TARGET="main"
+>minView</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AmaxView" TARGET="main"
+>maxView</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AminViewWithKey" TARGET="main"
+>minViewWithKey</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AmaxViewWithKey" TARGET="main"
+>maxViewWithKey</A
+></DIV
+> <H1
+>Debugging
+</H1
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AshowTree" TARGET="main"
+>showTree</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3AshowTreeWith" TARGET="main"
+>showTreeWith</A
+></DIV
+> <DIV CLASS="decl"
+><A HREF="Yaiba-Map.html#v%3Avalid" TARGET="main"
+>valid</A
+></DIV
+></DIV
+></DIV
+></BODY
+></HTML
+>
