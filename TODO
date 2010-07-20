@@ -7,7 +7,7 @@ performs the intended function, then merge that branch into dev.  Only merge dev
 performance increase is observed.
 
 LEGEND
-Difficulty.Project...........................................................................Worker.BranchName
+Difficulty.Project......................................................................Worker.BranchName.Currently Working On
 
 STRATEGIC IMPROVEMENTS (major changes or improvements increment 1st digit in version number)
 M Saccharine reduction strategy.                                                               -J sacc
@@ -20,14 +20,14 @@ H Make the polynomial reduction algorithm smarter.                              
 
 PARALLEL EXECUTION IMPROVEMENTS (major changes or improvements increment 3rd digit in version number)
 M Adaptive parallel selection strategy.                                                        - adaptive
-E Variable buffer width (a-la Amrhein-Gloor-Kuchlin).                                          -J rain
+E Variable buffer width (a-la Amrhein-Gloor-Kuchlin).                                          -J rain (*)
 M Make number of terms (size of coeffs, etc) part of the sugar.                                -F newsugar
-H Make it possible to move certain elements of the buffer back to the cloud.                   -J evaporate
+H Make it possible to move certain elements of the buffer back to the cloud.                   -J evaporate (*)
 -- M Defer reduction after N terms have been introduced.                                       -
 I Investigate a tree-like structure for computing Grobner bases.                               -
 
 MISCELLANEOUS IMPROVEMENTS
-I Write a nice parser.                                                                         -J (?)
+I Write a nice parser.                                                                         -J
 M Write an M2 package that calls Yaiba functions.                                              -F m2Yaiba
 M Integrating a package tester and/or QuickCheck                                               -
 M Write a broad set of tests to benchmark new branches                                         -F yaibaBench
