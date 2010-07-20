@@ -50,7 +50,7 @@ sizeSP :: SPoly ord -> Int
 sizeSP (SP pairs) = DL.length pairs
 
 -- | Delete from the existing queue of CritPairs every pair (i,j) such that
--- [;\tau_i;] and [;\tau_j;] strictly divide [;\tau_k;].
+-- [;\\tau_i;] and [;\\tau_j;] strictly divide [;\\tau_k;].
 bTest :: SPoly ord -> Ideal ord -> Mon ord -> SPoly ord
 bTest (SP ps) fs tauk = let test ((i,j),CP (_,tauij)) = tauk `isFactor` tauij &&
                                                         tau fs i tauk /= tauij &&
@@ -69,14 +69,14 @@ constructN fs (fk,S sugk) k = let tauk = monLT fk
                                  , let sug = S $ degree tauik + max (sugi - degree taui) (sugk - degree tauk)
                                  , let copr = gcdMon taui tauk == Constant ]
 
--- | Consider the set of new pairs nps. Discard all pairs (j,k) s.t. [;\tau_j;] and [;\tau_k;] are
--- comprime, along with any other pair (i,k) s.t. [;\tau_{jk}\left|\tau_{ik}\right.;].
+-- | Consider the set of new pairs nps. Discard all pairs (j,k) s.t. [;\\tau_j;] and [;\\tau_k;] are
+-- comprime, along with any other pair (i,k) s.t. [;\\tau_{jk}\left|\\tau_{ik}\\right.;].
 tTest :: [(((Int,Int),CritPair ord),Bool)] -> SPoly ord
 tTest nps = SP $ [ ps | (ps,_) <- notcoprs, tTest' ps ] where
     (coprs,notcoprs) = DL.partition snd nps
     tTest' (_,CP (_,taujk)) = DL.null $ filter (\((_,CP (_,tauik)),_) -> tauik `isFactor` taujk) coprs
 
--- | Discards from a set of new pairs all pairs (j,k) s.t. [;\tau_{ik}\left|\tau_{jk}\right.;] with (i,k)
+-- | Discards from a set of new pairs all pairs (j,k) s.t. [;\\tau_{ik}\left|\\tau_{jk}\\right.;] with (i,k)
 -- before (j,k) when sorted according to sugar (Fussy).
 mTest :: Ord (Mon ord) => SPoly ord -> SPoly ord
 mTest (SP nps) = SP $ [ ps | ps <- nps, mTest' ps ] where
