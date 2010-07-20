@@ -12,8 +12,7 @@ import Data.Maybe
 import Control.DeepSeq
 import Prelude hiding (null,filter,map,rem,sum)
 
--- | 
-newtype Poly ord = P (YM.Map (Mon ord) Field)
+-- | PolySug is a type that stores a polynomial, together with its sugar.
 newtype PolySug ord = PS (Poly ord, Sugar ord)
 
 instance Ord (Mon ord) => Ord (PolySug ord) where
@@ -30,6 +29,10 @@ getPolySug (PS a) = a
 deleteFindMin :: Ord (Mon ord) => DS.Set (PolySug ord) -> ((Poly ord, Sugar ord), DS.Set (PolySug ord))
 deleteFindMin a = let (minPoly,restPolys) = DS.deleteFindMin a
                   in (getPolySug minPoly, restPolys)
+
+-- | Poly is the type of a polynomial.  Currently, these are represented as a Map from Monomials to Field
+-- where Field is a type that can be chosen at compile time between [;F_2;], a finite field, or Q (in Base.hs)
+newtype Poly ord = P (YM.Map (Mon ord) Field)
 
 instance Ord (Mon ord) => Show (Poly ord) where
   show a | numTerms a == 0 = "0"
