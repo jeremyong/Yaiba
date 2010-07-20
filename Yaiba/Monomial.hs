@@ -68,7 +68,7 @@ multiply (M as) (M bs)     = M $! DVU.zipWith (+) as bs
 --                                    Constant
 
 -- | Divide a pair of monomials.  Warning:  If a/b = 1, divide does not return Constant, but a tuple of zeros
-ivide :: Mon ord -> Mon ord -> Mon ord
+divide :: Mon ord -> Mon ord -> Mon ord
 divide Constant Constant = Constant
 divide Constant (M as)   = M $! DVU.map negate as
 divide (M as) Constant   = M as
