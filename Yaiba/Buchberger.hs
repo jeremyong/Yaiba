@@ -18,7 +18,7 @@ ngB :: Ord (Mon ord) => DS.Set (PolySug ord) -> Ideal ord
 ngB seed = let (initial,restSeed) = deleteFindMin seed
            in gB' (I $ DV.singleton initial) restSeed empty where
                gB' res fks queue | DS.null fks && isEmpty queue = res
-                                 | DS.null fks = let (lowSugPolys, higherSugPolys) = delFindNLowest queue (numCapabilities+2) res
+                                 | DS.null fks = let (lowSugPolys, higherSugPolys) = delFindNLowest queue (numCapabilities-1) res
                                                      -- !redPolys' = worker $ parMap rdeepseq (\f -> (totalRed f res)) lowSugPolys
                                                      !redPolys' = worker $ parMap rdeepseq (\f -> (lppRed f res)) lowSugPolys
                                                      !worker = DL.filter (\(poly,_) -> not $ isNull poly)
@@ -30,7 +30,7 @@ ngB seed = let (initial,restSeed) = deleteFindMin seed
                                                    --reducedGen = makeMonic $ gen /. res
                                                    newQueue = updateSPolys queue reducedGen res
                                                    newres = res `snoc` reducedGen
-                                                   (lowSugPolys, higherSugPolys) = delFindNLowest newQueue (numCapabilities+2) newres
+                                                   (lowSugPolys, higherSugPolys) = delFindNLowest newQueue (numCapabilities-1) newres
                                                    -- !redPolys' = worker $ parMap rdeepseq (\f -> (totalRed f res)) lowSugPolys
                                                    !redPolys' = worker $ parMap rdeepseq (\f -> (lppRed f res)) lowSugPolys
                                                    !worker = DL.filter (\(poly,_) -> not $ isNull poly)
