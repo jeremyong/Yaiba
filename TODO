@@ -9,11 +9,15 @@ performance increase is observed.
 LEGEND
 Ref.Difficulty.Project...........................................................................Worker.BranchName
 
+BASELINE IMPROVEMENTS
+B.1 H Packed monomial implementation                                                               -F packMon
+B.2 H Parallel heap algorithm for polynomial multiplication, addition and division                 -J parHeapDiv
+B.3 H Eliminate fractions (aka keeping the coefficients down).                                     - 
+
 STRATEGIC IMPROVEMENTS (major changes or improvements increment 1st digit in version number)
 S.1 M Saccharine reduction strategy.                                                               -J sacc
 
 TECHNICAL IMPROVEMENTS (major changes or improvements increment 2nd digit in version number)
-T.1 H Eliminate fractions (aka keeping the coefficients down).                                     -F nofrac
 T.2 H Reify finite field types.                                                                    -
 T.3 M Memoize finite field tables.                                                                 -F memoize
 T.4 H Make the polynomial reduction algorithm smarter.                                             -
