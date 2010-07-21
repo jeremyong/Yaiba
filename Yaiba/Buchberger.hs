@@ -18,9 +18,9 @@ ngB :: Ord (Mon ord) => DS.Set (PolySug ord) -> Ideal ord
 ngB seed = let (initial,restSeed) = deleteFindMin seed
            in gB' (I $ DV.singleton initial) restSeed empty where
                gB' res fks queue | DS.null fks && isEmpty queue = res
-                                 | DS.null fks = let (lowSugPolys, higherSugPolys) = delFindNLowest queue (numCapabilities-1) res
+                                 | DS.null fks = let (lowSugPolys, higherSugPolys) = delFindNOrSugLowest queue (numCapabilities*4) res
                                                      -- !redPolys' = worker $ parMap rdeepseq (\f -> (totalRed f res)) lowSugPolys
-                                                     !redPolys' = worker $ parMap rdeepseq (\f -> (lppRed f res)) lowSugPolys
+                                                     !redPolys' = worker $ parMap rdeepseq (\f -> (totalRed f res)) lowSugPolys
                                                      !worker = DL.filter (\(poly,_) -> not $ isNull poly)
                                                      !redPolys = parMap rdeepseq makeMonic redPolys'
                                                      newfks = DL.foldl' (\acc x -> DS.insert (PS x) acc) fks redPolys
@@ -30,9 +30,9 @@ ngB seed = let (initial,restSeed) = deleteFindMin seed
                                                    --reducedGen = makeMonic $ gen /. res
                                                    newQueue = updateSPolys queue reducedGen res
                                                    newres = res `snoc` reducedGen
-                                                   (lowSugPolys, higherSugPolys) = delFindNLowest newQueue (numCapabilities-1) newres
+                                                   (lowSugPolys, higherSugPolys) = delFindNOrSugLowest newQueue (numCapabilities*4) newres
                                                    -- !redPolys' = worker $ parMap rdeepseq (\f -> (totalRed f res)) lowSugPolys
-                                                   !redPolys' = worker $ parMap rdeepseq (\f -> (lppRed f res)) lowSugPolys
+                                                   !redPolys' = worker $ parMap rdeepseq (\f -> (totalRed f res)) lowSugPolys
                                                    !worker = DL.filter (\(poly,_) -> not $ isNull poly)
                                                    !redPolys = parMap rdeepseq makeMonic redPolys'
                                                    newfks = DL.foldl' (\acc x -> DS.insert (PS x) acc) newGens redPolys
@@ -49,7 +49,7 @@ modgB seed = let (initial,restSeed) = deleteFindMin seed
                  gB' res fks queue | DS.null fks && isEmpty queue = res
                                    | DS.null fks = let (lowSugPolys, higherSugPolys) = delFindLowest queue res
                                                        -- !redPolys' = worker $ parMap rdeepseq (\f -> (totalRed f res)) lowSugPolys
-                                                       !redPolys' = worker $ parMap rdeepseq (\f -> (lppRed f res)) lowSugPolys
+                                                       !redPolys' = worker $ parMap rdeepseq (\f -> (totalRed f res)) lowSugPolys
                                                        !worker = DL.filter (\(poly,_) -> not $ isNull poly)
                                                        !redPolys = parMap rdeepseq makeMonic redPolys'
                                                        newfks = DL.foldl' (\acc x -> DS.insert (PS x) acc) fks redPolys
@@ -61,7 +61,7 @@ modgB seed = let (initial,restSeed) = deleteFindMin seed
                                                      newres = res `snoc` reducedGen
                                                      (lowSugPolys, higherSugPolys) = delFindLowest newQueue newres
                                                      -- !redPolys' = worker $ parMap rdeepseq (\f -> (totalRed f res)) lowSugPolys
-                                                     !redPolys' = worker $ parMap rdeepseq (\f -> (lppRed f res)) lowSugPolys
+                                                     !redPolys' = worker $ parMap rdeepseq (\f -> (totalRed f res)) lowSugPolys
                                                      !worker = DL.filter (\(poly,_) -> not $ isNull poly)
                                                      !redPolys = parMap rdeepseq makeMonic redPolys'
                                                      newfks = DL.foldl' (\acc x -> DS.insert (PS x) acc) newGens redPolys
