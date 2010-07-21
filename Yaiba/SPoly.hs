@@ -102,7 +102,8 @@ delFindSingleLowest (SP pairs) ideal = let minsug = findMinSug pairs
                                            (bottom':top',top) = DL.partition (\(_,CP (sug,_)) -> sug == minsug) pairs
                                            bottom = toSPoly ideal bottom'
                                        in (bottom, SP (top'++top))
-{-
+
+{- This implementation runs slower for some reason. Hypothesis: sortBy is not well optimized.
 delFindSingleLowest (SP []) _ = ((nullPoly, S 0), empty)
 delFindSingleLowest (SP pairs) ideal = let lowest:rest = DL.sortBy (comparing snd) pairs
                                            lowestSPoly = toSPoly ideal lowest
@@ -111,7 +112,7 @@ delFindSingleLowest (SP pairs) ideal = let lowest:rest = DL.sortBy (comparing sn
 
 delFindNLowest :: Ord (Mon ord) => SPoly ord -> Int -> Ideal ord -> ([(Poly ord, Sugar ord)], SPoly ord)
 delFindNLowest (SP []) _ _ = ([],empty)
-delFindNLowest (SP pairs) n ideal = let sugs = [ sug | (_,CP (sug,_)) <- pairs ]
+delFindNLowest (SP pairs) n ideal = let sugs = DL.nub [ sug | (_,CP (sug,_)) <- pairs ]
                                         orderedps = DL.foldl' (\(ops,ps) sug -> let (front,back) = DL.partition (\(_,CP (s,_)) -> s == sug) ps
                                                                                in (ops++front,back)) ([],pairs) sugs
                                         (bottom',top) = DL.splitAt n $ fst orderedps
@@ -120,11 +121,21 @@ delFindNLowest (SP pairs) n ideal = let sugs = [ sug | (_,CP (sug,_)) <- pairs ]
                                            (DL.map (toSPoly ideal) pairs, SP [])
                                        else (bottom, SP top)
 
+delFindNOrSugLowest :: Ord (Mon ord) => SPoly ord -> Int -> Ideal ord -> ([(Poly ord, Sugar ord)], SPoly ord)
+delFindNOrSugLowest (SP []) _ _ = ([],empty)
+delFindNOrSugLowest (SP pairs) n ideal = let !minSug = findMinSug pairs
+                                             !(bottom',top') = DL.partition (\(_,CP (sug,_)) -> sug == minSug) pairs
+                                             !(bottom1,bottom2) = DL.splitAt n bottom'
+                                             !bottom = DL.map (toSPoly ideal) bottom1
+                                             !top = bottom2 ++ top'
+                                         in (bottom, SP top)
+
+
 delFindLowest :: Ord (Mon ord) => SPoly ord -> Ideal ord -> ([(Poly ord, Sugar ord)], SPoly ord)
 delFindLowest (SP []) _ = ([],empty)
-delFindLowest (SP pairs) ideal = let minsug = findMinSug pairs
-                                     (bottom',top) = DL.partition (\(_,CP (sug,_)) -> sug == minsug) pairs
-                                     bottom = DL.map (toSPoly ideal) bottom'
+delFindLowest (SP pairs) ideal = let !minsug = findMinSug pairs
+                                     !(bottom',top) = DL.partition (\(_,CP (sug,_)) -> sug == minsug) pairs
+                                     !bottom = DL.map (toSPoly ideal) bottom'
                                  in --("Bin size: " ++ show (DL.length bottom) ++ " Sugar: " ++ show minsug) `trace` 
                                         (bottom, SP top)
 
