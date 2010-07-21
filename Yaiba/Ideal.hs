@@ -55,8 +55,11 @@ null (I as) = DV.null as
 (!) :: Ideal t -> Int -> (Poly t, Sugar t)
 (!) (I as) index = (DV.!) as index
 
+find :: Mon ord -> Ideal ord -> [(Poly ord, Sugar ord)]
 find tauk fs = [ gi | i <- [0..(numGens fs -1)], let gi@(polyi,_) = fs!i, let taui = monLT polyi, taui `isFactor` tauk ]
 
+totalRed :: (Ord (Mon ord)) =>
+            (Poly ord, Sugar ord) -> Ideal ord -> (Poly ord, Sugar ord)
 totalRed p (I fs) = totalRed' p nullPoly where
     totalRed' polysug rem = let !(rem', poly', sug, divOcc) = lppRedDivOcc polysug rem False
                             in if divOcc then
@@ -74,8 +77,10 @@ totalRed p (I fs) = totalRed' p nullPoly where
                                                                                   S $ max psug (degree tauki * sugf), True)
                                                      Nothing -> lppRedDivOcc (newpoly,S psug) (monAdd tauk ck rem) divOcc
 
+lppRed :: (Ord (Mon ord)) =>
+     (Poly ord, Sugar ord) -> Ideal ord -> (Poly ord, Sugar ord)
 lppRed p (I fs) = lppRed' p nullPoly where
-    lppRed' polysug rem = let !(rem', poly', sug, divOcc) = lppRedDivOcc polysug rem False
+    lppRed' polysug rem = let !(rem', poly', sug, _) = lppRedDivOcc polysug rem False
                           in (rem'+poly',sug)
     lppRedDivOcc (poly,S psug) rem divOcc = if isNull poly then (rem,poly, S psug, divOcc) else
                                                 let !((tauk,ck),newpoly) = deleteFindLT poly

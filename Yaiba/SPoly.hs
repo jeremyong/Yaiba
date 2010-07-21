@@ -116,7 +116,9 @@ delFindNLowest (SP pairs) n ideal = let sugs = [ sug | (_,CP (sug,_)) <- pairs ]
                                                                                in (ops++front,back)) ([],pairs) sugs
                                         (bottom',top) = DL.splitAt n $ fst orderedps
                                         bottom = DL.map (toSPoly ideal) bottom'
-                                    in (bottom, SP top)
+                                    in if n >= length pairs then
+                                           (DL.map (toSPoly ideal) pairs, SP [])
+                                       else (bottom, SP top)
 
 delFindLowest :: Ord (Mon ord) => SPoly ord -> Ideal ord -> ([(Poly ord, Sugar ord)], SPoly ord)
 delFindLowest (SP []) _ = ([],empty)
