@@ -96,7 +96,7 @@ updateSPolys oldsp (fk,sugk) ideal = let SP bPass = bTest oldsp ideal (monLT fk)
                                      in SP $ bPass ++ mPass
 
 
-delFindSingleLowest :: Ord (Mon ord) => SPoly ord -> Ideal ord -> ((Poly ord, Sugar ord),SPoly ord)
+delFindSingleLowest :: Ord (Mon ord) => SPoly ord -> Ideal ord -> ((Poly ord, Sugar ord), SPoly ord)
 delFindSingleLowest (SP []) _ = ((nullPoly,S 0),empty)
 delFindSingleLowest (SP pairs) ideal = let minsug = findMinSug pairs
                                            (bottom':top',top) = DL.partition (\(_,CP (sug,_)) -> sug == minsug) pairs
@@ -109,7 +109,18 @@ delFindSingleLowest (SP pairs) ideal = let lowest:rest = DL.sortBy (comparing sn
                                        in (lowestSPoly, SP rest)
 -}
 
-delFindLowest :: Ord (Mon ord) => SPoly ord -> Ideal ord -> ([(Poly ord, Sugar ord)],SPoly ord)
+delFindNLowest :: Ord (Mon ord) => SPoly ord -> Int -> Ideal ord -> ([(Poly ord, Sugar ord)], SPoly ord)
+delFindNLowest (SP []) _ _ = ([],empty)
+delFindNLowest (SP pairs) n ideal = let sugs = [ sug | (_,CP (sug,_)) <- pairs ]
+                                        orderedps = DL.foldl' (\(ops,ps) sug -> let (front,back) = DL.partition (\(_,CP (s,_)) -> s == sug) ps
+                                                                               in (ops++front,back)) ([],pairs) sugs
+                                        (bottom',top) = DL.splitAt n $ fst orderedps
+                                        bottom = DL.map (toSPoly ideal) bottom'
+                                    in if n >= length pairs then
+                                           (DL.map (toSPoly ideal) pairs, SP [])
+                                       else (bottom, SP top)
+
+delFindLowest :: Ord (Mon ord) => SPoly ord -> Ideal ord -> ([(Poly ord, Sugar ord)], SPoly ord)
 delFindLowest (SP []) _ = ([],empty)
 delFindLowest (SP pairs) ideal = let minsug = findMinSug pairs
                                      (bottom',top) = DL.partition (\(_,CP (sug,_)) -> sug == minsug) pairs

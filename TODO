@@ -7,43 +7,45 @@ performs the intended function, then merge that branch into dev.  Only merge dev
 performance increase is observed.
 
 LEGEND
-Difficulty.Project......................................................................Worker.BranchName.Currently Working On
+Ref.Difficulty.Project...........................................................................Worker.BranchName
 
 STRATEGIC IMPROVEMENTS (major changes or improvements increment 1st digit in version number)
-M Saccharine reduction strategy.                                                               -J sacc
+S.1 M Saccharine reduction strategy.                                                               -J sacc
 
 TECHNICAL IMPROVEMENTS (major changes or improvements increment 2nd digit in version number)
-H Eliminate fractions (aka keeping the coefficients down).                                     -F nofrac
-H Reify finite field types.                                                                    -
-M Memoize finite field tables.                                                                 -F memoize
-H Make the polynomial reduction algorithm smarter.                                             -
+T.1 H Eliminate fractions (aka keeping the coefficients down).                                     -F nofrac
+T.2 H Reify finite field types.                                                                    -
+T.3 M Memoize finite field tables.                                                                 -F memoize
+T.4 H Make the polynomial reduction algorithm smarter.                                             -
 
 PARALLEL EXECUTION IMPROVEMENTS (major changes or improvements increment 3rd digit in version number)
-M Adaptive parallel selection strategy.                                                        - adaptive
-E Variable buffer width (a-la Amrhein-Gloor-Kuchlin).                                          -J rain (*)
-M Make number of terms (size of coeffs, etc) part of the sugar.                                -F newsugar
-H Make it possible to move certain elements of the buffer back to the cloud.                   -J evaporate (*)
--- M Defer reduction after N terms have been introduced.                                       -
-I Investigate a tree-like structure for computing Grobner bases.                               -
+P.1 M Adaptive parallel selection strategy.                                                        - adaptive
+P.2 M Make number of terms (size of coeffs, etc) part of the sugar.                                -F newsugar
+P.3 H Make it possible to move certain elements of the buffer back to the cloud.                   -J evaporate
+P.3.1 -- M Defer reduction after N terms have been introduced.                                     -
+P.3.2 -- M Allow scheduler to roll back poor reductions                                            -
+P.4 I Investigate a tree-like structure for computing Grobner bases.                               -
 
 MISCELLANEOUS IMPROVEMENTS
-I Write a nice parser.                                                                         -J
-M Write an M2 package that calls Yaiba functions.                                              -F m2Yaiba
-M Integrating a package tester and/or QuickCheck                                               -
-M Write a broad set of tests to benchmark new branches                                         -F yaibaBench
-H Submit the package to hackage                                                                -
-M Figure out Criterion?                                                                        -
+M.1 I Write a nice parser.                                                                         -J (?)
+M.2 M Write an M2 package that calls Yaiba functions.                                              -F m2Yaiba
+M.3 M Integrating a package tester and/or QuickCheck                                               -
+M.4 M Write a broad set of tests to benchmark new branches                                         -F yaibaBench
+M.5 H Submit the package to hackage                                                                -
+M.6 M Figure out Criterion?                                                                        -
 
-I Finish the project.                                                                          -F && J master
-M Produce a paper, or at least a TeX document, that reports on our findings                    -F && J paper
+-------------------------------------------------------------------------------------------------------------------
+I Finish the project.                                                                             -F && J master
+M Produce a paper, or at least a TeX document, that reports on our findings                       -F && J paper
 
 COMPLETED SPECS
-X Sweeten the algorithm with some sugar.                                                     -J
-X Rewrite fTest to be like Mike.                                                             -F/J
-X Eliminate need for cluster.                                                                -J
-X Fix 1-2 Bug (Discovered it was not a bug, but I tracked down where the 1-2 pair went.      -F
-X Implement strategy accurate version.                                                       -J
-X Keep track of minimal cloud generators.                                                    -J
-X Try implementing ideals using [: :] -- dph *itself* is still not developed enough          -J
-X Look at e/f4/moninfo.hpp in the M2 code. (one of the tests from Gebauer-Moller)            -J
-X Lpp reduction when reducing from the buffer.                                               -J lppred
+X Sweeten the algorithm with some sugar.                                                          -J
+X Rewrite fTest to be like Mike.                                                                  -F/J
+X Eliminate need for cluster.                                                                     -J
+X Fix 1-2 Bug (Discovered it was not a bug, but I tracked down where the 1-2 pair went.           -F
+X Implement strategy accurate version.                                                            -J
+X Keep track of minimal cloud generators.                                                         -J
+X Try implementing ideals using [: :] -- dph *itself* is still not developed enough               -J
+X Look at e/f4/moninfo.hpp in the M2 code. (one of the tests from Gebauer-Moller)                 -J
+X Lpp reduction when reducing from the buffer.                                                    -J lppred
+E Variable buffer width (a-la Amrhein-Gloor-Kuchlin).                                             -J rain

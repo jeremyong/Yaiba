@@ -1,4 +1,4 @@
-Name:                Yaiba
+Name:                yaiba
 Version:             0.3.3.1
 License:             BSD3
 License-file:        LICENSE
@@ -11,7 +11,7 @@ Category:            Math
 Homepage:            http://github.com/jeremyong/Yaiba
 Bug-reports:         http://github.com/jeremyong/Yaiba/issues
 Description:
-        Implementation of Buchberger's algorithm
+        Parallel implementation of Buchberger's algorithm.
 
 Synopsis:
         Implementation of Buchberger's algorithms
@@ -22,9 +22,7 @@ Library
   Build-Depends:
         vector               == 0.6.*,
         base                 == 4.*,
-        dph-base             == 0.4.*,
         containers           == 0.3.0.*,
-        dph-par              == 0.4.*,
         parallel             == 2.2.0.*,
         deepseq              == 1.1.0.*,
         array                == 0.3.0.*
